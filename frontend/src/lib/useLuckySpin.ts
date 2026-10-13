@@ -2,13 +2,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
-import type { Card, EmergencyBonusStatus, LuckySpinResult, StakeTier } from "../types/game";
+import type { Card, EmergencyBonusStatus, LuckySpinMeta, LuckySpinResult, Rarity } from "../types/game";
 
-export function useStakeTiers() {
+export function useLuckySpinMeta() {
   return useQuery({
-    queryKey: ["lucky-spin-tiers"],
-    queryFn: () => api.get<{ tiers: StakeTier[] }>("/api/lucky-spin").then((r) => r.tiers),
+    queryKey: ["lucky-spin-meta"],
+    queryFn: () => api.get<LuckySpinMeta>("/api/lucky-spin"),
   });
+}
+
+/** Та же линейная интерполяция, что в backend/src/lib/luckySpin.ts — для живого превью шансов. */
+export function weightsForStake(meta: LuckySpinMeta, stake: number): Record<Rarity, number> {
+  const t = Math.max(0, Math.min(1, (stake - meta.minStake) / (meta.maxStake - meta.minStake)));
+  const result = {} as Record<Rarity, number>;
+  (Object.keys(meta.minWeights) as Rarity[]).forEach((rarity) => {
+    result[rarity] = meta.minWeights[rarity] + (meta.maxWeights[rarity] - meta.minWeights[rarity]) * t;
+  });
+  return result;
 }
 
 export function useLuckySpin() {

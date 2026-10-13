@@ -205,10 +205,12 @@ export interface FreeBonusClaimResult {
   intervalMs: number;
 }
 
-export interface StakeTier {
-  stake: number;
-  label: string;
-  weights: Record<Rarity, number>;
+export interface LuckySpinMeta {
+  minStake: number;
+  maxStake: number;
+  step: number;
+  minWeights: Record<Rarity, number>;
+  maxWeights: Record<Rarity, number>;
 }
 
 export interface LuckySpinResult {

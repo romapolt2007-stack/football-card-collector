@@ -2,14 +2,20 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
-import { findStakeTier, rollRarity, STAKE_TIERS } from "../lib/luckySpin.js";
+import { isValidStake, MAX_STAKE, MIN_STAKE, rollRarity, STAKE_STEP, weightsForStake } from "../lib/luckySpin.js";
 import { randomPlayerByRarity } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 
 const router = Router();
 
 router.get("/", (_req, res) => {
-  res.json({ tiers: STAKE_TIERS });
+  res.json({
+    minStake: MIN_STAKE,
+    maxStake: MAX_STAKE,
+    step: STAKE_STEP,
+    minWeights: weightsForStake(MIN_STAKE),
+    maxWeights: weightsForStake(MAX_STAKE),
+  });
 });
 
 const spinSchema = z.object({ stake: z.number().int() });
@@ -21,20 +27,20 @@ router.post("/spin", requireAuth, async (req, res) => {
     return;
   }
 
-  const tier = findStakeTier(parsed.data.stake);
-  if (!tier) {
-    res.status(404).json({ error: "Такой ставки не существует" });
+  const stake = parsed.data.stake;
+  if (!isValidStake(stake)) {
+    res.status(400).json({ error: `Ставка должна быть от ${MIN_STAKE} до ${MAX_STAKE}` });
     return;
   }
 
   const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
-  if (user.coins < tier.stake) {
+  if (user.coins < stake) {
     res.status(400).json({ error: "Недостаточно монет" });
     return;
   }
 
   const spinNumberAfterThis = user.luckySpinCount + 1;
-  const { rarity, wasPity } = rollRarity(tier, { spinNumberAfterThis, userLevel: user.level });
+  const { rarity, wasPity } = rollRarity(stake, { spinNumberAfterThis, userLevel: user.level });
 
   const player = await randomPlayerByRarity(rarity);
   if (!player) {
@@ -45,7 +51,7 @@ router.post("/spin", requireAuth, async (req, res) => {
   const { updatedUser, card } = await prisma.$transaction(async (tx) => {
     const updatedUser = await tx.user.update({
       where: { id: user.id },
-      data: { coins: { decrement: tier.stake }, luckySpinCount: spinNumberAfterThis },
+      data: { coins: { decrement: stake }, luckySpinCount: spinNumberAfterThis },
     });
     const card = await tx.card.create({
       data: {
@@ -60,8 +66,8 @@ router.post("/spin", requireAuth, async (req, res) => {
       data: {
         userId: user.id,
         type: "LUCKY_SPIN",
-        amount: -tier.stake,
-        meta: { stake: tier.stake, rarity, wasPity },
+        amount: -stake,
+        meta: { stake, rarity, wasPity },
       },
     });
     return { updatedUser, card };
