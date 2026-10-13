@@ -15,6 +15,7 @@ import paymentsRouter from "./routes/payments.js";
 import questsRouter from "./routes/quests.js";
 import teamRouter from "./routes/team.js";
 import userRouter from "./routes/user.js";
+import { startBot } from "./bot.js";
 import { setIo } from "./lib/socket.js";
 
 const app = express();
@@ -60,3 +61,5 @@ const port = Number(process.env.PORT ?? 4000);
 httpServer.listen(port, () => {
   console.log(`Backend запущен на http://localhost:${port}`);
 });
+
+startBot();
