@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pitch-dark: #0b0f2b;
+  --color-pitch-violet: #1b1246;
+  --color-pitch-blue: #241a6b;
+  --color-gold: #ffd166;
+  --color-bronze: #cd7f32;
+  --color-silver: #c0c0c8;
+  --color-legend: #b24bf3;
+  --color-icon: #ff3b5c;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    background: var(--color-pitch-dark);
+  }
+
+  body {
+    color: white;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  @keyframes holo-sweep {
+    0% {
+      background-position: -150% -150%;
+    }
+    100% {
+      background-position: 150% 150%;
+    }
+  }
+
+  .holo-sweep {
+    background: linear-gradient(
+      115deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.55) 40%,
+      rgba(255, 255, 255, 0.1) 48%,
+      transparent 60%
+    );
+    background-size: 250% 250%;
+    mix-blend-mode: overlay;
+    animation: holo-sweep 2.8s ease-in-out infinite;
+  }
+
+  @keyframes icon-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+  }
+
+  .icon-pulse {
+    animation: icon-pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes sparkle-float {
+    0% {
+      opacity: 0;
+      transform: translateY(6px) scale(0.6);
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-18px) scale(1);
+    }
+  }
+
+  .sparkle {
+    animation: sparkle-float 1.6s ease-in infinite;
+  }
+}

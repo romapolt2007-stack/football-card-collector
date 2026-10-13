@@ -1,0 +1,305 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────
+// Игроки и состав лиги (вымышленная вселенная —
+// см. README-FICTION.md: никаких реальных имён/клубов/лого)
+// ──────────────────────────────────────────
+
+model League {
+  id    String @id @default(cuid())
+  name  String @unique
+  order Int    @default(0)
+
+  clubs Club[]
+
+  @@map("leagues")
+}
+
+model Club {
+  id       String @id @default(cuid())
+  name     String
+  shortName String
+  colorPrimary   String
+  colorSecondary String
+
+  league   League @relation(fields: [leagueId], references: [id])
+  leagueId String
+
+  players Player[]
+
+  @@unique([leagueId, name])
+  @@map("clubs")
+}
+
+enum Position {
+  GK
+  CB
+  LB
+  RB
+  CDM
+  CM
+  CAM
+  LW
+  RW
+  ST
+  CF
+}
+
+enum Rarity {
+  BRONZE
+  SILVER
+  GOLD
+  LEGEND
+  ICON
+}
+
+enum Foot {
+  LEFT
+  RIGHT
+}
+
+model Player {
+  id       String @id @default(cuid())
+  name     String
+  fullName String
+  photoUrl String?
+  nation   String
+  nationFlag String
+
+  position Position
+  overall  Int
+  pace       Int
+  shooting   Int
+  passing    Int
+  dribbling  Int
+  defending  Int
+  physical   Int
+
+  age        Int
+  height     Int
+  foot       Foot
+  weakFoot   Int @default(3)
+  skillMoves Int @default(3)
+
+  rarity Rarity
+
+  club   Club   @relation(fields: [clubId], references: [id])
+  clubId String
+
+  cards Card[]
+
+  createdAt DateTime @default(now())
+
+  @@index([rarity])
+  @@index([clubId])
+  @@map("players")
+}
+
+// ──────────────────────────────────────────
+// Пользователь и его карточки
+// ──────────────────────────────────────────
+
+model User {
+  id         String  @id @default(cuid())
+  tgId       String  @unique
+  username   String?
+  firstName  String?
+  photoUrl   String?
+
+  coins Int @default(5000)
+  stars Int @default(0)
+  xp    Int @default(0)
+  level Int @default(1)
+
+  teamName   String?
+  teamLogo   String?
+  teamColors String?
+
+  isVip    Boolean   @default(false)
+  vipUntil DateTime?
+
+  referralCode String  @unique @default(cuid())
+  referredBy   String?
+
+  hasClaimedStarter Boolean   @default(false)
+  dailyStreak       Int       @default(0)
+  lastDailyClaimAt  DateTime?
+
+  cards       Card[]
+  listings    Listing[]
+  matches     Match[]
+  transactions Transaction[]
+  userQuests  UserQuest[]
+  squads      Squad[]
+
+  createdAt DateTime @default(now())
+
+  @@map("users")
+}
+
+model Card {
+  id         String @id @default(cuid())
+  player     Player @relation(fields: [playerId], references: [id])
+  playerId   String
+  owner      User   @relation(fields: [ownerId], references: [id])
+  ownerId    String
+
+  rarity         Rarity
+  isListed       Boolean @default(false)
+  quickSellPrice Int
+
+  obtainedAt DateTime @default(now())
+
+  listing Listing?
+
+  @@index([ownerId])
+  @@index([playerId])
+  @@map("cards")
+}
+
+// ──────────────────────────────────────────
+// Состав команды
+// ──────────────────────────────────────────
+
+model Squad {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  name      String  @default("Состав 1")
+  formation String // "4-4-2" | "4-3-3" | "3-5-2" | "4-2-3-1" | "5-3-2"
+  /// [{ slotId: string, cardId: string | null }]
+  slots     Json
+  isActive  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("squads")
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  EXPIRED
+}
+
+model Listing {
+  id       String @id @default(cuid())
+  card     Card   @relation(fields: [cardId], references: [id])
+  cardId   String @unique
+  seller   User   @relation(fields: [sellerId], references: [id])
+  sellerId String
+
+  price  Int
+  status ListingStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+
+  @@index([status])
+  @@map("listings")
+}
+
+// ──────────────────────────────────────────
+// Матчи
+// ──────────────────────────────────────────
+
+enum MatchMode {
+  QUICK
+  DIVISION_RIVALS
+  TOURNAMENT
+  DRAFT
+}
+
+model Match {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  mode         MatchMode
+  opponentName String
+  opponentOvr  Int
+
+  userScore Int @default(0)
+  oppScore  Int @default(0)
+
+  events  Json
+  rewards Json
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("matches")
+}
+
+// ──────────────────────────────────────────
+// Экономика
+// ──────────────────────────────────────────
+
+enum TransactionType {
+  PACK_OPEN
+  CASE_SPIN
+  QUICK_SELL
+  MARKET_BUY
+  MARKET_SELL
+  MARKET_FEE
+  MATCH_REWARD
+  DAILY_BONUS
+  QUEST_REWARD
+  REFERRAL_BONUS
+  STARS_PURCHASE
+}
+
+model Transaction {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  type   TransactionType
+  amount Int
+  meta   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("transactions")
+}
+
+model Quest {
+  id          String @id @default(cuid())
+  code        String @unique
+  title       String
+  description String
+  target      Int
+  reward      Int
+  isDaily     Boolean @default(true)
+
+  userQuests UserQuest[]
+
+  @@map("quests")
+}
+
+model UserQuest {
+  id      String @id @default(cuid())
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+  quest   Quest  @relation(fields: [questId], references: [id])
+  questId String
+
+  progress  Int      @default(0)
+  completed Boolean  @default(false)
+  claimed   Boolean  @default(false)
+  expiresAt DateTime
+
+  @@unique([userId, questId, expiresAt])
+  @@map("user_quests")
+}
