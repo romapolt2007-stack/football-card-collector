@@ -94,5 +94,7 @@ bot.on("message:successful_payment", async (ctx) => {
   );
 });
 
-bot.start();
+bot.start().catch((err) => {
+  console.error("Бот остановился с ошибкой:", err);
+});
 console.log("Бот запущен");

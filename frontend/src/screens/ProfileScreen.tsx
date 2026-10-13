@@ -1,5 +1,7 @@
 import { xpForLevel } from "../lib/xp";
 import { useClaimQuest, useDailyClaim, useQuests } from "../lib/queries";
+import { useClaimFreeBonus, useFreeBonusStatus, formatCountdown } from "../lib/useFreeBonus";
+import { haptics } from "../lib/telegram";
 import { useAuthStore } from "../store/useAuthStore";
 
 function isSameUtcDay(a: Date, b: Date) {
@@ -11,6 +13,8 @@ export function ProfileScreen() {
   const { data: quests } = useQuests();
   const claimQuest = useClaimQuest();
   const dailyClaim = useDailyClaim();
+  const freeBonus = useFreeBonusStatus();
+  const claimFreeBonus = useClaimFreeBonus();
 
   if (!user) return null;
 
@@ -33,6 +37,36 @@ export function ProfileScreen() {
           {user.coins.toLocaleString("ru-RU")} 🪙
         </span>
       </header>
+
+      <section
+        className="rounded-xl border p-4"
+        style={{
+          borderColor: freeBonus.ready ? "var(--color-gold)" : "rgba(255,255,255,0.1)",
+          background: freeBonus.ready ? "rgba(255,209,102,0.12)" : "rgba(255,255,255,0.05)",
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-semibold">🎁 Бесплатный бонус</p>
+            <p className="text-xs text-white/50">
+              {freeBonus.ready ? "Готов к получению!" : `Следующий через ${formatCountdown(freeBonus.msLeft)}`}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              haptics.notify("success");
+              claimFreeBonus.mutate();
+            }}
+            disabled={!freeBonus.ready || claimFreeBonus.isPending}
+            className="rounded-full bg-gold px-4 py-2 text-sm font-extrabold text-pitch-dark disabled:opacity-30"
+          >
+            Забрать
+          </button>
+        </div>
+        {claimFreeBonus.isSuccess && (
+          <p className="mt-2 text-xs text-gold">+{claimFreeBonus.data.reward.toLocaleString("ru-RU")} монет!</p>
+        )}
+      </section>
 
       <section className="rounded-xl border border-white/10 bg-white/5 p-4">
         <p className="font-semibold">{user.firstName ?? user.username ?? "Игрок"}</p>

@@ -132,6 +132,11 @@ model User {
   dailyStreak       Int       @default(0)
   lastDailyClaimAt  DateTime?
 
+  // Короткий таймер-бонус для удержания (каждые N минут) + отметка,
+  // чтобы не слать уведомление повторно, пока бонус лежит неполученным
+  lastFreeBonusAt     DateTime?
+  freeBonusNotifiedAt DateTime?
+
   cards       Card[]
   listings    Listing[]
   matches     Match[]
@@ -254,6 +259,7 @@ enum TransactionType {
   MARKET_FEE
   MATCH_REWARD
   DAILY_BONUS
+  FREE_BONUS
   QUEST_REWARD
   REFERRAL_BONUS
   STARS_PURCHASE

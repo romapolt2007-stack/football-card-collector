@@ -16,6 +16,7 @@ import questsRouter from "./routes/quests.js";
 import teamRouter from "./routes/team.js";
 import userRouter from "./routes/user.js";
 import { startBot } from "./bot.js";
+import { startFreeBonusNotifier } from "./lib/freeBonusNotifier.js";
 import { setIo } from "./lib/socket.js";
 
 const app = express();
@@ -62,4 +63,5 @@ httpServer.listen(port, () => {
   console.log(`Backend запущен на http://localhost:${port}`);
 });
 
-startBot();
+const bot = startBot();
+if (bot) startFreeBonusNotifier(bot);

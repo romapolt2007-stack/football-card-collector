@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 import { addXp } from "../lib/xp.js";
+import { FREE_BONUS_INTERVAL_MS, msUntilFreeBonusReady, rollFreeBonusCoins } from "../lib/freeBonus.js";
 
 const router = Router();
 
@@ -67,6 +68,36 @@ router.post("/daily-claim", requireAuth, async (req, res) => {
 
   const { xp, level } = await addXp(user.id, DAILY_XP_REWARD);
   res.json({ coins: updatedUser.coins, streak, reward, xp, level });
+});
+
+router.get("/free-bonus", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  const msLeft = msUntilFreeBonusReady(user.lastFreeBonusAt);
+  res.json({ ready: msLeft === 0, msLeft, intervalMs: FREE_BONUS_INTERVAL_MS });
+});
+
+router.post("/free-bonus", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  const msLeft = msUntilFreeBonusReady(user.lastFreeBonusAt);
+  if (msLeft > 0) {
+    res.status(400).json({ error: "Бонус ещё не готов", msLeft });
+    return;
+  }
+
+  const reward = rollFreeBonusCoins();
+  const now = new Date();
+
+  const [updatedUser] = await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { coins: { increment: reward }, lastFreeBonusAt: now },
+    }),
+    prisma.transaction.create({
+      data: { userId: user.id, type: "FREE_BONUS", amount: reward },
+    }),
+  ]);
+
+  res.json({ coins: updatedUser.coins, reward, intervalMs: FREE_BONUS_INTERVAL_MS });
 });
 
 export default router;
