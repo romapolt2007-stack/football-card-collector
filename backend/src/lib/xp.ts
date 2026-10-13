@@ -11,14 +11,35 @@ export function xpForLevel(level: number): number {
   return 500 * ((level - 1) * level) / 2;
 }
 
+/** Награда монетами за новый уровень — скромная, но настоящая (не просто текст в UI). */
+export function levelUpReward(level: number): number {
+  return level * 200;
+}
+
 export async function addXp(userId: string, amount: number) {
   const user = await prisma.user.update({
     where: { id: userId },
     data: { xp: { increment: amount } },
   });
   const newLevel = levelForXp(user.xp);
-  if (newLevel !== user.level) {
-    await prisma.user.update({ where: { id: userId }, data: { level: newLevel } });
+
+  if (newLevel === user.level) {
+    return { xp: user.xp, level: newLevel, coins: user.coins, levelUpReward: 0 };
   }
-  return { xp: user.xp, level: newLevel };
+
+  let coins = user.coins;
+  let totalReward = 0;
+  for (let lvl = user.level + 1; lvl <= newLevel; lvl++) totalReward += levelUpReward(lvl);
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { level: newLevel, coins: { increment: totalReward } },
+  });
+  coins = updated.coins;
+
+  await prisma.transaction.create({
+    data: { userId, type: "LEVEL_UP", amount: totalReward, meta: { newLevel } },
+  });
+
+  return { xp: user.xp, level: newLevel, coins, levelUpReward: totalReward };
 }

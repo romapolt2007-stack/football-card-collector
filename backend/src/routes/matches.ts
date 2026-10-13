@@ -152,7 +152,7 @@ router.post("/quick", requireAuth, async (req, res) => {
   }
 
   const rewards = calcRewards(result.userScore, result.oppScore);
-  const { match, updatedUser, wonCard } = await finalizeMatch({
+  const { match, wonCard } = await finalizeMatch({
     userId: req.userId!,
     opponentName,
     opponentOvr,
@@ -169,17 +169,18 @@ router.post("/quick", requireAuth, async (req, res) => {
   if (result.userScore > result.oppScore) {
     await incrementQuestProgress(req.userId!, "WIN_MATCH");
   }
-  const { xp, level } = await addXp(req.userId!, rewards.xp);
+  const { xp, level, coins, levelUpReward } = await addXp(req.userId!, rewards.xp);
 
   res.json({
     match,
     stats: result.stats,
     squad: { strength, avgOvr, chemistry },
-    coins: updatedUser.coins,
+    coins,
     xp,
     level,
     wonCard,
     shootout: null,
+    levelUpReward,
   });
 });
 
@@ -237,7 +238,7 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
   const userWon = session.userScore > session.oppScore;
   const rewards = userWon ? calcRewards(1, 0) : calcRewards(0, 0);
 
-  const { match, updatedUser, wonCard } = await finalizeMatch({
+  const { match, wonCard } = await finalizeMatch({
     userId: req.userId!,
     opponentName: session.opponentName,
     opponentOvr: session.opponentOvr,
@@ -252,7 +253,7 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
 
   await incrementQuestProgress(req.userId!, "PLAY_MATCH");
   if (userWon) await incrementQuestProgress(req.userId!, "WIN_MATCH");
-  const { xp, level } = await addXp(req.userId!, rewards.xp);
+  const { xp, level, coins, levelUpReward } = await addXp(req.userId!, rewards.xp);
 
   deleteShootoutSession(session.draftId);
 
@@ -266,10 +267,11 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
       match,
       stats: session.ninetyMin.stats,
       squad: session.squad,
-      coins: updatedUser.coins,
+      coins,
       xp,
       level,
       wonCard,
+      levelUpReward,
       shootout: { userScore: session.userScore, oppScore: session.oppScore, won: userWon },
     },
   });

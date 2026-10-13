@@ -71,6 +71,20 @@ export interface GameUser {
   teamName: string | null;
   teamLogo: string | null;
   teamColors: string | null;
+  avatarIcon: string | null;
+  createdAt: string;
+}
+
+export interface UserStats {
+  totalMatches: number;
+  wins: number;
+  winRate: number;
+  totalGoals: number;
+  totalCards: number;
+  squadValue: number;
+  marketSales: number;
+  daysPlayed: number;
+  bestCard: Card | null;
 }
 
 export type Formation = "4-4-2" | "4-3-3" | "3-5-2" | "4-2-3-1" | "5-3-2";

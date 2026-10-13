@@ -48,7 +48,7 @@ router.post("/open", requireAuth, async (req, res) => {
     return;
   }
 
-  const { updatedUser, cards } = await prisma.$transaction(async (tx) => {
+  const { cards } = await prisma.$transaction(async (tx) => {
     const updatedUser = await tx.user.update({
       where: { id: user.id },
       data: {
@@ -84,9 +84,9 @@ router.post("/open", requireAuth, async (req, res) => {
   });
 
   await incrementQuestProgress(user.id, "OPEN_PACK");
-  const { xp, level } = await addXp(user.id, PACK_OPEN_XP);
+  const { xp, level, coins, levelUpReward } = await addXp(user.id, PACK_OPEN_XP);
 
-  res.json({ cards, coins: updatedUser.coins, xp, level });
+  res.json({ cards, coins, xp, level, levelUpReward });
 });
 
 export default router;

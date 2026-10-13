@@ -50,6 +50,23 @@ router.post("/team", requireAuth, async (req, res) => {
   res.json({ user });
 });
 
+const AVATAR_PRESETS = ["⚽", "🧤", "🦁", "🐺", "🦅", "🔱", "⚡", "🛡️", "👑", "🔥", "⭐", "🎯"];
+
+const avatarSchema = z.object({ icon: z.enum(AVATAR_PRESETS as [string, ...string[]]) });
+
+router.post("/avatar", requireAuth, async (req, res) => {
+  const parsed = avatarSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Некорректная иконка аватара" });
+    return;
+  }
+  const user = await prisma.user.update({
+    where: { id: req.userId },
+    data: { avatarIcon: parsed.data.icon },
+  });
+  res.json({ user });
+});
+
 function utcDay(date: Date): number {
   return Math.floor(date.getTime() / 86_400_000); // целые UTC-сутки от эпохи
 }
@@ -70,7 +87,7 @@ router.post("/daily-claim", requireAuth, async (req, res) => {
   const streak = wasConsecutive ? (user.dailyStreak % 7) + 1 : 1;
   const reward = 300 * streak * (streak === 7 ? 3 : 1);
 
-  const [updatedUser] = await prisma.$transaction([
+  await prisma.$transaction([
     prisma.user.update({
       where: { id: user.id },
       data: { coins: { increment: reward }, dailyStreak: streak, lastDailyClaimAt: now },
@@ -80,8 +97,8 @@ router.post("/daily-claim", requireAuth, async (req, res) => {
     }),
   ]);
 
-  const { xp, level } = await addXp(user.id, DAILY_XP_REWARD);
-  res.json({ coins: updatedUser.coins, streak, reward, xp, level });
+  const { xp, level, coins, levelUpReward } = await addXp(user.id, DAILY_XP_REWARD);
+  res.json({ coins, streak, reward, xp, level, levelUpReward });
 });
 
 router.get("/free-bonus", requireAuth, async (req, res) => {
@@ -182,6 +199,67 @@ router.post("/emergency-bonus", requireAuth, async (req, res) => {
   ]);
 
   res.json({ coins: updatedUser.coins, reward: EMERGENCY_BONUS_REWARD, intervalMs: EMERGENCY_BONUS_INTERVAL_MS });
+});
+
+interface MatchEventLike {
+  type: string;
+  team: "user" | "opponent";
+}
+
+router.get("/stats", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+
+  const matches = await prisma.match.findMany({
+    where: { userId: req.userId },
+    select: { userScore: true, oppScore: true, events: true, rewards: true },
+  });
+
+  let wins = 0;
+  let totalGoals = 0;
+  for (const m of matches) {
+    const rewards = m.rewards as { shootout?: { won?: boolean } } | null;
+    const won = rewards?.shootout ? Boolean(rewards.shootout.won) : m.userScore > m.oppScore;
+    if (won) wins++;
+    const events = (m.events as unknown as MatchEventLike[]) ?? [];
+    totalGoals += events.filter((e) => e.type === "GOAL" && e.team === "user").length;
+  }
+  const totalMatches = matches.length;
+  const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+
+  const cards = await prisma.card.findMany({
+    where: { ownerId: req.userId },
+    include: { player: { include: { club: { include: { league: true } } } } },
+    orderBy: { player: { overall: "desc" } },
+    take: 1,
+  });
+  const bestCard = cards[0] ?? null;
+
+  const totalCards = await prisma.card.count({ where: { ownerId: req.userId } });
+
+  const activeSquad = await prisma.squad.findFirst({ where: { userId: req.userId, isActive: true } });
+  let squadValue = 0;
+  if (activeSquad) {
+    const slots = activeSquad.slots as unknown as { cardId: string | null }[];
+    const cardIds = slots.map((s) => s.cardId).filter((id): id is string => Boolean(id));
+    const squadCards = await prisma.card.findMany({ where: { id: { in: cardIds } }, select: { quickSellPrice: true } });
+    squadValue = squadCards.reduce((sum, c) => sum + c.quickSellPrice, 0);
+  }
+
+  const marketSales = await prisma.transaction.count({ where: { userId: req.userId, type: "MARKET_SELL" } });
+
+  const daysPlayed = Math.floor((Date.now() - user.createdAt.getTime()) / 86_400_000);
+
+  res.json({
+    totalMatches,
+    wins,
+    winRate,
+    totalGoals,
+    totalCards,
+    squadValue,
+    marketSales,
+    daysPlayed,
+    bestCard,
+  });
 });
 
 export default router;

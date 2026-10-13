@@ -45,7 +45,7 @@ router.post("/claim", requireAuth, async (req, res) => {
     return;
   }
 
-  const [user] = await prisma.$transaction([
+  await prisma.$transaction([
     prisma.user.update({
       where: { id: req.userId },
       data: { coins: { increment: userQuest.quest.reward } },
@@ -61,8 +61,8 @@ router.post("/claim", requireAuth, async (req, res) => {
     }),
   ]);
 
-  const { xp, level } = await addXp(req.userId!, QUEST_XP_REWARD);
-  res.json({ coins: user.coins, xp, level });
+  const { xp, level, coins, levelUpReward } = await addXp(req.userId!, QUEST_XP_REWARD);
+  res.json({ coins, xp, level, levelUpReward });
 });
 
 export default router;

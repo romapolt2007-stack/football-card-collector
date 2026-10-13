@@ -121,6 +121,7 @@ model User {
   teamName   String?
   teamLogo   String?
   teamColors String?
+  avatarIcon String?
 
   isVip    Boolean   @default(false)
   vipUntil DateTime?
@@ -299,6 +300,7 @@ enum TransactionType {
   QUEST_REWARD
   REFERRAL_BONUS
   STARS_PURCHASE
+  LEVEL_UP
 }
 
 model Transaction {

@@ -13,6 +13,7 @@ import type {
   Squad,
   SquadSlot,
   UserQuest,
+  UserStats,
 } from "../types/game";
 
 export function usePacks() {
@@ -128,7 +129,9 @@ export function useClaimQuest() {
 
   return useMutation({
     mutationFn: (userQuestId: string) =>
-      api.post<{ coins: number; xp: number; level: number }>("/api/quests/claim", { userQuestId }),
+      api.post<{ coins: number; xp: number; level: number; levelUpReward: number }>("/api/quests/claim", {
+        userQuestId,
+      }),
     onSuccess: (result, userQuestId) => {
       if (user) setUser({ ...user, coins: result.coins, xp: result.xp, level: result.level });
       queryClient.setQueryData<UserQuest[]>(["quests"], (prev) =>
@@ -144,7 +147,7 @@ export function useDailyClaim() {
 
   return useMutation({
     mutationFn: () =>
-      api.post<{ coins: number; streak: number; reward: number; xp: number; level: number }>(
+      api.post<{ coins: number; streak: number; reward: number; xp: number; level: number; levelUpReward: number }>(
         "/api/user/daily-claim",
       ),
     onSuccess: (result) => {
@@ -213,5 +216,22 @@ export function useUpdateTeamProfile() {
     mutationFn: (input: { teamName: string; teamLogo?: string; teamColors?: string }) =>
       api.post<{ user: GameUser }>("/api/user/team", input),
     onSuccess: (r) => setUser(r.user),
+  });
+}
+
+export function useUpdateAvatar() {
+  const setUser = useAuthStore((s) => s.setUser);
+  return useMutation({
+    mutationFn: (icon: string) => api.post<{ user: GameUser }>("/api/user/avatar", { icon }),
+    onSuccess: (r) => setUser(r.user),
+  });
+}
+
+export function useUserStats() {
+  const token = useAuthStore((s) => s.token);
+  return useQuery({
+    queryKey: ["user-stats"],
+    queryFn: () => api.get<UserStats>("/api/user/stats"),
+    enabled: Boolean(token),
   });
 }
