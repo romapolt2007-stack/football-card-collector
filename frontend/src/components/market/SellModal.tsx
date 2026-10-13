@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Card } from "../../types/game";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import { useCreateListing } from "../../lib/useMarket";
+import { POSITION_RU } from "../../lib/ruLabels";
 
 interface Props {
   cards: Card[];
@@ -58,7 +59,7 @@ export function SellModal({ cards, onClose }: Props) {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{card.player.name}</p>
                   <p className="truncate text-xs text-white/50">
-                    {card.player.position} · {card.player.club.shortName}
+                    {POSITION_RU[card.player.position]} · {card.player.club.shortName}
                   </p>
                 </div>
                 <span className="text-xs text-white/40">
@@ -83,7 +84,7 @@ export function SellModal({ cards, onClose }: Props) {
             <div>
               <p className="font-semibold">{selected.player.name}</p>
               <p className="text-xs text-white/50">
-                {selected.player.position} · {selected.player.club.shortName}
+                {POSITION_RU[selected.player.position]} · {selected.player.club.shortName}
               </p>
             </div>
           </div>

@@ -171,6 +171,10 @@ model Card {
 
   obtainedAt DateTime @default(now())
 
+  // Дисквалификация (красная карточка) или травма — сколько ближайших матчей
+  // команды игрок пропускает. Уменьшается на 1 после каждого сыгранного матча.
+  unavailableMatches Int @default(0)
+
   listing Listing?
 
   @@index([ownerId])

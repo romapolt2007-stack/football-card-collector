@@ -1,5 +1,6 @@
 import type { Listing } from "../../types/game";
 import { RARITY_THEME } from "../cards/rarityTheme";
+import { POSITION_RU } from "../../lib/ruLabels";
 
 interface Props {
   listing: Listing;
@@ -20,7 +21,7 @@ export function ListingRow({ listing, isMine, onBuy, onCancel, isBusy }: Props) 
         style={{ background: theme.background, color: theme.textColor }}
       >
         {player.overall}
-        <span className="text-[8px] font-semibold opacity-80">{player.position}</span>
+        <span className="text-[8px] font-semibold opacity-80">{POSITION_RU[player.position]}</span>
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{player.name}</p>

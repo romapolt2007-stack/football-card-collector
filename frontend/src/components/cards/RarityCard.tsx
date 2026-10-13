@@ -1,14 +1,7 @@
 import type { Card } from "../../types/game";
 import { RARITY_THEME } from "./rarityTheme";
-
-const STAT_LABELS = [
-  ["PAC", "pace"],
-  ["DRI", "dribbling"],
-  ["SHO", "shooting"],
-  ["DEF", "defending"],
-  ["PAS", "passing"],
-  ["PHY", "physical"],
-] as const;
+import { ClubCrest } from "./ClubCrest";
+import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
 
 interface Props {
   card: Card;
@@ -24,7 +17,6 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
 export function RarityCard({ card, size = "md" }: Props) {
   const theme = RARITY_THEME[card.rarity];
   const { player } = card;
-  const initials = player.name.slice(0, 2).toUpperCase();
   const isIcon = card.rarity === "ICON";
   const isLegend = card.rarity === "LEGEND";
 
@@ -44,7 +36,7 @@ export function RarityCard({ card, size = "md" }: Props) {
       <div className="relative flex items-start justify-between">
         <div className="flex flex-col items-center leading-none">
           <span className="text-2xl font-extrabold">{player.overall}</span>
-          <span className="mt-0.5 text-[0.7em] font-bold opacity-80">{player.position}</span>
+          <span className="mt-0.5 text-[0.7em] font-bold opacity-80">{POSITION_RU[player.position]}</span>
         </div>
         <div className="flex flex-col items-end gap-1 text-right">
           <span className="text-lg leading-none">{player.nationFlag}</span>
@@ -58,22 +50,14 @@ export function RarityCard({ card, size = "md" }: Props) {
       </div>
 
       <div className="relative mt-1 flex flex-col items-center">
-        <div
-          className="flex h-16 w-16 items-center justify-center rounded-full border-2 text-lg font-extrabold"
-          style={{
-            background: `linear-gradient(160deg, ${player.club.colorPrimary}, ${player.club.colorSecondary})`,
-            borderColor: theme.borderColor,
-          }}
-        >
-          {initials}
-        </div>
+        <ClubCrest club={player.club} size={56} />
         <p className="mt-1.5 truncate text-center text-[0.85em] font-bold tracking-wide uppercase">
           {player.name}
         </p>
       </div>
 
       <div className="relative mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
-        {STAT_LABELS.map(([label, key]) => (
+        {STAT_LABELS_RU.map(([label, key]) => (
           <div key={label} className="flex items-center justify-between gap-1">
             <span className="font-extrabold">{player[key]}</span>
             <span className="opacity-70">{label}</span>

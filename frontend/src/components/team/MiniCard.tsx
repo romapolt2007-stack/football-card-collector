@@ -3,6 +3,7 @@ import type { Card, Rarity } from "../../types/game";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import { haptics } from "../../lib/telegram";
 import { sfx } from "../../lib/sfx";
+import { POSITION_RU } from "../../lib/ruLabels";
 
 interface Props {
   card: Card;
@@ -16,6 +17,7 @@ function isGoldBadge(rarity: Rarity) {
 
 export function MiniCard({ card, onTap, onDragEnd }: Props) {
   const theme = RARITY_THEME[card.rarity];
+  const isUnavailable = card.unavailableMatches > 0;
 
   function handleTap() {
     sfx.kick();
@@ -53,8 +55,14 @@ export function MiniCard({ card, onTap, onDragEnd }: Props) {
             background: theme.background,
             borderColor: theme.borderColor,
             boxShadow: theme.glow !== "none" ? theme.glow : undefined,
+            opacity: isUnavailable ? 0.55 : 1,
           }}
         >
+          {isUnavailable && (
+            <span className="absolute -right-1 -top-1 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-extrabold text-white">
+              {card.unavailableMatches}
+            </span>
+          )}
           <span
             className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold leading-none text-[#241a0a]"
             style={{
@@ -66,7 +74,7 @@ export function MiniCard({ card, onTap, onDragEnd }: Props) {
             {card.player.overall}
           </span>
           <span className="text-[7px] font-bold leading-none opacity-90" style={{ color: theme.textColor }}>
-            {card.player.position}
+            {POSITION_RU[card.player.position]}
           </span>
           <span
             className="w-full truncate px-0.5 text-center text-[7.5px] font-bold leading-none"

@@ -49,6 +49,7 @@ export interface Card {
   isListed: boolean;
   quickSellPrice: number;
   obtainedAt: string;
+  unavailableMatches: number;
   player: Player;
 }
 
@@ -67,6 +68,9 @@ export interface GameUser {
   referralCode: string;
   dailyStreak: number;
   lastDailyClaimAt: string | null;
+  teamName: string | null;
+  teamLogo: string | null;
+  teamColors: string | null;
 }
 
 export type Formation = "4-4-2" | "4-3-3" | "3-5-2" | "4-2-3-1" | "5-3-2";
@@ -89,8 +93,10 @@ export interface Squad {
 
 export interface MatchEvent {
   minute: number;
-  type: "GOAL" | "POST" | "SAVE";
+  type: "GOAL" | "POST" | "SAVE" | "YELLOW" | "RED" | "INJURY";
   team: "user" | "opponent";
+  cardId?: string;
+  playerName?: string;
 }
 
 export interface MatchStats {
@@ -119,6 +125,13 @@ export interface MatchRecord {
   createdAt: string;
 }
 
+export interface ShootoutSummary {
+  userScore: number;
+  oppScore: number;
+  rounds?: unknown[];
+  won?: boolean;
+}
+
 export interface QuickMatchResult {
   match: MatchRecord;
   stats: MatchStats;
@@ -127,6 +140,41 @@ export interface QuickMatchResult {
   xp: number;
   level: number;
   wonCard: Card | null;
+  shootout: ShootoutSummary | null;
+}
+
+export interface ShootoutPending {
+  needsShootout: true;
+  draftId: string;
+  ninetyMin: { userScore: number; oppScore: number; events: MatchEvent[]; stats: MatchStats };
+  opponentName: string;
+  opponentOvr: number;
+  squad: { strength: number; avgOvr: number; chemistry: number };
+}
+
+export type QuickMatchResponse = QuickMatchResult | ShootoutPending;
+
+export type ShootoutZone = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type ShootoutPower = "WEAK" | "MEDIUM" | "STRONG";
+
+export interface ShootoutRoundOutcome {
+  userShotOnTarget: boolean;
+  userScored: boolean;
+  botDiveZone: ShootoutZone;
+  botShotZone: ShootoutZone;
+  botShotPower: ShootoutPower;
+  botOnTarget: boolean;
+  userSaved: boolean;
+  userConceded: boolean;
+}
+
+export interface ShootoutRoundResponse {
+  outcome: ShootoutRoundOutcome;
+  userScore: number;
+  oppScore: number;
+  round: number;
+  finished: boolean;
+  result?: QuickMatchResult;
 }
 
 export type CasePrizeType = "CARD" | "COINS" | "JACKPOT";

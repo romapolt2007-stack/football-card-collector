@@ -1,7 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
-import type { Card, Formation, GameUser, PackDef, QuickMatchResult, Squad, SquadSlot, UserQuest } from "../types/game";
+import type {
+  Card,
+  Formation,
+  GameUser,
+  PackDef,
+  QuickMatchResponse,
+  ShootoutPower,
+  ShootoutRoundResponse,
+  ShootoutZone,
+  Squad,
+  SquadSlot,
+  UserQuest,
+} from "../types/game";
 
 export function usePacks() {
   return useQuery({
@@ -137,8 +149,32 @@ export function usePlayQuickMatch() {
   const user = useAuthStore((s) => s.user);
 
   return useMutation({
-    mutationFn: () => api.post<QuickMatchResult>("/api/matches/quick"),
+    mutationFn: () => api.post<QuickMatchResponse>("/api/matches/quick"),
     onSuccess: (result) => {
+      if ("needsShootout" in result) return;
+      if (user) setUser({ ...user, coins: result.coins, xp: result.xp, level: result.level });
+      if (result.wonCard) {
+        queryClient.setQueryData<Card[]>(["cards"], (prev) => [result.wonCard!, ...(prev ?? [])]);
+      }
+    },
+  });
+}
+
+export function useShootoutRound() {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((s) => s.setUser);
+  const user = useAuthStore((s) => s.user);
+
+  return useMutation({
+    mutationFn: (input: { draftId: string; kickZone: ShootoutZone; kickPower: ShootoutPower; saveZone: ShootoutZone }) =>
+      api.post<ShootoutRoundResponse>(`/api/matches/shootout/${input.draftId}/round`, {
+        kickZone: input.kickZone,
+        kickPower: input.kickPower,
+        saveZone: input.saveZone,
+      }),
+    onSuccess: (response) => {
+      if (!response.finished || !response.result) return;
+      const result = response.result;
       if (user) setUser({ ...user, coins: result.coins, xp: result.xp, level: result.level });
       if (result.wonCard) {
         queryClient.setQueryData<Card[]>(["cards"], (prev) => [result.wonCard!, ...(prev ?? [])]);
@@ -150,4 +186,13 @@ export function usePlayQuickMatch() {
 export function useRefreshMe() {
   const setUser = useAuthStore((s) => s.setUser);
   return () => api.get<{ user: GameUser }>("/api/user/me").then((r) => setUser(r.user));
+}
+
+export function useUpdateTeamProfile() {
+  const setUser = useAuthStore((s) => s.setUser);
+  return useMutation({
+    mutationFn: (input: { teamName: string; teamLogo?: string; teamColors?: string }) =>
+      api.post<{ user: GameUser }>("/api/user/team", input),
+    onSuccess: (r) => setUser(r.user),
+  });
 }

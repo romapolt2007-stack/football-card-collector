@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Card, Position, Rarity } from "../../types/game";
 import { RARITY_THEME } from "../cards/rarityTheme";
+import { POSITION_RU } from "../../lib/ruLabels";
 
 interface Props {
   cards: Card[];
@@ -79,27 +80,38 @@ export function CardPicker({ cards, slotEligible, onPick, onRemove, onClose }: P
           <p className="mt-6 text-center text-sm text-white/40">Ничего не найдено</p>
         )}
         <div className="flex flex-col gap-2">
-          {filtered.map((card) => (
-            <button
-              key={card.id}
-              onClick={() => onPick(card)}
-              className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left"
-            >
-              <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-xs font-extrabold"
-                style={{ background: RARITY_THEME[card.rarity].background, color: RARITY_THEME[card.rarity].textColor }}
+          {filtered.map((card) => {
+            const isStarterSlot = slotEligible.length > 0;
+            const isUnavailable = card.unavailableMatches > 0;
+            const blocked = isStarterSlot && isUnavailable;
+            return (
+              <button
+                key={card.id}
+                onClick={() => !blocked && onPick(card)}
+                disabled={blocked}
+                className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left disabled:opacity-40"
               >
-                {card.player.overall}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{card.player.name}</p>
-                <p className="truncate text-xs text-white/50">
-                  {card.player.position} · {card.player.club.shortName}
-                </p>
-              </div>
-              <span className="text-lg">{card.player.nationFlag}</span>
-            </button>
-          ))}
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-xs font-extrabold"
+                  style={{ background: RARITY_THEME[card.rarity].background, color: RARITY_THEME[card.rarity].textColor }}
+                >
+                  {card.player.overall}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{card.player.name}</p>
+                  <p className="truncate text-xs text-white/50">
+                    {POSITION_RU[card.player.position]} · {card.player.club.shortName}
+                  </p>
+                </div>
+                {isUnavailable && (
+                  <span className="shrink-0 rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-300">
+                    🚑 {card.unavailableMatches} игр
+                  </span>
+                )}
+                <span className="text-lg">{card.player.nationFlag}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -49,6 +49,7 @@ app.use("/api/market/list", actionLimiter);
 app.use("/api/market/buy", actionLimiter);
 app.use("/api/market", marketRouter);
 app.use("/api/matches/quick", actionLimiter);
+app.use("/api/matches/shootout", actionLimiter);
 app.use("/api/matches", matchesRouter);
 app.use("/api/cases/spin", actionLimiter);
 app.use("/api/cases", casesRouter);

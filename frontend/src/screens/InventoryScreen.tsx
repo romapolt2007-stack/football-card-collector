@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { useInventory, useQuickSell } from "../lib/queries";
 import { haptics } from "../lib/telegram";
+import { POSITION_RU } from "../lib/ruLabels";
 import type { Card, Rarity } from "../types/game";
 
 const RARITIES: Rarity[] = ["BRONZE", "SILVER", "GOLD", "LEGEND", "ICON"];
@@ -83,13 +84,16 @@ export function InventoryScreen() {
               style={{ background: RARITY_THEME[card.rarity].background, color: RARITY_THEME[card.rarity].textColor }}
             >
               {card.player.overall}
-              <span className="text-[8px] font-semibold opacity-80">{card.player.position}</span>
+              <span className="text-[8px] font-semibold opacity-80">{POSITION_RU[card.player.position]}</span>
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{card.player.name}</p>
               <p className="truncate text-xs text-white/50">
                 {card.player.club.shortName} · {RARITY_THEME[card.rarity].emoji} {RARITY_THEME[card.rarity].label}
                 {card.isListed && " · на рынке"}
+                {card.unavailableMatches > 0 && (
+                  <span className="text-red-300"> · 🚑 ещё {card.unavailableMatches} игр</span>
+                )}
               </p>
             </div>
             <button

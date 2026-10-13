@@ -1,7 +1,10 @@
 export interface MatchEvent {
   minute: number;
-  type: "GOAL" | "POST" | "SAVE";
+  type: "GOAL" | "POST" | "SAVE" | "YELLOW" | "RED" | "INJURY";
   team: "user" | "opponent";
+  /** Только для дисциплинарных событий своей команды — нужно для применения последствий. */
+  cardId?: string;
+  playerName?: string;
 }
 
 export interface MatchStats {
@@ -83,6 +86,42 @@ export function simulateMatch(userStrength: number, opponentOvr: number): MatchR
       xg: [Math.round(userXg * 10) / 10, Math.round(oppXg * 10) / 10],
     },
   };
+}
+
+export interface DisciplineCandidate {
+  cardId: string;
+  name: string;
+}
+
+/**
+ * Жёлтые/красные карточки и травмы — независимые редкие броски по
+ * стартовому составу пользователя (+ флейвор-события у соперника без
+ * игровых последствий, у бота нет настоящих карточек игроков).
+ */
+export function rollDisciplineEvents(userStarters: DisciplineCandidate[]): MatchEvent[] {
+  const events: MatchEvent[] = [];
+
+  for (const p of userStarters) {
+    if (Math.random() < 0.05) {
+      events.push({ minute: randInt(8, 88), type: "YELLOW", team: "user", cardId: p.cardId, playerName: p.name });
+    }
+  }
+
+  if (userStarters.length > 0 && Math.random() < 0.035) {
+    const p = userStarters[randInt(0, userStarters.length - 1)];
+    events.push({ minute: randInt(10, 88), type: "RED", team: "user", cardId: p.cardId, playerName: p.name });
+  }
+
+  if (userStarters.length > 0 && Math.random() < 0.04) {
+    const p = userStarters[randInt(0, userStarters.length - 1)];
+    events.push({ minute: randInt(5, 85), type: "INJURY", team: "user", cardId: p.cardId, playerName: p.name });
+  }
+
+  if (Math.random() < 0.12) {
+    events.push({ minute: randInt(8, 88), type: Math.random() < 0.75 ? "YELLOW" : "RED", team: "opponent" });
+  }
+
+  return events;
 }
 
 export interface MatchRewards {

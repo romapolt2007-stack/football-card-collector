@@ -187,4 +187,67 @@ export const sfx = {
     osc.start(now);
     osc.stop(now + 0.2);
   },
+  /** Свисток арбитра — стартовый/финальный или нарушение. */
+  whistle() {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    [0, 0.18, 0.36].forEach((offset) => {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(2300, now + offset);
+      gain.gain.setValueAtTime(0.0001, now + offset);
+      gain.gain.linearRampToValueAtTime(0.06, now + offset + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.15);
+      osc.connect(gain).connect(c.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.17);
+    });
+  },
+  /** Рёв трибун при голе. */
+  goalRoar() {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    const bufferSize = Math.floor(c.sampleRate * 1.1);
+    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const env = Math.sin((Math.PI * i) / bufferSize);
+      data[i] = (Math.random() * 2 - 1) * env * 0.5;
+    }
+    const noise = c.createBufferSource();
+    noise.buffer = buffer;
+    const filter = c.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 900;
+    filter.Q.value = 0.6;
+    const gain = c.createGain();
+    gain.gain.setValueAtTime(0.22, now);
+    noise.connect(filter).connect(gain).connect(c.destination);
+    noise.start(now);
+    this.fanfare();
+  },
+  /** Короткий резкий сигнал при показе карточки — выше тон для жёлтой, ниже и жёстче для красной. */
+  cardReveal(color: "YELLOW" | "RED") {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    tone(c, color === "YELLOW" ? 760 : 320, now, color === "YELLOW" ? 0.25 : 0.4, "sawtooth", 0.07);
+  },
+  /** Глухой стон при травме. */
+  injury() {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    tone(c, 180, now, 0.5, "sine", 0.05);
+  },
+  /** Металлический "дзынь" при ударе в штангу. */
+  postClang() {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    [1, 1.6, 2.3].forEach((mult, i) => tone(c, 1200 * mult, now + i * 0.01, 0.4, "triangle", 0.05 / (i + 1)));
+  },
 };

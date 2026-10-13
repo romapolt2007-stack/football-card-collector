@@ -6,6 +6,7 @@ import { CasesScreen } from "./screens/CasesScreen";
 import { InventoryScreen } from "./screens/InventoryScreen";
 import { MarketScreen } from "./screens/MarketScreen";
 import { MatchScreen } from "./screens/MatchScreen";
+import { OnboardingScreen } from "./screens/OnboardingScreen";
 import { PacksScreen } from "./screens/PacksScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { TeamScreen } from "./screens/TeamScreen";
@@ -14,6 +15,7 @@ import { useAuthStore } from "./store/useAuthStore";
 function App() {
   const { status, error } = useTelegramAuth();
   const isReady = useAuthStore((s) => s.isReady);
+  const user = useAuthStore((s) => s.user);
   const [tab, setTab] = useState<TabId>("packs");
 
   useEffect(() => {
@@ -44,6 +46,10 @@ function App() {
         <p className="text-sm text-white/60">{error}</p>
       </div>
     );
+  }
+
+  if (!user?.teamName) {
+    return <OnboardingScreen />;
   }
 
   return (
