@@ -16,9 +16,9 @@ export interface MarketFilters {
   sort: "newest" | "price_asc" | "price_desc" | "ovr_desc";
 }
 
-function toQueryString(filters: Record<string, string | number | undefined>): string {
+function toQueryString(filters: object): string {
   const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
+  Object.entries(filters as Record<string, string | number | undefined>).forEach(([key, value]) => {
     if (value !== undefined && value !== "") params.set(key, String(value));
   });
   return params.toString();
