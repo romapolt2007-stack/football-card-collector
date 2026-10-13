@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
+import type { Card, FreeBonusClaimResult } from "../types/game";
 
 interface FreeBonusStatus {
   ready: boolean;
@@ -40,9 +41,12 @@ export function useClaimFreeBonus() {
   const user = useAuthStore((s) => s.user);
 
   return useMutation({
-    mutationFn: () => api.post<{ coins: number; reward: number; intervalMs: number }>("/api/user/free-bonus"),
+    mutationFn: () => api.post<FreeBonusClaimResult>("/api/user/free-bonus"),
     onSuccess: (result) => {
       if (user) setUser({ ...user, coins: result.coins });
+      if (result.prize.cards.length > 0) {
+        queryClient.setQueryData<Card[]>(["cards"], (prev) => [...result.prize.cards, ...(prev ?? [])]);
+      }
       queryClient.setQueryData<FreeBonusStatus>(["free-bonus"], {
         ready: false,
         msLeft: result.intervalMs,

@@ -3,6 +3,7 @@ import { BottomNav, type TabId } from "./components/BottomNav";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { useTelegramAuth } from "./hooks/useTelegramAuth";
 import { CasesScreen } from "./screens/CasesScreen";
+import { InventoryScreen } from "./screens/InventoryScreen";
 import { MarketScreen } from "./screens/MarketScreen";
 import { MatchScreen } from "./screens/MatchScreen";
 import { PacksScreen } from "./screens/PacksScreen";
@@ -50,6 +51,7 @@ function App() {
       {tab === "packs" && <PacksScreen />}
       {tab === "cases" && <CasesScreen />}
       {tab === "team" && <TeamScreen />}
+      {tab === "inventory" && <InventoryScreen />}
       {tab === "match" && <MatchScreen />}
       {tab === "market" && <MarketScreen />}
       {tab === "profile" && <ProfileScreen />}

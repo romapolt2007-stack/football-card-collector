@@ -1,7 +1,8 @@
+import { useState } from "react";
+import { FreeBonusRoulette } from "../components/profile/FreeBonusRoulette";
 import { xpForLevel } from "../lib/xp";
 import { useClaimQuest, useDailyClaim, useQuests } from "../lib/queries";
 import { useClaimFreeBonus, useFreeBonusStatus, formatCountdown } from "../lib/useFreeBonus";
-import { haptics } from "../lib/telegram";
 import { useAuthStore } from "../store/useAuthStore";
 
 function isSameUtcDay(a: Date, b: Date) {
@@ -15,6 +16,7 @@ export function ProfileScreen() {
   const dailyClaim = useDailyClaim();
   const freeBonus = useFreeBonusStatus();
   const claimFreeBonus = useClaimFreeBonus();
+  const [showRoulette, setShowRoulette] = useState(false);
 
   if (!user) return null;
 
@@ -54,7 +56,7 @@ export function ProfileScreen() {
           </div>
           <button
             onClick={() => {
-              haptics.notify("success");
+              setShowRoulette(true);
               claimFreeBonus.mutate();
             }}
             disabled={!freeBonus.ready || claimFreeBonus.isPending}
@@ -63,10 +65,23 @@ export function ProfileScreen() {
             Забрать
           </button>
         </div>
-        {claimFreeBonus.isSuccess && (
-          <p className="mt-2 text-xs text-gold">+{claimFreeBonus.data.reward.toLocaleString("ru-RU")} монет!</p>
-        )}
       </section>
+
+      {showRoulette && (
+        <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/90 px-4">
+          {!claimFreeBonus.data ? (
+            <p className="text-sm text-white/40">Крутим...</p>
+          ) : (
+            <FreeBonusRoulette
+              prize={claimFreeBonus.data.prize}
+              onDone={() => {
+                setShowRoulette(false);
+                claimFreeBonus.reset();
+              }}
+            />
+          )}
+        </div>
+      )}
 
       <section className="rounded-xl border border-white/10 bg-white/5 p-4">
         <p className="font-semibold">{user.firstName ?? user.username ?? "Игрок"}</p>

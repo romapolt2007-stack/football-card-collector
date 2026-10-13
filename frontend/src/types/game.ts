@@ -191,6 +191,20 @@ export interface UserQuest {
   quest: QuestDef;
 }
 
+export type FreeBonusPrizeType = "COINS" | "CARD" | "PACK";
+
+export interface FreeBonusPrize {
+  type: FreeBonusPrizeType;
+  coins: number;
+  cards: Card[];
+}
+
+export interface FreeBonusClaimResult {
+  coins: number;
+  prize: FreeBonusPrize;
+  intervalMs: number;
+}
+
 export interface PackDef {
   id: string;
   title: string;

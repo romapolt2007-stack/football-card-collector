@@ -3,7 +3,15 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 import { addXp } from "../lib/xp.js";
-import { FREE_BONUS_INTERVAL_MS, msUntilFreeBonusReady, rollFreeBonusCoins } from "../lib/freeBonus.js";
+import {
+  FREE_BONUS_INTERVAL_MS,
+  msUntilFreeBonusReady,
+  rollFreeBonusCoinsAmount,
+  rollFreeBonusPrizeType,
+} from "../lib/freeBonus.js";
+import { drawPackCards } from "../lib/cardDraw.js";
+import { quickSellPrice } from "../lib/cardValue.js";
+import type { Rarity } from "@prisma/client";
 
 const router = Router();
 
@@ -84,20 +92,50 @@ router.post("/free-bonus", requireAuth, async (req, res) => {
     return;
   }
 
-  const reward = rollFreeBonusCoins();
   const now = new Date();
+  const prizeType = rollFreeBonusPrizeType();
 
-  const [updatedUser] = await prisma.$transaction([
-    prisma.user.update({
+  let coins = 0;
+  let drawn: Awaited<ReturnType<typeof drawPackCards>> = [];
+  if (prizeType === "COINS") {
+    coins = rollFreeBonusCoinsAmount();
+  } else if (prizeType === "CARD") {
+    drawn = await drawPackCards(1, "BRONZE" as Rarity, 0);
+  } else {
+    drawn = await drawPackCards(3, "BRONZE" as Rarity, 0); // мини-пак
+  }
+
+  const { updatedUser, cards } = await prisma.$transaction(async (tx) => {
+    const updatedUser = await tx.user.update({
       where: { id: user.id },
-      data: { coins: { increment: reward }, lastFreeBonusAt: now },
-    }),
-    prisma.transaction.create({
-      data: { userId: user.id, type: "FREE_BONUS", amount: reward },
-    }),
-  ]);
+      data: { coins: { increment: coins }, lastFreeBonusAt: now },
+    });
+    await tx.transaction.create({
+      data: { userId: user.id, type: "FREE_BONUS", amount: coins, meta: { prizeType } },
+    });
 
-  res.json({ coins: updatedUser.coins, reward, intervalMs: FREE_BONUS_INTERVAL_MS });
+    const cards = [];
+    for (const d of drawn) {
+      const card = await tx.card.create({
+        data: {
+          playerId: d.player.id,
+          ownerId: user.id,
+          rarity: d.rarity,
+          quickSellPrice: quickSellPrice(d.rarity, d.player.overall),
+        },
+        include: { player: { include: { club: { include: { league: true } } } } },
+      });
+      cards.push(card);
+    }
+
+    return { updatedUser, cards };
+  });
+
+  res.json({
+    coins: updatedUser.coins,
+    prize: { type: prizeType, coins, cards },
+    intervalMs: FREE_BONUS_INTERVAL_MS,
+  });
 });
 
 export default router;
