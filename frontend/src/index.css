@@ -119,4 +119,97 @@
   .flip-hint {
     animation: flip-hint 1.4s ease-in-out infinite;
   }
+
+  @keyframes rays-spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .light-rays {
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(255, 209, 102, 0.3) 8deg,
+      transparent 18deg,
+      transparent 88deg,
+      rgba(255, 209, 102, 0.3) 96deg,
+      transparent 106deg,
+      transparent 178deg,
+      rgba(255, 209, 102, 0.3) 186deg,
+      transparent 196deg,
+      transparent 268deg,
+      rgba(255, 209, 102, 0.3) 276deg,
+      transparent 286deg,
+      transparent 360deg
+    );
+    animation: rays-spin 14s linear infinite;
+  }
+
+  @keyframes neon-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      filter: brightness(1);
+    }
+    50% {
+      opacity: 1;
+      filter: brightness(1.25);
+    }
+  }
+
+  .neon-pulse {
+    animation: neon-pulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes coin-pulse {
+    0% {
+      transform: scale(1);
+    }
+    35% {
+      transform: scale(1.22);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .coin-pulse {
+    animation: coin-pulse 0.4s ease-out;
+  }
+
+  @keyframes float-up-fade {
+    0% {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    25% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-18px);
+    }
+  }
+
+  .float-up-fade {
+    animation: float-up-fade 1s ease-out forwards;
+  }
+
+  @keyframes pill-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 10px rgba(255, 209, 102, 0.35);
+    }
+    50% {
+      box-shadow: 0 0 18px rgba(255, 209, 102, 0.6);
+    }
+  }
+
+  .pill-glow {
+    animation: pill-glow 2.4s ease-in-out infinite;
+  }
 }

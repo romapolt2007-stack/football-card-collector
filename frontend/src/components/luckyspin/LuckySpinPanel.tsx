@@ -1,8 +1,15 @@
 import { useMemo, useState } from "react";
 import { LuckyReel } from "./LuckyReel";
 import { RARITY_THEME } from "../cards/rarityTheme";
-import { useLuckySpin, useLuckySpinMeta, weightsForStake } from "../../lib/useLuckySpin";
+import {
+  formatLongCountdown,
+  useFreeLuckySpinStatus,
+  useLuckySpin,
+  useLuckySpinMeta,
+  weightsForStake,
+} from "../../lib/useLuckySpin";
 import { useAuthStore } from "../../store/useAuthStore";
+import { haptics } from "../../lib/telegram";
 import type { LuckySpinResult, Rarity } from "../../types/game";
 
 const RARITY_ORDER: Rarity[] = ["BRONZE", "SILVER", "GOLD", "LEGEND", "ICON"];
@@ -18,6 +25,7 @@ export function LuckySpinPanel() {
   const { data: meta, isLoading } = useLuckySpinMeta();
   const user = useAuthStore((s) => s.user);
   const spin = useLuckySpin();
+  const freeSpin = useFreeLuckySpinStatus();
   const [stake, setStake] = useState<number | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<LuckySpinResult | null>(null);
@@ -35,9 +43,17 @@ export function LuckySpinPanel() {
   const canAfford = (user?.coins ?? 0) >= currentStake;
 
   function startSpin() {
+    haptics.impact("medium");
     setSpinning(true);
     setResult(null);
-    spin.mutate(currentStake, { onSuccess: setResult });
+    spin.mutate({ stake: currentStake }, { onSuccess: setResult });
+  }
+
+  function startFreeSpin() {
+    haptics.impact("medium");
+    setSpinning(true);
+    setResult(null);
+    spin.mutate({ free: true }, { onSuccess: setResult });
   }
 
   if (isLoading || !meta) return <p className="text-sm text-white/50">Загрузка...</p>;
@@ -49,10 +65,40 @@ export function LuckySpinPanel() {
         гарантированная удача x5.
       </p>
 
-      <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
+      {freeSpin.data && (
+        <div
+          className="flex items-center justify-between rounded-2xl border p-4"
+          style={{
+            borderColor: freeSpin.ready ? "rgba(110,231,160,0.5)" : "rgba(255,255,255,0.1)",
+            background: freeSpin.ready
+              ? "linear-gradient(135deg, rgba(110,231,160,0.18), rgba(110,231,160,0.05))"
+              : "rgba(255,255,255,0.05)",
+            boxShadow: freeSpin.ready ? "0 0 20px rgba(110,231,160,0.25)" : "none",
+          }}
+        >
+          <div>
+            <p className={`font-semibold ${freeSpin.ready ? "neon-pulse" : ""}`}>🎁 Бесплатный спин</p>
+            <p className="text-xs text-white/50">
+              {freeSpin.ready ? "Доступен прямо сейчас" : `Через ${formatLongCountdown(freeSpin.msLeft)}`}
+            </p>
+          </div>
+          <button
+            onClick={startFreeSpin}
+            disabled={!freeSpin.ready || spin.isPending}
+            className="shrink-0 rounded-full bg-emerald-400 px-4 py-2 text-sm font-extrabold text-pitch-dark disabled:opacity-30"
+          >
+            Крутить
+          </button>
+        </div>
+      )}
+
+      <div
+        className="rounded-2xl border p-4"
+        style={{ borderColor: "rgba(255,209,102,0.25)", background: "rgba(255,255,255,0.05)" }}
+      >
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-white/50">{riskLabel(fraction)}</span>
-          <span className="text-lg font-extrabold text-gold">
+          <span className="text-lg font-extrabold text-gold" style={{ textShadow: "0 0 12px rgba(255,209,102,0.5)" }}>
             {currentStake.toLocaleString("ru-RU")} 🪙
           </span>
         </div>
@@ -81,7 +127,11 @@ export function LuckySpinPanel() {
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                   <div
                     className="h-full rounded-full"
-                    style={{ width: `${Math.max(pct, 1)}%`, background: RARITY_THEME[rarity].borderColor }}
+                    style={{
+                      width: `${Math.max(pct, 1)}%`,
+                      background: RARITY_THEME[rarity].borderColor,
+                      boxShadow: `0 0 6px ${RARITY_THEME[rarity].borderColor}`,
+                    }}
                   />
                 </div>
                 <span className="w-10 shrink-0 text-right text-white/40">{pct.toFixed(1)}%</span>

@@ -218,6 +218,14 @@ export interface LuckySpinResult {
   coins: number;
   spinNumber: number;
   wasPity: boolean;
+  free: boolean;
+}
+
+export interface FreeLuckySpinStatus {
+  ready: boolean;
+  msLeft: number;
+  intervalMs: number;
+  stakeEquivalent: number;
 }
 
 export interface EmergencyBonusStatus {

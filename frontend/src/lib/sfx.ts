@@ -82,11 +82,34 @@ export const sfx = {
     const now = c.currentTime;
     [660, 880].forEach((f, i) => tone(c, f, now + i * 0.06, 0.4, "sine", 0.06));
   },
-  /** Триумфальный аккорд для топ-карты (Walkout). */
+  /** Триумфальный аккорд для топ-карты (Walkout / джекпот). */
   fanfare() {
     const c = getCtx();
     if (!c) return;
     const now = c.currentTime;
     [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, f, now + i * 0.09, 0.9, "triangle", 0.07));
+  },
+  /**
+   * Тиканье рулетки, замедляющееся к концу (классический эффект колеса).
+   * Возвращает cancel() — обязательно вызывать при размонтировании/смене фазы.
+   */
+  reelTicker(durationMs: number): () => void {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    function scheduleNext(elapsed: number) {
+      if (cancelled || elapsed >= durationMs) return;
+      const progress = elapsed / durationMs;
+      const c = getCtx();
+      if (c) tone(c, 420, c.currentTime, 0.05, "square", 0.025 * (1 - progress * 0.5));
+      const delay = 60 + progress * progress * 260; // ускоренно в начале, редко к концу
+      timer = setTimeout(() => scheduleNext(elapsed + delay), delay);
+    }
+    scheduleNext(0);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
   },
 };

@@ -1,11 +1,16 @@
+import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { haptics } from "../../lib/telegram";
+import { sfx } from "../../lib/sfx";
 import type { CaseDef, CasePrize, CasePrizeDef } from "../../types/game";
+import { CASE_THEME } from "./caseTheme";
 import { ITEM_WIDTH, ReelItem } from "./ReelItem";
 
 const STRIP_LENGTH = 40;
 const WINNER_INDEX = 33;
+const SPIN_DURATION_MS = 4500;
+const BIG_WIN_RARITIES = ["LEGEND", "ICON"];
 
 interface Props {
   caseDef: CaseDef;
@@ -27,11 +32,17 @@ function prizeToDef(prize: CasePrize, pool: CasePrizeDef[]): CasePrizeDef {
   return { type: "COINS", weight: 1, coinsMin: prize.coins, coinsMax: prize.coins };
 }
 
+function isBigWin(prize: CasePrize): boolean {
+  return prize.type === "JACKPOT" || (!!prize.card && BIG_WIN_RARITIES.includes(prize.card.rarity));
+}
+
 export function CaseRoulette({ caseDef, prize, onDone }: Props) {
+  const theme = CASE_THEME[caseDef.id] ?? CASE_THEME.common;
   const containerRef = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
   const hapticsFiredRef = useRef(false);
+  const tickerCancelRef = useRef<(() => void) | null>(null);
 
   const strip = useMemo(() => {
     const winnerDef = prizeToDef(prize, caseDef.prizes);
@@ -48,17 +59,48 @@ export function CaseRoulette({ caseDef, prize, onDone }: Props) {
     if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
   }, []);
 
+  // Тиканье рулетки, замедляющееся к концу — нарастающее напряжение перед призом.
+  useEffect(() => {
+    if (!containerWidth) return;
+    tickerCancelRef.current = sfx.reelTicker(SPIN_DURATION_MS);
+    return () => tickerCancelRef.current?.();
+  }, [containerWidth]);
+
   const targetX = -(WINNER_INDEX * ITEM_WIDTH + ITEM_WIDTH / 2 - containerWidth / 2);
+
+  function handleComplete() {
+    if (!containerWidth) return;
+    tickerCancelRef.current?.();
+
+    if (isBigWin(prize)) {
+      sfx.fanfare();
+      haptics.notify("success");
+      confetti({
+        particleCount: 140,
+        spread: 90,
+        origin: { y: 0.4 },
+        colors: ["#ffd166", "#b24bf3", "#ffffff"],
+      });
+    } else {
+      sfx.chime();
+      haptics.notify("success");
+    }
+    setDone(true);
+  }
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div ref={containerRef} className="relative w-full overflow-hidden">
+      <div
+        ref={containerRef}
+        className="relative w-full overflow-hidden rounded-2xl border-2 p-1"
+        style={{ borderColor: theme.borderColor, boxShadow: theme.glow }}
+      >
         <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-0.5 -translate-x-1/2 bg-gold" />
         <motion.div
           className="flex gap-2 py-1"
           initial={{ x: 0 }}
           animate={containerWidth ? { x: targetX } : { x: 0 }}
-          transition={{ duration: 4.5, ease: [0.12, 0.65, 0.2, 1] }}
+          transition={{ duration: SPIN_DURATION_MS / 1000, ease: [0.12, 0.65, 0.2, 1] }}
           onUpdate={(latest) => {
             if (!containerWidth) return;
             const x = typeof latest.x === "number" ? latest.x : 0;
@@ -67,11 +109,7 @@ export function CaseRoulette({ caseDef, prize, onDone }: Props) {
               haptics.impact("light");
             }
           }}
-          onAnimationComplete={() => {
-            if (!containerWidth) return;
-            haptics.notify("success");
-            setDone(true);
-          }}
+          onAnimationComplete={handleComplete}
         >
           {strip.map((item, i) => (
             <ReelItem
@@ -89,7 +127,7 @@ export function CaseRoulette({ caseDef, prize, onDone }: Props) {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center gap-3"
         >
-          <p className="text-sm font-semibold text-white/70">
+          <p className={`text-sm font-semibold ${isBigWin(prize) ? "text-gold" : "text-white/70"}`}>
             {prize.card
               ? `Выпала карта: ${prize.card.player.name}`
               : `+${prize.coins.toLocaleString("ru-RU")} монет`}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CoinBalance } from "../components/common/CoinBalance";
 import { PackOpeningModal } from "../components/packs/PackOpeningModal";
 import { PackTile } from "../components/packs/PackTile";
 import { usePacks } from "../lib/queries";
@@ -25,9 +26,7 @@ export function PacksScreen() {
     <div className="flex min-h-dvh flex-col gap-5 px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-28">
       <header className="flex items-center justify-between">
         <h1 className="text-lg font-extrabold">📦 Паки</h1>
-        <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold">
-          {(user?.coins ?? 0).toLocaleString("ru-RU")} 🪙
-        </span>
+        <CoinBalance coins={user?.coins ?? 0} />
       </header>
 
       {isLoading && <p className="text-sm text-white/50">Загрузка...</p>}

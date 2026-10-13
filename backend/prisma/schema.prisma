@@ -143,6 +143,9 @@ model User {
   // Платная рулетка «Удача»: счётчик спинов для pity-системы (каждый 100-й — гарантированный буст)
   luckySpinCount Int @default(0)
 
+  // Один бесплатный спин «Удачи» раз в сутки — чтобы можно было пробовать удачу не только за монеты
+  lastFreeLuckySpinAt DateTime?
+
   cards       Card[]
   listings    Listing[]
   matches     Match[]
