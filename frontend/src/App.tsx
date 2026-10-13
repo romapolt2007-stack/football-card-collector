@@ -57,7 +57,7 @@ function App() {
       {tab === "packs" && <PacksScreen />}
       {tab === "cases" && <CasesScreen />}
       {tab === "team" && <TeamScreen />}
-      {tab === "inventory" && <InventoryScreen />}
+      {tab === "inventory" && <InventoryScreen onNavigateToTeam={() => setTab("team")} />}
       {tab === "match" && <MatchScreen />}
       {tab === "market" && <MarketScreen />}
       {tab === "profile" && <ProfileScreen />}

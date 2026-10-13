@@ -5,33 +5,43 @@ import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
 
 interface Props {
   card: Card;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "full";
+  onClick?: () => void;
 }
 
 const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
   sm: "w-32 text-[10px]",
   md: "w-44 text-xs",
   lg: "w-60 text-sm",
+  full: "w-full text-[11px]",
 };
 
-export function RarityCard({ card, size = "md" }: Props) {
+export function RarityCard({ card, size = "md", onClick }: Props) {
   const theme = RARITY_THEME[card.rarity];
   const { player } = card;
   const isIcon = card.rarity === "ICON";
   const isLegend = card.rarity === "LEGEND";
+  const isUnavailable = card.unavailableMatches > 0;
 
   return (
     <div
-      className={`relative aspect-[3/4.2] shrink-0 overflow-hidden rounded-2xl border-2 p-3 ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""}`}
+      onClick={onClick}
+      className={`relative aspect-[3/4.2] shrink-0 overflow-hidden rounded-2xl border-2 p-3 ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""} ${onClick ? "cursor-pointer" : ""}`}
       style={{
         background: theme.background,
         borderColor: theme.borderColor,
         boxShadow: theme.glow,
         color: theme.textColor,
+        opacity: isUnavailable ? 0.6 : 1,
       }}
     >
       {isLegend && <div className="holo-sweep pointer-events-none absolute inset-0" />}
       {isIcon && <IconSparkles />}
+      {isUnavailable && (
+        <span className="absolute right-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white">
+          {card.unavailableMatches}
+        </span>
+      )}
 
       <div className="relative flex items-start justify-between">
         <div className="flex flex-col items-center leading-none">

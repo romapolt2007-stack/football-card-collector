@@ -58,4 +58,49 @@ router.post("/quick-sell", requireAuth, async (req, res) => {
   res.json({ coins: updatedUser.coins });
 });
 
+const bulkSellSchema = z.object({ cardIds: z.array(z.string()).min(1).max(200) });
+
+router.post("/quick-sell-bulk", requireAuth, async (req, res) => {
+  const parsed = bulkSellSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Некорректное тело запроса" });
+    return;
+  }
+
+  const cards = await prisma.card.findMany({
+    where: { id: { in: parsed.data.cardIds }, ownerId: req.userId, isListed: false },
+  });
+  if (cards.length === 0) {
+    res.status(400).json({ error: "Нет карт, подходящих для продажи" });
+    return;
+  }
+
+  const total = cards.reduce((sum, c) => sum + c.quickSellPrice, 0);
+  const cardIds = cards.map((c) => c.id);
+
+  for (const id of cardIds) {
+    await clearCardFromSquads(req.userId!, id);
+  }
+
+  const updatedUser = await prisma.$transaction(async (tx) => {
+    await tx.card.deleteMany({ where: { id: { in: cardIds } } });
+    const user = await tx.user.update({
+      where: { id: req.userId },
+      data: { coins: { increment: total } },
+    });
+    await tx.transaction.create({
+      data: {
+        userId: req.userId!,
+        type: "QUICK_SELL",
+        amount: total,
+        meta: { cardIds, count: cardIds.length, bulk: true },
+      },
+    });
+    return user;
+  });
+
+  await incrementQuestProgress(req.userId!, "SELL_CARD", cardIds.length);
+  res.json({ coins: updatedUser.coins, soldCount: cardIds.length, total, soldCardIds: cardIds });
+});
+
 export default router;

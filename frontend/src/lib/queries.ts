@@ -60,6 +60,25 @@ export function useQuickSell() {
   });
 }
 
+export function useQuickSellBulk() {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((s) => s.setUser);
+  const user = useAuthStore((s) => s.user);
+
+  return useMutation({
+    mutationFn: (cardIds: string[]) =>
+      api.post<{ coins: number; soldCount: number; total: number; soldCardIds: string[] }>(
+        "/api/cards/quick-sell-bulk",
+        { cardIds },
+      ),
+    onSuccess: (result) => {
+      if (user) setUser({ ...user, coins: result.coins });
+      const sold = new Set(result.soldCardIds);
+      queryClient.setQueryData<Card[]>(["cards"], (prev) => prev?.filter((c) => !sold.has(c.id)));
+    },
+  });
+}
+
 export function useSquads() {
   const token = useAuthStore((s) => s.token);
   return useQuery({
