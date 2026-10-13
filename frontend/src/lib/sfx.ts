@@ -82,6 +82,52 @@ export const sfx = {
     const now = c.currentTime;
     [660, 880].forEach((f, i) => tone(c, f, now + i * 0.06, 0.4, "sine", 0.06));
   },
+  /** Рывок мотора в момент старта рулетки. */
+  launch() {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(90, now);
+    osc.frequency.exponentialRampToValueAtTime(260, now + 0.35);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.1, now + 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+    osc.connect(gain).connect(c.destination);
+    osc.start(now);
+    osc.stop(now + 0.42);
+  },
+  /**
+   * Щелчок при прохождении карточки через маркер — тяжелее и ниже тоном,
+   * чем ближе к победной карте (distanceToWinner: 3=далеко, 0=она самая).
+   */
+  reelLandTick(distanceToWinner: number) {
+    const c = getCtx();
+    if (!c) return;
+    const t = Math.max(0, Math.min(1, (3 - distanceToWinner) / 3));
+    const freq = 420 - t * 200; // 420Hz далеко -> 220Hz на самой карте
+    const peak = 0.05 + t * 0.06;
+    tone(c, freq, c.currentTime, 0.1 + t * 0.06, "square", peak);
+  },
+  /** Глухой звук при приземлении на базовую редкость (не триумф). */
+  thud() {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.25);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.12, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+    osc.connect(gain).connect(c.destination);
+    osc.start(now);
+    osc.stop(now + 0.32);
+  },
   /** Триумфальный аккорд для топ-карты (Walkout / джекпот). */
   fanfare() {
     const c = getCtx();

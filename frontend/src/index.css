@@ -212,4 +212,40 @@
   .pill-glow {
     animation: pill-glow 2.4s ease-in-out infinite;
   }
+
+  @keyframes marker-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 8px rgba(255, 209, 102, 0.6),
+        0 0 2px rgba(255, 209, 102, 0.9);
+    }
+    50% {
+      box-shadow:
+        0 0 20px rgba(255, 209, 102, 1),
+        0 0 5px rgba(255, 209, 102, 1);
+    }
+  }
+
+  .marker-pulse {
+    animation: marker-pulse 0.45s ease-in-out infinite;
+  }
+
+  @keyframes spark-burst {
+    0% {
+      transform: scale(0.2) rotate(0deg);
+      opacity: 0;
+    }
+    35% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2.4) rotate(100deg);
+      opacity: 0;
+    }
+  }
+
+  .spark-burst {
+    animation: spark-burst 0.75s ease-out forwards;
+  }
 }
