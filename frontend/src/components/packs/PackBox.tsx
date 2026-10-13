@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { PackFoilArt } from "../cases/PackFoilArt";
 import type { PackDef } from "../../types/game";
 import { PACK_THEME } from "./packTheme";
 
@@ -20,8 +21,7 @@ export function PackBox({ pack, shaking }: Props) {
 
   return (
     <motion.div
-      className="relative flex h-56 w-40 flex-col items-center justify-center overflow-hidden rounded-2xl border-2 shadow-2xl"
-      style={{ background: theme.background, borderColor: theme.borderColor, boxShadow: theme.glow }}
+      className="relative flex h-56 w-40 flex-col items-center justify-center"
       animate={
         shaking
           ? { rotate: [0, -6, 6, -6, 6, -3, 3, 0], scale: [1, 1.03, 1, 1.04, 1, 1.02, 1] }
@@ -29,8 +29,6 @@ export function PackBox({ pack, shaking }: Props) {
       }
       transition={shaking ? { duration: 1.1, ease: "easeInOut" } : { duration: 0.3 }}
     >
-      <div className="sheen-sweep pointer-events-none absolute inset-0" />
-
       {theme.sparky && shaking && (
         <div className="pointer-events-none absolute inset-0">
           {SPARK_POSITIONS.map((pos, i) => (
@@ -43,8 +41,13 @@ export function PackBox({ pack, shaking }: Props) {
         </div>
       )}
 
-      <span className="relative text-4xl drop-shadow-lg">{theme.accent}</span>
-      <span className="relative mt-3 text-center text-sm font-bold text-white drop-shadow">{pack.title}</span>
+      <PackFoilArt
+        colorLight={theme.colorLight}
+        colorDark={theme.colorDark}
+        label={pack.title}
+        emblem={pack.id === "starter" ? "⚽" : "🛡️"}
+        size="lg"
+      />
     </motion.div>
   );
 }

@@ -31,6 +31,8 @@ export function CaseTile({ caseDef, disabled, onOpen }: Props) {
       className="relative flex flex-col items-center gap-1.5 overflow-hidden rounded-2xl border-2 p-3 pt-4 text-center transition-transform active:scale-95 disabled:opacity-40"
       style={{ background: theme.background, borderColor: theme.borderColor, boxShadow: theme.glow }}
     >
+      <div className="foil-texture pointer-events-none absolute inset-0" />
+
       {theme.effect === "rays" && <div className="light-rays pointer-events-none absolute inset-0" />}
 
       {theme.badge && (
@@ -54,7 +56,7 @@ export function CaseTile({ caseDef, disabled, onOpen }: Props) {
       )}
 
       <div className={theme.effect === "neon" ? "neon-pulse" : ""}>
-        <PackFoilArt colorLight={theme.colorLight} colorDark={theme.colorDark} packSize={theme.packSize} />
+        <PackFoilArt colorLight={theme.colorLight} colorDark={theme.colorDark} label={`Pack ${theme.packSize}`} />
       </div>
 
       <span className="relative text-sm font-extrabold text-white drop-shadow">{caseDef.title}</span>

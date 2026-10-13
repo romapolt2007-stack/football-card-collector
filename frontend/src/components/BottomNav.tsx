@@ -1,3 +1,6 @@
+import type { ReactNode } from "react";
+import { MiniPackIcon } from "./common/MiniPackIcon";
+
 export type TabId = "packs" | "cases" | "team" | "inventory" | "match" | "market" | "profile";
 
 interface Props {
@@ -5,8 +8,8 @@ interface Props {
   onChange: (tab: TabId) => void;
 }
 
-const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: "packs", label: "Паки", icon: "📦" },
+const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
+  { id: "packs", label: "Паки", icon: <MiniPackIcon className="h-4 w-4" /> },
   { id: "cases", label: "Кейсы", icon: "🎰" },
   { id: "team", label: "Состав", icon: "👥" },
   { id: "inventory", label: "Карты", icon: "🗂️" },
@@ -28,7 +31,7 @@ export function BottomNav({ tab, onChange }: Props) {
               active ? "text-gold" : "text-white/40"
             }`}
           >
-            <span className="text-base leading-none">{t.icon}</span>
+            <span className="flex h-4 items-center justify-center text-base leading-none">{t.icon}</span>
             {active && <span>{t.label}</span>}
           </button>
         );

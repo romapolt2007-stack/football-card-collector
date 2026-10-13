@@ -3,10 +3,17 @@ import { useId } from "react";
 interface Props {
   colorLight: string;
   colorDark: string;
-  packSize: number;
+  label: string;
+  emblem?: string;
+  size?: "md" | "lg";
 }
 
-const PACK_PATH =
+const SIZE_CLASS: Record<NonNullable<Props["size"]>, string> = {
+  md: "h-32 w-24",
+  lg: "h-56 w-40",
+};
+
+export const PACK_PATH =
   "M8 16 L21 7 L35 13 L50 5 L65 13 L79 7 L92 16 L94 118 Q94 127 85 127 L15 127 Q6 127 6 118 Z";
 
 /**
@@ -14,13 +21,13 @@ const PACK_PATH =
  * SVG вместо растровой текстуры, т.к. в проекте нет пайплайна для фото-ассетов.
  * useId — чтобы градиенты/маски не схлопывались между несколькими тайлами на странице.
  */
-export function PackFoilArt({ colorLight, colorDark, packSize }: Props) {
+export function PackFoilArt({ colorLight, colorDark, label, emblem = "⚽", size = "md" }: Props) {
   const uid = useId();
   const gradId = `pack-grad-${uid}`;
   const clipId = `pack-clip-${uid}`;
 
   return (
-    <div className="relative mx-auto h-32 w-24">
+    <div className={`relative mx-auto ${SIZE_CLASS[size]}`}>
       <svg viewBox="0 0 100 132" className="h-full w-full drop-shadow-xl">
         <defs>
           <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -40,10 +47,14 @@ export function PackFoilArt({ colorLight, colorDark, packSize }: Props) {
         <polygon points="6,118 94,100 94,118 85,127 15,127" fill="rgba(0,0,0,0.25)" clipPath={`url(#${clipId})`} />
       </svg>
 
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center">
-        <span className="mt-7 text-2xl drop-shadow-lg">⚽</span>
-        <span className="mt-auto mb-8 text-[10px] font-extrabold tracking-wide text-white drop-shadow-lg">
-          Pack {packSize}
+      <div className={`pointer-events-none absolute inset-0 flex flex-col items-center ${size === "lg" ? "px-4" : "px-2"}`}>
+        <span className={`${size === "lg" ? "mt-12 text-4xl" : "mt-7 text-2xl"} drop-shadow-lg`}>{emblem}</span>
+        <span
+          className={`mt-auto text-center font-extrabold leading-tight tracking-wide text-white drop-shadow-lg ${
+            size === "lg" ? "mb-14 text-sm" : "mb-8 text-[9px]"
+          }`}
+        >
+          {label}
         </span>
       </div>
 

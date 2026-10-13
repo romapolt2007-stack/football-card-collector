@@ -328,4 +328,10 @@
       transform: translateX(-50%);
     }
   }
+
+  .foil-texture {
+    background-image:
+      repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 14px),
+      repeating-linear-gradient(25deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 20px);
+  }
 }
