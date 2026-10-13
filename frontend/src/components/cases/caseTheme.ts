@@ -2,40 +2,50 @@ export interface CaseTheme {
   background: string;
   borderColor: string;
   glow: string;
-  accent: string;
-  badge?: { label: string; tone: "hot" | "jackpot" };
+  colorLight: string;
+  colorDark: string;
+  packSize: number;
+  badge?: { label: string; tone: "collection" | "limited" | "legends" };
   effect?: "sparky" | "rays" | "neon";
 }
 
 export const CASE_THEME: Record<string, CaseTheme> = {
   common: {
-    background: "linear-gradient(155deg, #9aa3b2 0%, #5c636f 45%, #2b2f36 100%)",
-    borderColor: "#b7bec9",
-    glow: "0 0 14px rgba(183,190,201,0.3)",
-    accent: "🎰",
+    background: "linear-gradient(155deg, #2a2d33 0%, #121318 60%, #060607 100%)",
+    borderColor: "rgba(183,190,201,0.4)",
+    glow: "0 0 14px rgba(183,190,201,0.18)",
+    colorLight: "#aeb6c2",
+    colorDark: "#454b54",
+    packSize: 500,
   },
   rare: {
-    background: "linear-gradient(155deg, #4fd1ff 0%, #1f6fd6 45%, #0b2f73 100%)",
-    borderColor: "#5ad1ff",
-    glow: "0 0 22px rgba(90,209,255,0.5)",
-    accent: "🎲",
-    badge: { label: "Шанс x10", tone: "hot" },
+    background: "linear-gradient(155deg, #10233f 0%, #0a1326 60%, #05070f 100%)",
+    borderColor: "rgba(79,145,255,0.45)",
+    glow: "0 0 20px rgba(79,145,255,0.25)",
+    colorLight: "#5aa8ff",
+    colorDark: "#0b2a63",
+    packSize: 1000,
+    badge: { label: "Collection item", tone: "collection" },
     effect: "neon",
   },
   epic: {
-    background: "linear-gradient(155deg, #e6cbff 0%, #a85af5 40%, #5618a8 70%, #220a4a 100%)",
-    borderColor: "#c07bff",
-    glow: "0 0 28px rgba(192,123,255,0.55)",
-    accent: "💠",
-    badge: { label: "Джекпот", tone: "jackpot" },
+    background: "linear-gradient(155deg, #2a1240 0%, #150a26 60%, #070410 100%)",
+    borderColor: "rgba(178,106,255,0.45)",
+    glow: "0 0 24px rgba(178,106,255,0.28)",
+    colorLight: "#b06bff",
+    colorDark: "#3b0f72",
+    packSize: 2000,
+    badge: { label: "Limited series", tone: "limited" },
     effect: "sparky",
   },
   mythic: {
-    background: "linear-gradient(155deg, #fff3cc 0%, #f0c04a 25%, #2a2a2a 55%, #0c0c0c 100%)",
-    borderColor: "#ffd166",
-    glow: "0 0 36px rgba(255,209,102,0.6)",
-    accent: "👑",
-    badge: { label: "Джекпот x3", tone: "jackpot" },
+    background: "linear-gradient(155deg, #2b2004 0%, #19130a 55%, #070504 100%)",
+    borderColor: "rgba(255,209,102,0.5)",
+    glow: "0 0 30px rgba(255,209,102,0.32)",
+    colorLight: "#ffd166",
+    colorDark: "#2a1a00",
+    packSize: 5000,
+    badge: { label: "Legends edition", tone: "legends" },
     effect: "rays",
   },
 };

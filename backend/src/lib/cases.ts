@@ -21,7 +21,7 @@ export interface CaseDef {
 export const CASES: CaseDef[] = [
   {
     id: "common",
-    title: "Common Case",
+    title: "Common Pack",
     priceCoins: 5000,
     prizes: [
       { type: "COINS", weight: 60, coinsMin: 500, coinsMax: 2000 },
@@ -33,7 +33,7 @@ export const CASES: CaseDef[] = [
   },
   {
     id: "rare",
-    title: "Rare Case",
+    title: "Rare Pack",
     priceCoins: 25000,
     prizes: [
       { type: "COINS", weight: 50, coinsMin: 3000, coinsMax: 10000 },
@@ -45,7 +45,7 @@ export const CASES: CaseDef[] = [
   },
   {
     id: "epic",
-    title: "Epic Case",
+    title: "Epic Pack",
     priceCoins: 100_000,
     prizes: [
       { type: "COINS", weight: 40, coinsMin: 15_000, coinsMax: 40_000 },
@@ -57,7 +57,7 @@ export const CASES: CaseDef[] = [
   },
   {
     id: "mythic",
-    title: "Mythic Case",
+    title: "Mythic Pack",
     priceCoins: 500_000,
     prizes: [
       { type: "COINS", weight: 30, coinsMin: 80_000, coinsMax: 200_000 },
