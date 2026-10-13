@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { haptics } from "../../lib/telegram";
 import type { CaseDef, CasePrize, CasePrizeDef } from "../../types/game";
 import { ITEM_WIDTH, ReelItem } from "./ReelItem";
@@ -30,6 +30,7 @@ function prizeToDef(prize: CasePrize, pool: CasePrizeDef[]): CasePrizeDef {
 export function CaseRoulette({ caseDef, prize, onDone }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
   const hapticsFiredRef = useRef(false);
 
   const strip = useMemo(() => {
@@ -40,7 +41,13 @@ export function CaseRoulette({ caseDef, prize, onDone }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const containerWidth = containerRef.current?.offsetWidth ?? 360;
+  // Измеряем реальную ширину после монтирования — offsetWidth во время рендера
+  // ещё null (ref не привязан), иначе лента целится по заглушке и приз
+  // останавливается не под указателем.
+  useLayoutEffect(() => {
+    if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
+  }, []);
+
   const targetX = -(WINNER_INDEX * ITEM_WIDTH + ITEM_WIDTH / 2 - containerWidth / 2);
 
   return (
@@ -50,9 +57,10 @@ export function CaseRoulette({ caseDef, prize, onDone }: Props) {
         <motion.div
           className="flex gap-2 py-1"
           initial={{ x: 0 }}
-          animate={{ x: targetX }}
+          animate={containerWidth ? { x: targetX } : { x: 0 }}
           transition={{ duration: 4.5, ease: [0.12, 0.65, 0.2, 1] }}
           onUpdate={(latest) => {
+            if (!containerWidth) return;
             const x = typeof latest.x === "number" ? latest.x : 0;
             if (!hapticsFiredRef.current && x < targetX + ITEM_WIDTH * 1.5) {
               hapticsFiredRef.current = true;
@@ -60,6 +68,7 @@ export function CaseRoulette({ caseDef, prize, onDone }: Props) {
             }
           }}
           onAnimationComplete={() => {
+            if (!containerWidth) return;
             haptics.notify("success");
             setDone(true);
           }}

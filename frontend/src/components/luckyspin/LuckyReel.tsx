@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FlippableCard } from "../cards/FlippableCard";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import { haptics } from "../../lib/telegram";
@@ -36,6 +36,7 @@ export function LuckyReel({ card, wasPity, onDone }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [landed, setLanded] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
   const quickSell = useQuickSell();
 
   const strip = useMemo(() => {
@@ -45,7 +46,13 @@ export function LuckyReel({ card, wasPity, onDone }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const containerWidth = containerRef.current?.offsetWidth ?? 360;
+  // Измеряем реальную ширину после монтирования — offsetWidth во время рендера
+  // ещё null (ref не привязан), иначе лента целится по заглушке и карточка
+  // останавливается не под указателем.
+  useLayoutEffect(() => {
+    if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
+  }, []);
+
   const targetX = -(WINNER_INDEX * ITEM_WIDTH + ITEM_WIDTH / 2 - containerWidth / 2);
 
   function handleLanded() {
@@ -70,9 +77,9 @@ export function LuckyReel({ card, wasPity, onDone }: Props) {
         <motion.div
           className="flex gap-2 py-1"
           initial={{ x: 0 }}
-          animate={{ x: targetX }}
+          animate={containerWidth ? { x: targetX } : { x: 0 }}
           transition={{ duration: 4, ease: [0.12, 0.65, 0.2, 1] }}
-          onAnimationComplete={handleLanded}
+          onAnimationComplete={() => containerWidth && handleLanded()}
         >
           {strip.map((rarity, i) => (
             <Tile key={i} rarity={rarity} />
