@@ -50,38 +50,52 @@ export function MiniCard({ card, onTap, onDragEnd }: Props) {
         <div className="card-float-shadow absolute -bottom-1 left-1/2 h-2 w-8 -translate-x-1/2 rounded-full bg-black/60 blur-[3px]" />
 
         <div
-          className="pitch-card-bevel relative flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-md border"
+          className="pitch-card-bevel relative flex h-full w-full flex-col items-center justify-center gap-0.5 overflow-hidden rounded-md border"
           style={{
             background: theme.background,
             borderColor: theme.borderColor,
-            boxShadow: theme.glow !== "none" ? theme.glow : undefined,
+            boxShadow: `${theme.glow !== "none" ? `${theme.glow}, ` : ""}0 0 7px ${theme.borderColor}66`,
             opacity: isUnavailable ? 0.55 : 1,
           }}
         >
+          <div className="pointer-events-none absolute inset-0 bg-black/22" />
+          <div className="foil-texture pointer-events-none absolute inset-0" />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.26) 0%, transparent 32%)" }}
+          />
+
           {isUnavailable && (
             <span className="absolute -right-1 -top-1 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-extrabold text-white">
               {card.unavailableMatches}
             </span>
           )}
-          <span
-            className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold leading-none text-[#241a0a]"
-            style={{
-              background: isGoldBadge(card.rarity)
-                ? "radial-gradient(circle at 35% 30%, #fff6d8, #e3a825 75%)"
-                : "radial-gradient(circle at 35% 30%, #f5f6f8, #9aa0ab 75%)",
-            }}
-          >
-            {card.player.overall}
-          </span>
-          <span className="text-[7px] font-bold leading-none opacity-90" style={{ color: theme.textColor }}>
-            {POSITION_RU[card.player.position]}
-          </span>
-          <span
-            className="w-full truncate px-0.5 text-center text-[7.5px] font-bold leading-none"
-            style={{ color: theme.textColor }}
-          >
-            {card.player.name}
-          </span>
+
+          <div className="relative z-10 flex flex-col items-center gap-0.5">
+            <span
+              className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold leading-none text-[#241a0a]"
+              style={{
+                background: isGoldBadge(card.rarity)
+                  ? "radial-gradient(circle at 35% 30%, #fff6d8, #e3a825 75%)"
+                  : "radial-gradient(circle at 35% 30%, #f5f6f8, #9aa0ab 75%)",
+                boxShadow: "0 1px 1px rgba(0,0,0,0.4)",
+              }}
+            >
+              {card.player.overall}
+            </span>
+            <span
+              className="text-[7px] font-bold leading-none opacity-90"
+              style={{ color: theme.textColor, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}
+            >
+              {POSITION_RU[card.player.position]}
+            </span>
+            <span
+              className="w-full truncate px-0.5 text-center text-[7.5px] font-bold leading-none"
+              style={{ color: theme.textColor, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}
+            >
+              {card.player.name}
+            </span>
+          </div>
         </div>
       </motion.div>
     </motion.div>

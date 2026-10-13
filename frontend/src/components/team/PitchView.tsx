@@ -105,20 +105,20 @@ function PitchLines() {
     <svg
       viewBox="0 0 100 133"
       preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-0 h-full w-full opacity-55"
+      className="pointer-events-none absolute inset-0 h-full w-full opacity-75"
     >
-      <rect x="2" y="2" width="96" height="129" fill="none" stroke="white" strokeWidth="0.6" />
-      <line x1="2" y1="66.5" x2="98" y2="66.5" stroke="white" strokeWidth="0.6" />
-      <circle cx="50" cy="66.5" r="12" fill="none" stroke="white" strokeWidth="0.6" />
+      <rect x="2" y="2" width="96" height="129" fill="none" stroke="white" strokeWidth="0.7" />
+      <line x1="2" y1="66.5" x2="98" y2="66.5" stroke="white" strokeWidth="0.7" />
+      <circle cx="50" cy="66.5" r="12" fill="none" stroke="white" strokeWidth="0.7" />
       <circle cx="50" cy="66.5" r="0.8" fill="white" />
-      <rect x="22" y="2" width="56" height="20" fill="none" stroke="white" strokeWidth="0.6" />
-      <rect x="38" y="2" width="24" height="8" fill="none" stroke="white" strokeWidth="0.6" />
+      <rect x="22" y="2" width="56" height="20" fill="none" stroke="white" strokeWidth="0.7" />
+      <rect x="38" y="2" width="24" height="8" fill="none" stroke="white" strokeWidth="0.7" />
       <circle cx="50" cy="16" r="0.8" fill="white" />
-      <path d="M 38 20 A 12 12 0 0 0 62 20" fill="none" stroke="white" strokeWidth="0.6" />
-      <rect x="22" y="111" width="56" height="20" fill="none" stroke="white" strokeWidth="0.6" />
-      <rect x="38" y="123" width="24" height="8" fill="none" stroke="white" strokeWidth="0.6" />
+      <path d="M 38 20 A 12 12 0 0 0 62 20" fill="none" stroke="white" strokeWidth="0.7" />
+      <rect x="22" y="111" width="56" height="20" fill="none" stroke="white" strokeWidth="0.7" />
+      <rect x="38" y="123" width="24" height="8" fill="none" stroke="white" strokeWidth="0.7" />
       <circle cx="50" cy="117" r="0.8" fill="white" />
-      <path d="M 38 113 A 12 12 0 0 1 62 113" fill="none" stroke="white" strokeWidth="0.6" />
+      <path d="M 38 113 A 12 12 0 0 1 62 113" fill="none" stroke="white" strokeWidth="0.7" />
     </svg>
   );
 }
