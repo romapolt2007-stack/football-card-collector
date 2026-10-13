@@ -16,25 +16,39 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
   full: "w-full text-[11px]",
 };
 
+/** Силуэт "щит/баннер" с заострением снизу — только для крупных карт инвентаря. */
+const PENNANT_CLIP =
+  "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
+
 export function RarityCard({ card, size = "md", onClick }: Props) {
   const theme = RARITY_THEME[card.rarity];
   const { player } = card;
   const isIcon = card.rarity === "ICON";
   const isLegend = card.rarity === "LEGEND";
   const isUnavailable = card.unavailableMatches > 0;
+  const isFull = size === "full";
 
   return (
     <div
       onClick={onClick}
-      className={`relative aspect-[3/4.2] shrink-0 overflow-hidden rounded-2xl border-2 p-3 ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative aspect-[3/4.2] shrink-0 overflow-hidden ${isFull ? "pb-4" : "rounded-2xl"} border-2 p-3 ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""} ${onClick ? "cursor-pointer" : ""}`}
       style={{
         background: theme.background,
         borderColor: theme.borderColor,
         boxShadow: theme.glow,
         color: theme.textColor,
         opacity: isUnavailable ? 0.6 : 1,
+        clipPath: isFull ? PENNANT_CLIP : undefined,
       }}
     >
+      {isFull && <div className="pointer-events-none absolute inset-0 bg-black/18" />}
+      {isFull && <div className="foil-texture pointer-events-none absolute inset-0" />}
+      {isFull && (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "linear-gradient(140deg, rgba(255,255,255,0.22) 0%, transparent 38%)" }}
+        />
+      )}
       {isLegend && <div className="holo-sweep pointer-events-none absolute inset-0" />}
       {isIcon && <IconSparkles />}
       {isUnavailable && (
@@ -45,7 +59,9 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
 
       <div className="relative flex items-start justify-between">
         <div className="flex flex-col items-center leading-none">
-          <span className="text-2xl font-extrabold">{player.overall}</span>
+          <span className="text-2xl font-extrabold" style={isFull ? { textShadow: `0 0 10px ${theme.borderColor}88` } : undefined}>
+            {player.overall}
+          </span>
           <span className="mt-0.5 text-[0.7em] font-bold opacity-80">{POSITION_RU[player.position]}</span>
         </div>
         <div className="flex flex-col items-end gap-1 text-right">
@@ -60,7 +76,7 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
       </div>
 
       <div className="relative mt-1 flex flex-col items-center">
-        <ClubCrest club={player.club} size={56} />
+        <ClubCrest club={player.club} size={isFull ? 68 : 56} />
         <p className="mt-1.5 truncate text-center text-[0.85em] font-bold tracking-wide uppercase">
           {player.name}
         </p>
@@ -69,7 +85,9 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
       <div className="relative mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
         {STAT_LABELS_RU.map(([label, key]) => (
           <div key={label} className="flex items-center justify-between gap-1">
-            <span className="font-extrabold">{player[key]}</span>
+            <span className="font-extrabold" style={isFull ? { textShadow: `0 0 6px ${theme.borderColor}66` } : undefined}>
+              {player[key]}
+            </span>
             <span className="opacity-70">{label}</span>
           </div>
         ))}

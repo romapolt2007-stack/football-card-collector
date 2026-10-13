@@ -36,8 +36,12 @@ export function ClubCrest({ club, size = 48 }: Props) {
         {variant === 2 && <circle cx="50" cy="50" r="28" fill={s} />}
         {variant === 3 && <rect x="0" y="33" width="100" height="34" fill={s} />}
         {variant === 4 && <polygon points="50,0 100,50 50,100 0,50" fill={s} />}
+        {/* Рельефный блик сверху и тень снизу — объёмный "3D" вид щита. */}
+        <ellipse cx="42" cy="18" rx="38" ry="16" fill="rgba(255,255,255,0.28)" />
+        <rect y="70" width="100" height="30" fill="rgba(0,0,0,0.28)" />
       </g>
-      <path d={SHIELD_PATH} fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5" />
+      <path d={SHIELD_PATH} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" />
+      <path d={SHIELD_PATH} fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1" transform="translate(0.6,0.6)" />
       <text
         x="50"
         y="60"

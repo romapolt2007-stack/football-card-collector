@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 import { CardDetailModal } from "../components/cards/CardDetailModal";
 import { RarityCard } from "../components/cards/RarityCard";
+import { RarityFilterChip } from "../components/cards/RarityFilterChip";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { CoinBalance } from "../components/common/CoinBalance";
+import { CrackedBinIcon } from "../components/common/CrackedBinIcon";
+import { GoldCoinIcon } from "../components/common/GoldCoinIcon";
 import { useInventory, useQuickSell, useQuickSellBulk } from "../lib/queries";
 import { haptics } from "../lib/telegram";
 import { useAuthStore } from "../store/useAuthStore";
@@ -55,7 +58,7 @@ export function InventoryScreen({ onNavigateToTeam }: Props) {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col gap-4 px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-28">
+    <div className="velvet-texture flex min-h-dvh flex-col gap-4 px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-28">
       <header className="flex items-center justify-between">
         <h1 className="text-lg font-extrabold">🗂️ Инвентарь</h1>
         <CoinBalance coins={user?.coins ?? 0} />
@@ -64,14 +67,22 @@ export function InventoryScreen({ onNavigateToTeam }: Props) {
       <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
         <div>
           <p className="text-xs text-white/50">{cards?.length ?? 0} карт</p>
-          <p className="text-lg font-extrabold text-gold">{totalValue.toLocaleString("ru-RU")} 🪙</p>
+          <p className="flex items-center gap-1.5 text-xl font-extrabold">
+            <GoldCoinIcon size={20} />
+            <span className="shine-text-gold">{totalValue.toLocaleString("ru-RU")}</span>
+          </p>
           <p className="text-[10px] text-white/40">Общая стоимость коллекции</p>
         </div>
         {junkCards.length > 0 && (
           <button
             onClick={() => setConfirmingBulk(true)}
-            className="rounded-full border border-red-400/40 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300"
+            className="spin-button-texture relative flex shrink-0 items-center gap-1.5 overflow-hidden rounded-full px-3 py-2 text-xs font-bold text-white"
+            style={{
+              background: "linear-gradient(160deg, #c23a4a 0%, #7a1322 55%, #450a12 100%)",
+              boxShadow: "0 0 10px rgba(194,58,74,0.45), inset 0 1px 0 rgba(255,255,255,0.12)",
+            }}
           >
+            <CrackedBinIcon size={15} />
             Продать мусор ({junkCards.length})
           </button>
         )}
@@ -81,40 +92,32 @@ export function InventoryScreen({ onNavigateToTeam }: Props) {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Поиск по имени..."
-        className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm outline-none"
+        className="metal-input rounded-lg border border-white/15 px-3 py-2 text-sm text-white outline-none placeholder:text-white/40"
       />
 
       <div className="flex gap-1.5 overflow-x-auto pb-1">
-        <button
+        <RarityFilterChip
+          active={!rarityFilter}
+          label="Все"
+          background="linear-gradient(160deg, #fff1c2 0%, #e3a825 50%, #8a5a06 100%)"
+          borderColor="#ffd166"
           onClick={() => {
             haptics.select();
             setRarityFilter(null);
           }}
-          className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold"
-          style={{
-            borderColor: !rarityFilter ? "#ffd166" : "rgba(255,255,255,0.2)",
-            color: !rarityFilter ? "#ffd166" : "rgba(255,255,255,0.5)",
-            background: !rarityFilter ? "rgba(255,209,102,0.12)" : "transparent",
-          }}
-        >
-          Все
-        </button>
+        />
         {RARITIES.map((r) => (
-          <button
+          <RarityFilterChip
             key={r}
+            active={rarityFilter === r}
+            label={RARITY_THEME[r].label}
+            background={RARITY_THEME[r].background}
+            borderColor={RARITY_THEME[r].borderColor}
             onClick={() => {
               haptics.select();
               setRarityFilter((prev) => (prev === r ? null : r));
             }}
-            className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold"
-            style={{
-              borderColor: rarityFilter === r ? RARITY_THEME[r].borderColor : "rgba(255,255,255,0.2)",
-              color: rarityFilter === r ? RARITY_THEME[r].borderColor : "rgba(255,255,255,0.5)",
-              background: rarityFilter === r ? `${RARITY_THEME[r].borderColor}22` : "transparent",
-            }}
-          >
-            {RARITY_THEME[r].emoji} {RARITY_THEME[r].label}
-          </button>
+          />
         ))}
       </div>
 
