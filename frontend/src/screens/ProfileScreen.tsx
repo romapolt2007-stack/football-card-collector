@@ -3,6 +3,7 @@ import { FreeBonusRoulette } from "../components/profile/FreeBonusRoulette";
 import { xpForLevel } from "../lib/xp";
 import { useClaimQuest, useDailyClaim, useQuests } from "../lib/queries";
 import { useClaimFreeBonus, useFreeBonusStatus, formatCountdown } from "../lib/useFreeBonus";
+import { useClaimEmergencyBonus, useEmergencyBonusStatus } from "../lib/useLuckySpin";
 import { useAuthStore } from "../store/useAuthStore";
 
 function isSameUtcDay(a: Date, b: Date) {
@@ -17,6 +18,8 @@ export function ProfileScreen() {
   const freeBonus = useFreeBonusStatus();
   const claimFreeBonus = useClaimFreeBonus();
   const [showRoulette, setShowRoulette] = useState(false);
+  const emergencyBonus = useEmergencyBonusStatus();
+  const claimEmergencyBonus = useClaimEmergencyBonus();
 
   if (!user) return null;
 
@@ -39,6 +42,34 @@ export function ProfileScreen() {
           {user.coins.toLocaleString("ru-RU")} 🪙
         </span>
       </header>
+
+      {emergencyBonus.data?.eligible && (
+        <section
+          className="rounded-xl border p-4"
+          style={{
+            borderColor: emergencyBonus.ready ? "#f87171" : "rgba(248,113,113,0.3)",
+            background: "rgba(248,113,113,0.1)",
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold">🆘 Монеты кончились?</p>
+              <p className="text-xs text-white/50">
+                {emergencyBonus.ready
+                  ? `+${emergencyBonus.data.reward.toLocaleString("ru-RU")} монет прямо сейчас`
+                  : `Можно забрать через ${formatCountdown(emergencyBonus.msLeft)}`}
+              </p>
+            </div>
+            <button
+              onClick={() => claimEmergencyBonus.mutate()}
+              disabled={!emergencyBonus.ready || claimEmergencyBonus.isPending}
+              className="shrink-0 rounded-full bg-red-400 px-4 py-2 text-sm font-extrabold text-pitch-dark disabled:opacity-30"
+            >
+              Забрать
+            </button>
+          </div>
+        </section>
+      )}
 
       <section
         className="rounded-xl border p-4"

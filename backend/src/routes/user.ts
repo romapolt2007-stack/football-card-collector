@@ -9,6 +9,12 @@ import {
   rollFreeBonusCoinsAmount,
   rollFreeBonusPrizeType,
 } from "../lib/freeBonus.js";
+import {
+  EMERGENCY_BONUS_COINS_THRESHOLD,
+  EMERGENCY_BONUS_INTERVAL_MS,
+  EMERGENCY_BONUS_REWARD,
+  msUntilEmergencyBonusReady,
+} from "../lib/emergencyBonus.js";
 import { drawPackCards } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import type { Rarity } from "@prisma/client";
@@ -136,6 +142,46 @@ router.post("/free-bonus", requireAuth, async (req, res) => {
     prize: { type: prizeType, coins, cards },
     intervalMs: FREE_BONUS_INTERVAL_MS,
   });
+});
+
+router.get("/emergency-bonus", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  const eligible = user.coins < EMERGENCY_BONUS_COINS_THRESHOLD;
+  const msLeft = msUntilEmergencyBonusReady(user.lastEmergencyBonusAt);
+  res.json({
+    eligible,
+    ready: eligible && msLeft === 0,
+    msLeft,
+    intervalMs: EMERGENCY_BONUS_INTERVAL_MS,
+    threshold: EMERGENCY_BONUS_COINS_THRESHOLD,
+    reward: EMERGENCY_BONUS_REWARD,
+  });
+});
+
+router.post("/emergency-bonus", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  if (user.coins >= EMERGENCY_BONUS_COINS_THRESHOLD) {
+    res.status(400).json({ error: "Бонус доступен только когда монет почти нет" });
+    return;
+  }
+  const msLeft = msUntilEmergencyBonusReady(user.lastEmergencyBonusAt);
+  if (msLeft > 0) {
+    res.status(400).json({ error: "Бонус ещё не готов", msLeft });
+    return;
+  }
+
+  const now = new Date();
+  const [updatedUser] = await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { coins: { increment: EMERGENCY_BONUS_REWARD }, lastEmergencyBonusAt: now },
+    }),
+    prisma.transaction.create({
+      data: { userId: user.id, type: "EMERGENCY_BONUS", amount: EMERGENCY_BONUS_REWARD },
+    }),
+  ]);
+
+  res.json({ coins: updatedUser.coins, reward: EMERGENCY_BONUS_REWARD, intervalMs: EMERGENCY_BONUS_INTERVAL_MS });
 });
 
 export default router;

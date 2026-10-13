@@ -205,6 +205,28 @@ export interface FreeBonusClaimResult {
   intervalMs: number;
 }
 
+export interface StakeTier {
+  stake: number;
+  label: string;
+  weights: Record<Rarity, number>;
+}
+
+export interface LuckySpinResult {
+  card: Card;
+  coins: number;
+  spinNumber: number;
+  wasPity: boolean;
+}
+
+export interface EmergencyBonusStatus {
+  eligible: boolean;
+  ready: boolean;
+  msLeft: number;
+  intervalMs: number;
+  threshold: number;
+  reward: number;
+}
+
 export interface PackDef {
   id: string;
   title: string;

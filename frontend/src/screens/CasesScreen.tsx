@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CaseRoulette } from "../components/cases/CaseRoulette";
+import { LuckySpinPanel } from "../components/luckyspin/LuckySpinPanel";
 import { useCases, useSpinCase } from "../lib/useCases";
 import { useAuthStore } from "../store/useAuthStore";
 import type { CaseDef, CaseSpinResult } from "../types/game";
@@ -12,6 +13,7 @@ const CASE_EMOJI: Record<string, string> = {
 };
 
 export function CasesScreen() {
+  const [mode, setMode] = useState<"cases" | "lucky">("cases");
   const { data: cases, isLoading } = useCases();
   const user = useAuthStore((s) => s.user);
   const spinCase = useSpinCase();
@@ -27,30 +29,55 @@ export function CasesScreen() {
   return (
     <div className="flex min-h-dvh flex-col gap-5 px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-28">
       <header className="flex items-center justify-between">
-        <h1 className="text-lg font-extrabold">🎰 Кейсы</h1>
+        <h1 className="text-lg font-extrabold">{mode === "cases" ? "🎰 Кейсы" : "🍀 Удача"}</h1>
         <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold">
           {(user?.coins ?? 0).toLocaleString("ru-RU")} 🪙
         </span>
       </header>
 
-      {isLoading && <p className="text-sm text-white/50">Загрузка...</p>}
-
-      <div className="grid grid-cols-2 gap-3">
-        {cases?.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => openCase(c)}
-            disabled={(user?.coins ?? 0) < c.priceCoins}
-            className="flex flex-col items-center gap-2 rounded-2xl border-2 border-white/15 bg-white/5 p-4 text-center disabled:opacity-40"
-          >
-            <span className="text-3xl">{CASE_EMOJI[c.id] ?? "🎁"}</span>
-            <span className="text-sm font-bold">{c.title}</span>
-            <span className="mt-1 rounded-full bg-black/30 px-3 py-1 text-xs font-semibold">
-              {c.priceCoins.toLocaleString("ru-RU")} 🪙
-            </span>
-          </button>
-        ))}
+      <div className="flex gap-1.5">
+        <button
+          onClick={() => setMode("cases")}
+          className={`flex-1 rounded-full border py-2 text-sm font-semibold ${
+            mode === "cases" ? "border-gold bg-gold/15 text-gold" : "border-white/15 text-white/50"
+          }`}
+        >
+          Кейсы
+        </button>
+        <button
+          onClick={() => setMode("lucky")}
+          className={`flex-1 rounded-full border py-2 text-sm font-semibold ${
+            mode === "lucky" ? "border-gold bg-gold/15 text-gold" : "border-white/15 text-white/50"
+          }`}
+        >
+          Удача
+        </button>
       </div>
+
+      {mode === "lucky" ? (
+        <LuckySpinPanel />
+      ) : (
+        <>
+          {isLoading && <p className="text-sm text-white/50">Загрузка...</p>}
+
+          <div className="grid grid-cols-2 gap-3">
+            {cases?.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => openCase(c)}
+                disabled={(user?.coins ?? 0) < c.priceCoins}
+                className="flex flex-col items-center gap-2 rounded-2xl border-2 border-white/15 bg-white/5 p-4 text-center disabled:opacity-40"
+              >
+                <span className="text-3xl">{CASE_EMOJI[c.id] ?? "🎁"}</span>
+                <span className="text-sm font-bold">{c.title}</span>
+                <span className="mt-1 rounded-full bg-black/30 px-3 py-1 text-xs font-semibold">
+                  {c.priceCoins.toLocaleString("ru-RU")} 🪙
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {opening && (
         <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/90 px-4">

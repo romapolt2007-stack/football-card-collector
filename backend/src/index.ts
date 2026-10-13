@@ -8,6 +8,7 @@ import { Server as SocketIOServer } from "socket.io";
 import authRouter from "./routes/auth.js";
 import cardsRouter from "./routes/cards.js";
 import casesRouter from "./routes/cases.js";
+import luckySpinRouter from "./routes/luckySpin.js";
 import marketRouter from "./routes/market.js";
 import matchesRouter from "./routes/matches.js";
 import packsRouter from "./routes/packs.js";
@@ -51,6 +52,9 @@ app.use("/api/matches/quick", actionLimiter);
 app.use("/api/matches", matchesRouter);
 app.use("/api/cases/spin", actionLimiter);
 app.use("/api/cases", casesRouter);
+app.use("/api/lucky-spin/spin", actionLimiter);
+app.use("/api/lucky-spin", luckySpinRouter);
+app.use("/api/user/emergency-bonus", actionLimiter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {

@@ -137,6 +137,12 @@ model User {
   lastFreeBonusAt     DateTime?
   freeBonusNotifiedAt DateTime?
 
+  // "Спасательный" бонус — доступен чаще, но только когда монет почти нет
+  lastEmergencyBonusAt DateTime?
+
+  // Платная рулетка «Удача»: счётчик спинов для pity-системы (каждый 100-й — гарантированный буст)
+  luckySpinCount Int @default(0)
+
   cards       Card[]
   listings    Listing[]
   matches     Match[]
@@ -260,6 +266,8 @@ enum TransactionType {
   MATCH_REWARD
   DAILY_BONUS
   FREE_BONUS
+  EMERGENCY_BONUS
+  LUCKY_SPIN
   QUEST_REWARD
   REFERRAL_BONUS
   STARS_PURCHASE
