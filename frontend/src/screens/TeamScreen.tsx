@@ -2,11 +2,14 @@ import type { PanInfo } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BenchRow } from "../components/team/BenchRow";
 import { CardPicker } from "../components/team/CardPicker";
+import { ChemistryBadge } from "../components/team/ChemistryBadge";
+import { FormationPicker } from "../components/team/FormationPicker";
 import { PitchView } from "../components/team/PitchView";
-import { calcChemistry, chemistryColor } from "../lib/chemistry";
+import { calcChemistry } from "../lib/chemistry";
 import { BENCH_SLOT_IDS, emptySlotsFor, FORMATIONS } from "../lib/formations";
 import { useInventory, useSquads, useCreateSquad, useUpdateSquad } from "../lib/queries";
 import { haptics } from "../lib/telegram";
+import { sfx } from "../lib/sfx";
 import type { Card, Formation, SquadSlot } from "../types/game";
 
 const FORMATION_OPTIONS: Formation[] = ["4-4-2", "4-3-3", "3-5-2", "4-2-3-1", "5-3-2"];
@@ -106,6 +109,9 @@ export function TeamScreen() {
   }
 
   function handleFormationChange(next: Formation) {
+    if (next === formation) return;
+    sfx.whoosh();
+    haptics.impact("medium");
     setFormation(next);
     // переносим уже расставленных игроков в новые слоты по возможности, лишних — на скамейку
     const oldStarterCards = FORMATIONS[formation]
@@ -149,31 +155,11 @@ export function TeamScreen() {
   return (
     <div className="flex min-h-dvh flex-col gap-4 px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-28">
       <header className="flex items-center justify-between">
-        <h1 className="text-lg font-extrabold">👥 Состав</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-white/50">Химия</span>
-          <span
-            className="rounded-full px-2.5 py-1 text-xs font-extrabold"
-            style={{ background: chemistryColor(chemistry) + "33", color: chemistryColor(chemistry) }}
-          >
-            {chemistry}
-          </span>
-        </div>
+        <h1 className="text-lg font-extrabold">Состав</h1>
+        <ChemistryBadge value={chemistry} />
       </header>
 
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {FORMATION_OPTIONS.map((f) => (
-          <button
-            key={f}
-            onClick={() => handleFormationChange(f)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${
-              f === formation ? "border-gold bg-gold/20 text-gold" : "border-white/15 text-white/50"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+      <FormationPicker options={FORMATION_OPTIONS} active={formation} onChange={handleFormationChange} />
 
       <PitchView
         formation={formation}

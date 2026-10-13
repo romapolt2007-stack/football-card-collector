@@ -158,4 +158,33 @@ export const sfx = {
       if (timer) clearTimeout(timer);
     };
   },
+  /** Удар бутсы по мячу — короткий транзиент + глухой низкий хвост, для тапа по карточке. */
+  kick() {
+    const c = getCtx();
+    if (!c) return;
+    const now = c.currentTime;
+
+    const bufferSize = Math.floor(c.sampleRate * 0.04);
+    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    const noise = c.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = c.createGain();
+    noiseGain.gain.setValueAtTime(0.15, now);
+    noise.connect(noiseGain).connect(c.destination);
+    noise.start(now);
+
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.1, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    osc.connect(gain).connect(c.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  },
 };

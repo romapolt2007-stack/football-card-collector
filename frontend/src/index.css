@@ -248,4 +248,75 @@
   .spark-burst {
     animation: spark-burst 0.75s ease-out forwards;
   }
+
+  /* ─── Состав: стадион, объёмные карточки, кристалл химии ─── */
+
+  @keyframes crowd-shimmer {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 0.75;
+    }
+  }
+
+  .crowd-shimmer {
+    animation: crowd-shimmer 6s ease-in-out infinite;
+  }
+
+  @keyframes floodlight-pulse {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  .floodlight-pulse {
+    animation: floodlight-pulse 4.5s ease-in-out infinite;
+  }
+
+  .pitch-card-bevel {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -2px 3px rgba(0, 0, 0, 0.35),
+      0 6px 10px -2px rgba(0, 0, 0, 0.5);
+  }
+
+  @keyframes card-float-shadow {
+    0%,
+    100% {
+      transform: translateY(0) scaleX(1);
+      opacity: 0.45;
+    }
+    50% {
+      transform: translateY(1px) scaleX(0.92);
+      opacity: 0.3;
+    }
+  }
+
+  .card-float-shadow {
+    animation: card-float-shadow 2.6s ease-in-out infinite;
+  }
+
+  .chem-crystal {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  @keyframes chem-crystal-glow {
+    0%,
+    100% {
+      filter: brightness(1) saturate(1);
+    }
+    50% {
+      filter: brightness(1.3) saturate(1.2);
+    }
+  }
+
+  .chem-crystal-glow {
+    animation: chem-crystal-glow 2.2s ease-in-out infinite;
+  }
 }

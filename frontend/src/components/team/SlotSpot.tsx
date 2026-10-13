@@ -27,7 +27,13 @@ export function SlotSpot({ slotId, label, x, y, card, registerRef, onTapEmpty, o
       ) : (
         <button
           onClick={onTapEmpty}
-          className="flex h-11 w-9 flex-col items-center justify-center rounded-md border-2 border-dashed border-white/25 bg-white/5 text-[9px] font-bold text-white/40"
+          className="flex h-11 w-9 flex-col items-center justify-center rounded-md border-2 border-dashed text-[9px] font-bold"
+          style={{
+            borderColor: "rgba(255,209,102,0.35)",
+            background: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+            color: "rgba(255,209,102,0.55)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 3px rgba(0,0,0,0.25)",
+          }}
         >
           {label}
         </button>
