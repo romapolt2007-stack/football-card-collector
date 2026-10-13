@@ -148,6 +148,7 @@ model User {
 
   cards       Card[]
   listings    Listing[]
+  marketBids  MarketBid[]
   matches     Match[]
   transactions Transaction[]
   userQuests  UserQuest[]
@@ -217,14 +218,34 @@ model Listing {
   seller   User   @relation(fields: [sellerId], references: [id])
   sellerId String
 
-  price  Int
-  status ListingStatus @default(ACTIVE)
+  // price — стартовая цена аукциона (минимальная ставка). buyNowPrice — опциональный
+  // мгновенный выкуп в обход торгов; если не задан, лот доступен только через ставки.
+  price       Int
+  buyNowPrice Int?
+  status      ListingStatus @default(ACTIVE)
+
+  bids MarketBid[]
 
   createdAt DateTime  @default(now())
   expiresAt DateTime
 
   @@index([status])
   @@map("listings")
+}
+
+model MarketBid {
+  id        String  @id @default(cuid())
+  listing   Listing @relation(fields: [listingId], references: [id])
+  listingId String
+  bidder    User    @relation(fields: [bidderId], references: [id])
+  bidderId  String
+
+  amount Int
+
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@map("market_bids")
 }
 
 // ──────────────────────────────────────────

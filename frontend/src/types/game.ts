@@ -206,16 +206,40 @@ export interface CaseSpinResult {
   coins: number;
 }
 
+export interface MarketBid {
+  id: string;
+  amount: number;
+  createdAt: string;
+  bidder: { id: string; username: string | null; firstName: string | null };
+}
+
 export interface Listing {
   id: string;
   cardId: string;
   sellerId: string;
   price: number;
+  buyNowPrice: number | null;
   status: "ACTIVE" | "SOLD" | "EXPIRED";
   createdAt: string;
   expiresAt: string;
   card: Card;
   seller: { id: string; username: string | null; firstName: string | null };
+  bids: MarketBid[];
+}
+
+export interface MarketTrend {
+  rarity: Rarity;
+  recentAvg: number;
+  changePct: number;
+}
+
+export interface MarketHistoryEntry {
+  id: string;
+  type: "MARKET_BUY" | "MARKET_SELL";
+  amount: number;
+  createdAt: string;
+  playerName: string | null;
+  rarity: Rarity | null;
 }
 
 export interface QuestDef {

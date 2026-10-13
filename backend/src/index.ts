@@ -18,6 +18,8 @@ import teamRouter from "./routes/team.js";
 import userRouter from "./routes/user.js";
 import { startBot } from "./bot.js";
 import { startFreeBonusNotifier } from "./lib/freeBonusNotifier.js";
+import { startMarketAuctionSettler } from "./lib/marketAuctionSettler.js";
+import { startMarketBotSeeder } from "./lib/marketBot.js";
 import { setIo } from "./lib/socket.js";
 
 const app = express();
@@ -47,6 +49,7 @@ app.use("/api/user/daily-claim", actionLimiter);
 app.use("/api/quests", questsRouter);
 app.use("/api/market/list", actionLimiter);
 app.use("/api/market/buy", actionLimiter);
+app.use(/^\/api\/market\/listings\/[^/]+\/bid$/, actionLimiter);
 app.use("/api/market", marketRouter);
 app.use("/api/matches/quick", actionLimiter);
 app.use("/api/matches/shootout", actionLimiter);
@@ -70,3 +73,5 @@ httpServer.listen(port, () => {
 
 const bot = startBot();
 if (bot) startFreeBonusNotifier(bot);
+startMarketAuctionSettler();
+startMarketBotSeeder();
