@@ -144,7 +144,7 @@ export function rollRarity(): { rarity: Rarity; ovrRange: [number, number] } {
   const roll = Math.random() * 100;
   if (roll < 60) return { rarity: Rarity.BRONZE, ovrRange: [60, 74] };
   if (roll < 85) return { rarity: Rarity.SILVER, ovrRange: [75, 84] };
-  if (roll < 97) return { rarity: Rarity.GOLD, ovrRange: [85, 92] };
+  if (roll < 98.3) return { rarity: Rarity.GOLD, ovrRange: [85, 92] };
   if (roll < 99.5) return { rarity: Rarity.LEGEND, ovrRange: [93, 96] };
   return { rarity: Rarity.ICON, ovrRange: [97, 99] };
 }

@@ -9,14 +9,22 @@ const EVENT_LABEL: Record<string, string> = { GOAL: "⚽ Гол!", POST: "🥅 �
 
 type Phase = "idle" | "playing" | "result";
 
+// Полный матч «проигрывается» за это время — часы идут с 1-й по 90-ю
+// минуту равномерно, а события всплывают, когда часы доходят до их минуты.
+// Так матч ощущается как матч, а не как мгновенный вывод списка событий.
+const MATCH_PLAYBACK_MS = 28_000;
+const MINUTE_TICK_MS = MATCH_PLAYBACK_MS / 90;
+
 export function MatchScreen() {
   const playMatch = usePlayQuickMatch();
   const [phase, setPhase] = useState<Phase>("idle");
+  const [minute, setMinute] = useState(0);
   const [revealedCount, setRevealedCount] = useState(0);
   const resultRef = useRef<QuickMatchResult | null>(null);
 
   function start() {
     setPhase("playing");
+    setMinute(0);
     setRevealedCount(0);
     playMatch.mutate(undefined, {
       onSuccess: (result) => {
@@ -28,14 +36,26 @@ export function MatchScreen() {
   const result = resultRef.current;
   const events = result?.match.events ?? [];
 
+  // Часы матча: тикают раз в MINUTE_TICK_MS, не завязаны на количество событий.
   useEffect(() => {
     if (phase !== "playing" || !result) return;
-    if (revealedCount >= events.length) {
-      const timer = setTimeout(() => setPhase("result"), 500);
+    if (minute >= 90) {
+      const timer = setTimeout(() => setPhase("result"), 900);
       return () => clearTimeout(timer);
     }
-    const timer = setTimeout(() => {
-      const event = events[revealedCount];
+    const timer = setTimeout(() => setMinute((m) => m + 1), MINUTE_TICK_MS);
+    return () => clearTimeout(timer);
+  }, [phase, minute, result]);
+
+  // Раскрываем события по мере того, как часы доходят до их минуты.
+  useEffect(() => {
+    if (phase !== "playing" || !result) return;
+    let upTo = revealedCount;
+    while (upTo < events.length && events[upTo].minute <= minute) upTo++;
+    if (upTo === revealedCount) return;
+
+    for (let i = revealedCount; i < upTo; i++) {
+      const event = events[i];
       if (event.type === "GOAL") {
         if (event.team === "user") {
           confetti({ particleCount: 60, spread: 70, origin: { y: 0.5 } });
@@ -44,10 +64,9 @@ export function MatchScreen() {
           haptics.impact("heavy");
         }
       }
-      setRevealedCount((n) => n + 1);
-    }, 650);
-    return () => clearTimeout(timer);
-  }, [phase, revealedCount, events, result]);
+    }
+    setRevealedCount(upTo);
+  }, [phase, minute, revealedCount, events, result]);
 
   const liveScore = events.slice(0, revealedCount).reduce(
     (acc, e) => {
@@ -84,6 +103,7 @@ export function MatchScreen() {
           </span>
           <span className="text-sm font-semibold text-white/70">{result?.match.opponentName ?? "..."}</span>
         </div>
+        <p className="text-center text-xs font-semibold text-gold">{Math.min(minute, 90)}&apos;</p>
         <div className="flex-1 overflow-y-auto">
           <div className="flex flex-col gap-1.5">
             {events.slice(0, revealedCount).map((e, i) => (

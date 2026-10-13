@@ -6,8 +6,8 @@ import { nextRarity, rarityIndex } from "./packs.js";
 const BASE_WEIGHTS: Record<Rarity, number> = {
   [Rarity.BRONZE]: 60,
   [Rarity.SILVER]: 25,
-  [Rarity.GOLD]: 12,
-  [Rarity.LEGEND]: 2.5,
+  [Rarity.GOLD]: 13.3,
+  [Rarity.LEGEND]: 1.2,
   [Rarity.ICON]: 0.5,
 };
 
