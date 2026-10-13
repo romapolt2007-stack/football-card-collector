@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FlippableCard } from "../cards/FlippableCard";
 import { RARITY_THEME } from "../cards/rarityTheme";
+import { TierBall } from "./TierBall";
 import { haptics } from "../../lib/telegram";
 import { sfx } from "../../lib/sfx";
 import { useQuickSell } from "../../lib/queries";
@@ -59,7 +60,7 @@ function Tile({ rarity, active }: { rarity: Rarity; active: boolean }) {
   const theme = RARITY_THEME[rarity];
   return (
     <motion.div
-      className="flex h-20 w-[68px] shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2"
+      className="relative flex h-20 w-[68px] shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border-2"
       style={{ background: theme.background, borderColor: theme.borderColor }}
       animate={{
         scale: active ? 1.16 : 1,
@@ -67,8 +68,13 @@ function Tile({ rarity, active }: { rarity: Rarity; active: boolean }) {
       }}
       transition={{ duration: 0.15 }}
     >
-      <span className="text-lg">{theme.emoji}</span>
-      <span className="text-[10px] font-bold" style={{ color: theme.textColor }}>
+      <div className="foil-texture pointer-events-none absolute inset-0" />
+      <div className="sheen-sweep pointer-events-none absolute inset-0" />
+      <TierBall color={theme.borderColor} glow={theme.glow} emblem={rarity === "ICON"} size={22} />
+      <span
+        className="relative text-[10px] font-bold"
+        style={{ color: theme.textColor, textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
+      >
         {theme.label}
       </span>
     </motion.div>
@@ -256,20 +262,27 @@ export function LuckyReel({ card, wasPity, onDone }: Props) {
             />
           )}
 
-          <FlippableCard card={card} revealed={revealed} size="md" showRarityBack />
+          <div className="lucky-card-frame relative overflow-hidden rounded-[28px] p-2.5">
+            <div className="holo-sweep pointer-events-none absolute inset-0" />
+            <div className="foil-texture pointer-events-none absolute inset-0" />
+            <FlippableCard card={card} revealed={revealed} size="md" showRarityBack />
+          </div>
 
           {revealed && (
             <div className="flex gap-2">
               <button
                 onClick={handleSell}
                 disabled={quickSell.isPending}
-                className="rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold disabled:opacity-30"
+                className="flex items-center gap-1.5 rounded-full border-2 border-white/25 bg-white/5 px-5 py-3 text-sm font-bold text-white/90 backdrop-blur disabled:opacity-30"
               >
-                Продать за {card.quickSellPrice.toLocaleString("ru-RU")} 🪙
+                Продать за {card.quickSellPrice.toLocaleString("ru-RU")}
+                <span className="text-base text-gold" style={{ textShadow: "0 0 6px rgba(255,209,102,0.6)" }}>
+                  🪙
+                </span>
               </button>
               <button
                 onClick={onDone}
-                className="rounded-full bg-gold px-5 py-2.5 text-sm font-extrabold text-pitch-dark"
+                className="spin-button-texture relative overflow-hidden rounded-full bg-gold px-6 py-3 text-sm font-extrabold tracking-wide text-pitch-dark shadow-[0_0_20px_rgba(255,209,102,0.45)]"
               >
                 Оставить
               </button>

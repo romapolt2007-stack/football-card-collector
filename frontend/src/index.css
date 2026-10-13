@@ -11,6 +11,10 @@
   --color-icon: #ff3b5c;
 }
 
+:root {
+  --ball-thumb: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='47' fill='%23f2f2f2' stroke='%23222' stroke-width='4'/><polygon points='50,28 65,39 59,59 41,59 35,39' fill='%231a1a1a'/><path d='M50,28 L50,6 M65,39 L85,28 M59,59 L75,80 M41,59 L25,80 M35,39 L15,28' stroke='%23222' stroke-width='4' fill='none' stroke-linecap='round'/></svg>");
+}
+
 @layer base {
   html,
   body,
@@ -333,5 +337,91 @@
     background-image:
       repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 14px),
       repeating-linear-gradient(25deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 20px);
+  }
+
+  /* ─── Удача: премиальный ползунок ставки и кнопка SPIN ─── */
+
+  .luck-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    border-radius: 999px;
+    outline: none;
+    background-image:
+      repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.1) 0px, rgba(255, 255, 255, 0.1) 1px, transparent 1px, transparent 10px),
+      linear-gradient(
+        to right,
+        var(--slider-fill-color, #ffd166) 0%,
+        var(--slider-fill-color, #ffd166) var(--slider-pct, 0%),
+        rgba(255, 255, 255, 0.08) var(--slider-pct, 0%),
+        rgba(255, 255, 255, 0.08) 100%
+      );
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+  }
+
+  .luck-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-image: var(--ball-thumb);
+    background-size: cover;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.5),
+      0 0 10px rgba(255, 209, 102, 0.45);
+  }
+
+  .luck-slider::-moz-range-track {
+    height: 10px;
+    border-radius: 999px;
+    background-image:
+      repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.1) 0px, rgba(255, 255, 255, 0.1) 1px, transparent 1px, transparent 10px),
+      linear-gradient(
+        to right,
+        var(--slider-fill-color, #ffd166) 0%,
+        var(--slider-fill-color, #ffd166) var(--slider-pct, 0%),
+        rgba(255, 255, 255, 0.08) var(--slider-pct, 0%),
+        rgba(255, 255, 255, 0.08) 100%
+      );
+  }
+
+  .luck-slider::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-image: var(--ball-thumb);
+    background-size: cover;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.5),
+      0 0 10px rgba(255, 209, 102, 0.45);
+  }
+
+  .spin-button-texture {
+    background-image:
+      repeating-linear-gradient(115deg, rgba(0, 0, 0, 0.06) 0px, rgba(0, 0, 0, 0.06) 1px, transparent 1px, transparent 9px),
+      radial-gradient(circle at 15% 30%, rgba(0, 0, 0, 0.1) 0%, transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(0, 0, 0, 0.1) 0%, transparent 40%);
+  }
+
+  /* ─── Удача: бархатный фон оверлея и премиальная рамка раскрытой карты ─── */
+
+  .velvet-texture {
+    background-image:
+      radial-gradient(ellipse 120% 70% at 50% 15%, rgba(120, 70, 20, 0.22), transparent 60%),
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 2px, transparent 2px, transparent 14px),
+      repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 2px, transparent 2px, transparent 14px);
+  }
+
+  .lucky-card-frame {
+    background: linear-gradient(160deg, #4a3016 0%, #2a1a0a 50%, #140c04 100%);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 214, 140, 0.55),
+      inset 0 0 0 6px rgba(0, 0, 0, 0.35),
+      0 10px 30px rgba(0, 0, 0, 0.6);
   }
 }

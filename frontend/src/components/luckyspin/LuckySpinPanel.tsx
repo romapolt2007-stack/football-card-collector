@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { LuckyReel } from "./LuckyReel";
+import { TierBall } from "./TierBall";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import {
   formatLongCountdown,
@@ -19,6 +20,15 @@ function riskLabel(fraction: number): string {
   if (fraction < 0.5) return "Уверенно";
   if (fraction < 0.75) return "Рискованно";
   return "Ва-банк";
+}
+
+function lerpColor(from: string, to: string, t: number): string {
+  const a = parseInt(from.slice(1), 16);
+  const b = parseInt(to.slice(1), 16);
+  const r = Math.round(((a >> 16) & 255) + (((b >> 16) & 255) - ((a >> 16) & 255)) * t);
+  const g = Math.round(((a >> 8) & 255) + (((b >> 8) & 255) - ((a >> 8) & 255)) * t);
+  const bl = Math.round((a & 255) + ((b & 255) - (a & 255)) * t);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1)}`;
 }
 
 export function LuckySpinPanel() {
@@ -41,6 +51,7 @@ export function LuckySpinPanel() {
 
   const fraction = meta ? (currentStake - meta.minStake) / (meta.maxStake - meta.minStake) : 0;
   const canAfford = (user?.coins ?? 0) >= currentStake;
+  const sliderFillColor = lerpColor("#ffd166", "#ff3b5c", fraction);
 
   function startSpin() {
     haptics.impact("medium");
@@ -85,15 +96,15 @@ export function LuckySpinPanel() {
           <button
             onClick={startFreeSpin}
             disabled={!freeSpin.ready || spin.isPending}
-            className="shrink-0 rounded-full bg-emerald-400 px-4 py-2 text-sm font-extrabold text-pitch-dark disabled:opacity-30"
+            className="shrink-0 rounded-full bg-emerald-400 px-5 py-2 text-sm font-extrabold tracking-wide text-pitch-dark disabled:opacity-30"
           >
-            Крутить
+            SPIN
           </button>
         </div>
       )}
 
       <div
-        className="rounded-2xl border p-4"
+        className="foil-texture relative overflow-hidden rounded-2xl border p-4"
         style={{ borderColor: "rgba(255,209,102,0.25)", background: "rgba(255,255,255,0.05)" }}
       >
         <div className="flex items-center justify-between">
@@ -110,7 +121,13 @@ export function LuckySpinPanel() {
           step={meta.step}
           value={currentStake}
           onChange={(e) => setStake(Number(e.target.value))}
-          className="mt-3 w-full accent-gold"
+          className="luck-slider mt-3 w-full"
+          style={
+            {
+              "--slider-pct": `${fraction * 100}%`,
+              "--slider-fill-color": sliderFillColor,
+            } as CSSProperties
+          }
         />
         <div className="mt-1 flex justify-between text-[10px] text-white/40">
           <span>{meta.minStake}</span>
@@ -121,8 +138,13 @@ export function LuckySpinPanel() {
           <div className="mt-4 flex flex-col gap-1.5">
             {odds.map(({ rarity, pct }) => (
               <div key={rarity} className="flex items-center gap-2 text-xs">
-                <span className="w-20 shrink-0 text-white/60">
-                  {RARITY_THEME[rarity].emoji} {RARITY_THEME[rarity].label}
+                <span className="flex w-20 shrink-0 items-center gap-1.5 text-white/60">
+                  <TierBall
+                    color={RARITY_THEME[rarity].borderColor}
+                    glow={RARITY_THEME[rarity].glow}
+                    emblem={rarity === "ICON"}
+                  />
+                  {RARITY_THEME[rarity].label}
                 </span>
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                   <div
@@ -143,14 +165,14 @@ export function LuckySpinPanel() {
         <button
           onClick={startSpin}
           disabled={!canAfford}
-          className="mt-4 w-full rounded-full bg-gold py-3 text-sm font-extrabold text-pitch-dark disabled:opacity-30"
+          className="spin-button-texture relative mt-4 w-full overflow-hidden rounded-full bg-gold py-3.5 text-base font-extrabold tracking-widest text-pitch-dark shadow-[0_0_20px_rgba(255,209,102,0.4)] disabled:opacity-30"
         >
-          {canAfford ? "Крутить" : "Недостаточно монет"}
+          {canAfford ? "SPIN" : "Недостаточно монет"}
         </button>
       </div>
 
       {spinning && (
-        <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/90 px-4">
+        <div className="velvet-texture fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/90 px-4">
           {!result ? (
             <p className="text-sm text-white/40">Крутим...</p>
           ) : (
