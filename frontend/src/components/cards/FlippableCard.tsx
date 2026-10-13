@@ -7,9 +7,11 @@ interface Props {
   card: Card;
   revealed: boolean;
   size?: "sm" | "md" | "lg";
+  /** Рубашка намекает на редкость (золото/легенда светятся ещё до переворота) — для пак-опенинга. */
+  showRarityBack?: boolean;
 }
 
-export function FlippableCard({ card, revealed, size = "md" }: Props) {
+export function FlippableCard({ card, revealed, size = "md", showRarityBack }: Props) {
   return (
     <div style={{ perspective: 1000 }}>
       <motion.div
@@ -18,7 +20,7 @@ export function FlippableCard({ card, revealed, size = "md" }: Props) {
         style={{ transformStyle: "preserve-3d", position: "relative" }}
       >
         <div style={{ backfaceVisibility: "hidden" }}>
-          <CardBack size={size} />
+          <CardBack size={size} rarity={showRarityBack ? card.rarity : undefined} />
         </div>
         <div
           style={{

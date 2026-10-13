@@ -9,10 +9,16 @@ export function PacksScreen() {
   const { data: packs, isLoading } = usePacks();
   const user = useAuthStore((s) => s.user);
   const [openingPack, setOpeningPack] = useState<PackDef | null>(null);
+  const [openKey, setOpenKey] = useState(0);
 
   function canAfford(pack: PackDef) {
     if (pack.isStarter) return !user?.hasClaimedStarter;
     return (user?.coins ?? 0) >= pack.priceCoins;
+  }
+
+  function openPack(pack: PackDef) {
+    setOpeningPack(pack);
+    setOpenKey((k) => k + 1);
   }
 
   return (
@@ -32,13 +38,19 @@ export function PacksScreen() {
             key={pack.id}
             pack={pack}
             disabled={!canAfford(pack)}
-            onOpen={() => setOpeningPack(pack)}
+            onOpen={() => openPack(pack)}
           />
         ))}
       </div>
 
       {openingPack && (
-        <PackOpeningModal pack={openingPack} onClose={() => setOpeningPack(null)} />
+        <PackOpeningModal
+          key={`${openingPack.id}-${openKey}`}
+          pack={openingPack}
+          onClose={() => setOpeningPack(null)}
+          onOpenAnother={() => openPack(openingPack)}
+          canOpenAnother={canAfford(openingPack)}
+        />
       )}
     </div>
   );

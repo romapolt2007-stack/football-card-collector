@@ -27,8 +27,8 @@ export function useOpenPack() {
   return useMutation({
     mutationFn: (packId: string) =>
       api.post<{ cards: Card[]; coins: number }>("/api/packs/open", { packId }),
-    onSuccess: ({ cards, coins }) => {
-      if (user) setUser({ ...user, coins });
+    onSuccess: ({ cards, coins }, packId) => {
+      if (user) setUser({ ...user, coins, hasClaimedStarter: packId === "starter" ? true : user.hasClaimedStarter });
       queryClient.setQueryData<Card[]>(["cards"], (prev) => [...cards, ...(prev ?? [])]);
     },
   });
