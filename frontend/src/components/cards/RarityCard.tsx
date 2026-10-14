@@ -1,12 +1,15 @@
 import type { Card } from "../../types/game";
 import { RARITY_THEME } from "./rarityTheme";
 import { ClubCrest } from "./ClubCrest";
+import { PlayerPortrait } from "./PlayerPortrait";
 import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
 
 interface Props {
   card: Card;
   size?: "sm" | "md" | "lg" | "full";
   onClick?: () => void;
+  /** Стилизованный SVG-портрет вместо герба клуба в центре — для "парадного" раскрытия (рулетка «Удача»). */
+  portrait?: boolean;
 }
 
 const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
@@ -20,7 +23,7 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
 const PENNANT_CLIP =
   "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
 
-export function RarityCard({ card, size = "md", onClick }: Props) {
+export function RarityCard({ card, size = "md", onClick, portrait }: Props) {
   const theme = RARITY_THEME[card.rarity];
   const { player } = card;
   const isIcon = card.rarity === "ICON";
@@ -76,7 +79,19 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
       </div>
 
       <div className="relative mt-1 flex flex-col items-center">
-        <ClubCrest club={player.club} size={isFull ? 68 : 56} />
+        {portrait ? (
+          <div className="relative">
+            <PlayerPortrait accent={theme.borderColor} size={isFull ? 84 : 64} />
+            <div
+              className="absolute -bottom-1 -right-1 rounded-full border-2 bg-black/50 p-0.5"
+              style={{ borderColor: theme.borderColor }}
+            >
+              <ClubCrest club={player.club} size={20} />
+            </div>
+          </div>
+        ) : (
+          <ClubCrest club={player.club} size={isFull ? 68 : 56} />
+        )}
         <p className="mt-1.5 truncate text-center text-[0.85em] font-bold tracking-wide uppercase">
           {player.name}
         </p>

@@ -4,10 +4,22 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FlippableCard } from "../cards/FlippableCard";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import { TierBall } from "./TierBall";
+import { GoldCoinIcon } from "../common/GoldCoinIcon";
 import { haptics } from "../../lib/telegram";
 import { sfx } from "../../lib/sfx";
 import { useQuickSell } from "../../lib/queries";
 import type { Card, Rarity } from "../../types/game";
+
+const PARTICLE_POSITIONS = [
+  { top: "4%", left: "12%" },
+  { top: "14%", left: "82%" },
+  { top: "30%", left: "4%" },
+  { top: "42%", left: "92%" },
+  { top: "58%", left: "8%" },
+  { top: "68%", left: "88%" },
+  { top: "82%", left: "20%" },
+  { top: "88%", left: "70%" },
+];
 
 const ITEM_WIDTH = 76; // 68px-карта + gap-2 (8px)
 const STRIP_LENGTH = 36;
@@ -262,10 +274,26 @@ export function LuckyReel({ card, wasPity, onDone }: Props) {
             />
           )}
 
+          <div className="pointer-events-none absolute -inset-6 -z-10">
+            {PARTICLE_POSITIONS.map((pos, i) => (
+              <span
+                key={i}
+                className="sparkle absolute h-1 w-1 rounded-full"
+                style={{
+                  top: pos.top,
+                  left: pos.left,
+                  background: RARITY_THEME[card.rarity].borderColor,
+                  boxShadow: `0 0 6px ${RARITY_THEME[card.rarity].borderColor}`,
+                  animationDelay: `${i * 0.2}s`,
+                }}
+              />
+            ))}
+          </div>
+
           <div className="lucky-card-frame relative overflow-hidden rounded-[28px] p-2.5">
             <div className="holo-sweep pointer-events-none absolute inset-0" />
             <div className="foil-texture pointer-events-none absolute inset-0" />
-            <FlippableCard card={card} revealed={revealed} size="md" showRarityBack />
+            <FlippableCard card={card} revealed={revealed} size="md" showRarityBack portrait />
           </div>
 
           {revealed && (
@@ -273,12 +301,10 @@ export function LuckyReel({ card, wasPity, onDone }: Props) {
               <button
                 onClick={handleSell}
                 disabled={quickSell.isPending}
-                className="flex items-center gap-1.5 rounded-full border-2 border-white/25 bg-white/5 px-5 py-3 text-sm font-bold text-white/90 backdrop-blur disabled:opacity-30"
+                className="metal-input relative flex items-center gap-1.5 overflow-hidden rounded-full border-2 border-white/15 px-5 py-3 text-sm font-bold text-white/90 disabled:opacity-30"
               >
                 Продать за {card.quickSellPrice.toLocaleString("ru-RU")}
-                <span className="text-base text-gold" style={{ textShadow: "0 0 6px rgba(255,209,102,0.6)" }}>
-                  🪙
-                </span>
+                <GoldCoinIcon tone="silver" size={16} />
               </button>
               <button
                 onClick={onDone}

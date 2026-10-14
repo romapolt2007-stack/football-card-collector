@@ -9,9 +9,11 @@ interface Props {
   size?: "sm" | "md" | "lg";
   /** Рубашка намекает на редкость (золото/легенда светятся ещё до переворота) — для пак-опенинга. */
   showRarityBack?: boolean;
+  /** Стилизованный портрет вместо герба клуба — для "парадного" раскрытия (рулетка «Удача»). */
+  portrait?: boolean;
 }
 
-export function FlippableCard({ card, revealed, size = "md", showRarityBack }: Props) {
+export function FlippableCard({ card, revealed, size = "md", showRarityBack, portrait }: Props) {
   return (
     <div style={{ perspective: 1000 }}>
       <motion.div
@@ -30,7 +32,7 @@ export function FlippableCard({ card, revealed, size = "md", showRarityBack }: P
             transform: "rotateY(180deg)",
           }}
         >
-          <RarityCard card={card} size={size} />
+          <RarityCard card={card} size={size} portrait={portrait} />
         </div>
       </motion.div>
     </div>
