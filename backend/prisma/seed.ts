@@ -69,6 +69,7 @@ async function main() {
       { code: "WIN_MATCH", title: "Победи в матче", description: "Выиграй 1 матч", target: 1, reward: 1000 },
       { code: "SELL_CARD", title: "Продай карточку", description: "Выставь карточку на рынок", target: 1, reward: 300 },
       { code: "LOGIN_STREAK", title: "Зайди в игру", description: "Ежедневный вход", target: 1, reward: 200 },
+      { code: "WIN_DUEL", title: "Выиграй 2 дуэли", description: "Победи 2 раза в режиме «Дуэль»", target: 2, reward: 600 },
     ],
   });
 

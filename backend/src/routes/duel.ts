@@ -18,6 +18,7 @@ import { isShootoutDecided, isValidPower, isValidZone, resolveRound } from "../l
 import { drawGuaranteedCard } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import { addXp } from "../lib/xp.js";
+import { incrementQuestProgress } from "../lib/quests.js";
 
 const router = Router();
 
@@ -176,6 +177,7 @@ router.post("/:draftId/round", requireAuth, async (req, res) => {
   ]);
 
   const { xp, level, coins, levelUpReward } = await addXp(req.userId!, rewards.xp);
+  if (userWon) await incrementQuestProgress(req.userId!, "WIN_DUEL");
 
   deleteDuelSession(session.draftId);
 
