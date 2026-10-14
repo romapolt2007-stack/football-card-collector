@@ -209,6 +209,22 @@ export interface ShootoutSummary {
   won?: boolean;
 }
 
+export type CareerLeague = "BRONZE" | "SILVER" | "GOLD" | "CHAMPION";
+
+export interface CareerResult {
+  points: number;
+  league: CareerLeague;
+  pointsDelta: number;
+}
+
+export interface CareerStatus {
+  league: CareerLeague;
+  leagueLabel: string;
+  points: number;
+  wins: number;
+  losses: number;
+}
+
 export interface QuickMatchResult {
   match: MatchRecord;
   stats: MatchStats;
@@ -218,6 +234,7 @@ export interface QuickMatchResult {
   level: number;
   wonCard: Card | null;
   shootout: ShootoutSummary | null;
+  career: CareerResult;
 }
 
 export interface ShootoutPending {

@@ -3,6 +3,7 @@ import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
 import type {
   Card,
+  CareerStatus,
   Formation,
   GameUser,
   PackDef,
@@ -15,6 +16,15 @@ import type {
   UserQuest,
   UserStats,
 } from "../types/game";
+
+export function useCareerStatus() {
+  const token = useAuthStore((s) => s.token);
+  return useQuery({
+    queryKey: ["career-status"],
+    queryFn: () => api.get<CareerStatus>("/api/matches/career"),
+    enabled: Boolean(token),
+  });
+}
 
 export function usePacks() {
   return useQuery({
@@ -194,6 +204,7 @@ export function usePlayQuickMatch() {
       if (result.wonCard) {
         queryClient.setQueryData<Card[]>(["cards"], (prev) => [result.wonCard!, ...(prev ?? [])]);
       }
+      queryClient.invalidateQueries({ queryKey: ["career-status"] });
     },
   });
 }
@@ -217,6 +228,7 @@ export function useShootoutRound() {
       if (result.wonCard) {
         queryClient.setQueryData<Card[]>(["cards"], (prev) => [result.wonCard!, ...(prev ?? [])]);
       }
+      queryClient.invalidateQueries({ queryKey: ["career-status"] });
     },
   });
 }

@@ -7,7 +7,7 @@ import { DuelGame } from "../components/match/DuelGame";
 import { ShootoutMiniGame } from "../components/match/ShootoutMiniGame";
 import { TeamWalkout } from "../components/match/TeamWalkout";
 import { PillTabs } from "../components/common/PillTabs";
-import { usePlayQuickMatch } from "../lib/queries";
+import { useCareerStatus, usePlayQuickMatch } from "../lib/queries";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import type { MatchEvent, QuickMatchResponse, QuickMatchResult } from "../types/game";
@@ -54,6 +54,7 @@ interface QuickMatchProps {
 
 function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
   const playMatch = usePlayQuickMatch();
+  const careerStatus = useCareerStatus();
   const [phase, setPhase] = useState<Phase>("idle");
   const [minute, setMinute] = useState(0);
   const [revealedCount, setRevealedCount] = useState(0);
@@ -155,6 +156,16 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
           ]}
         />
 
+        {careerStatus.data && (
+          <div className="metal-banner overflow-hidden rounded-2xl border border-white/15 px-4 py-3 text-center">
+            <p className="text-xs font-semibold text-white/60">{careerStatus.data.leagueLabel}</p>
+            <p className="mt-1 text-xl font-extrabold text-gold">{careerStatus.data.points} 🏆</p>
+            <p className="mt-0.5 text-[11px] text-white/40">
+              {careerStatus.data.wins}W / {careerStatus.data.losses}L
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
           <p className="text-sm text-white/50">
             Сыграйте против случайного соперника на основе силы вашего активного состава
@@ -246,7 +257,7 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
   }
 
   if (!finalResult) return null;
-  const { match, squad, wonCard, shootout } = finalResult;
+  const { match, squad, wonCard, shootout, career } = finalResult;
 
   return (
     <div className="flex min-h-dvh flex-col gap-5 px-5 pt-[calc(env(safe-area-inset-top)+24px)] pb-28">
@@ -280,6 +291,12 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
       <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
         <p className="text-sm font-semibold text-gold">+{match.rewards.coins.toLocaleString("ru-RU")} монет</p>
         <p className="text-xs text-white/50">+{match.rewards.xp} XP</p>
+        {career && (
+          <p className="mt-1.5 text-sm font-bold" style={{ color: career.pointsDelta >= 0 ? "#6ee7a0" : "#ff6b6b" }}>
+            {career.pointsDelta >= 0 ? "+" : ""}
+            {career.pointsDelta} 🏆 карьера
+          </p>
+        )}
       </div>
 
       {wonCard && (

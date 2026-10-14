@@ -164,6 +164,7 @@ model User {
   penaltySaves Int @default(0)
 
   duelTrophy DuelTrophy?
+  careerTrophy CareerTrophy?
 
   cards       Card[]
   listings    Listing[]
@@ -417,6 +418,28 @@ model DuelTrophy {
   updatedAt DateTime @updatedAt
 
   @@map("duel_trophies")
+}
+
+enum CareerLeague {
+  BRONZE
+  SILVER
+  GOLD
+  CHAMPION
+}
+
+/** Лига-карьера «Быстрого матча» (Division Rivals) — отдельная от Дуэли система очков/лиг на обычных полных матчах. */
+model CareerTrophy {
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @id
+
+  league CareerLeague @default(BRONZE)
+  points Int          @default(0)
+  wins   Int          @default(0)
+  losses Int          @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@map("career_trophies")
 }
 
 /** История завершённых дуэлей — для ELO-пересчёта и будущего лидерборда. */

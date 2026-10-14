@@ -21,6 +21,7 @@ import { createShootoutSession, deleteShootoutSession, getShootoutSession } from
 import { isShootoutDecided, isValidPower, isValidZone, resolveRound, type RoundOutcome } from "../lib/shootout.js";
 import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
 import { effectiveOverall } from "../lib/cardStats.js";
+import { applyCareerResult, CAREER_LEAGUE_LABEL_RU, ensureCareerTrophy } from "../lib/careerLeague.js";
 import type { SquadSlotJson } from "../lib/squadTypes.js";
 import type { Prisma } from "@prisma/client";
 
@@ -172,6 +173,7 @@ router.post("/quick", requireAuth, async (req, res) => {
     await incrementQuestProgress(req.userId!, "WIN_MATCH");
   }
   const { xp, level, coins, levelUpReward } = await addXp(req.userId!, rewards.xp);
+  const career = await applyCareerResult(req.userId!, result.userScore > result.oppScore);
 
   res.json({
     match,
@@ -183,6 +185,7 @@ router.post("/quick", requireAuth, async (req, res) => {
     wonCard,
     shootout: null,
     levelUpReward,
+    career,
   });
 });
 
@@ -257,6 +260,7 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
   await incrementQuestProgress(req.userId!, "PLAY_MATCH");
   if (userWon) await incrementQuestProgress(req.userId!, "WIN_MATCH");
   const { xp, level, coins, levelUpReward } = await addXp(req.userId!, rewards.xp);
+  const career = await applyCareerResult(req.userId!, userWon);
 
   deleteShootoutSession(session.draftId);
 
@@ -276,7 +280,19 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
       wonCard,
       levelUpReward,
       shootout: { userScore: session.userScore, oppScore: session.oppScore, won: userWon },
+      career,
     },
+  });
+});
+
+router.get("/career", requireAuth, async (req, res) => {
+  const trophy = await ensureCareerTrophy(req.userId!);
+  res.json({
+    league: trophy.league,
+    leagueLabel: CAREER_LEAGUE_LABEL_RU[trophy.league],
+    points: trophy.points,
+    wins: trophy.wins,
+    losses: trophy.losses,
   });
 });
 
