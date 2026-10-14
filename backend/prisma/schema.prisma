@@ -466,6 +466,10 @@ model DuelMatch {
   won           Boolean
   pointsDelta   Int
 
+  // Реакция-эмоция после матча — чисто самовыражение в истории дуэлей (см. lib/duelEmotes.ts).
+  // Дуэль асинхронная (снимок состава, не живой канал с соперником), поэтому это не чат, а "поза победителя".
+  emote String?
+
   createdAt DateTime @default(now())
 
   @@index([attackerId])

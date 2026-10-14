@@ -24,6 +24,13 @@ export function useFindDuel() {
   });
 }
 
+export function useSetDuelEmote() {
+  return useMutation({
+    mutationFn: (input: { duelMatchId: string; emote: string }) =>
+      api.post<{ emote: string }>(`/api/duel/match/${input.duelMatchId}/emote`, { emote: input.emote }),
+  });
+}
+
 export function useDuelRound() {
   const queryClient = useQueryClient();
   const setUser = useAuthStore((s) => s.setUser);

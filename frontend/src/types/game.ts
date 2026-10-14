@@ -117,7 +117,10 @@ export interface DuelResult {
   leagueLabel: string;
   opponentName: string;
   isRealOpponent: boolean;
+  duelMatchId: string;
 }
+
+export const DUEL_EMOTES = ["🎉", "😎", "🔥", "💪", "😤", "🤝", "😢", "🫡"] as const;
 
 export interface DuelRoundResponse {
   outcome: ShootoutRoundOutcome;

@@ -20,6 +20,7 @@ import { quickSellPrice } from "../lib/cardValue.js";
 import { addXp } from "../lib/xp.js";
 import { incrementQuestProgress } from "../lib/quests.js";
 import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
+import { isValidDuelEmote } from "../lib/duelEmotes.js";
 
 const router = Router();
 
@@ -37,6 +38,15 @@ router.get("/status", requireAuth, async (req, res) => {
     wins: trophy.wins,
     losses: trophy.losses,
   });
+});
+
+router.get("/history", requireAuth, async (req, res) => {
+  const matches = await prisma.duelMatch.findMany({
+    where: { attackerId: req.userId },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+  res.json({ matches });
 });
 
 router.post("/find", requireAuth, async (req, res) => {
@@ -145,7 +155,7 @@ router.post("/:draftId/round", requireAuth, async (req, res) => {
     }
   }
 
-  await prisma.$transaction([
+  const [, , , duelMatch] = await prisma.$transaction([
     prisma.user.update({ where: { id: req.userId }, data: { coins: { increment: rewards.coins } } }),
     prisma.transaction.create({
       data: {
@@ -204,8 +214,32 @@ router.post("/:draftId/round", requireAuth, async (req, res) => {
       leagueLabel: LEAGUE_LABEL_RU[newLeague],
       opponentName: session.opponentName,
       isRealOpponent: session.isRealOpponent,
+      duelMatchId: duelMatch.id,
     },
   });
+});
+
+const emoteSchema = z.object({ emote: z.string() });
+
+router.post("/match/:matchId/emote", requireAuth, async (req, res) => {
+  const parsed = emoteSchema.safeParse(req.body);
+  if (!parsed.success || !isValidDuelEmote(parsed.data.emote)) {
+    res.status(400).json({ error: "Некорректная эмоция" });
+    return;
+  }
+
+  const match = await prisma.duelMatch.findUnique({ where: { id: req.params.matchId } });
+  if (!match || match.attackerId !== req.userId) {
+    res.status(404).json({ error: "Дуэль не найдена" });
+    return;
+  }
+  if (match.emote) {
+    res.status(400).json({ error: "Эмоция уже выбрана" });
+    return;
+  }
+
+  const updated = await prisma.duelMatch.update({ where: { id: match.id }, data: { emote: parsed.data.emote } });
+  res.json({ emote: updated.emote });
 });
 
 export default router;

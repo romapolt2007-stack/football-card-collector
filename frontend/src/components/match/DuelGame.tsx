@@ -4,11 +4,11 @@ import { useState } from "react";
 import { PillTabs } from "../common/PillTabs";
 import { CoinBalance } from "../common/CoinBalance";
 import { RarityCard } from "../cards/RarityCard";
-import { useDuelRound, useDuelStatus, useFindDuel } from "../../lib/useDuel";
+import { useDuelRound, useDuelStatus, useFindDuel, useSetDuelEmote } from "../../lib/useDuel";
 import { useAuthStore } from "../../store/useAuthStore";
 import { haptics } from "../../lib/telegram";
 import { sfx } from "../../lib/sfx";
-import type { DuelResult, ShootoutPower, ShootoutRoundOutcome, ShootoutZone } from "../../types/game";
+import { DUEL_EMOTES, type DuelResult, type ShootoutPower, type ShootoutRoundOutcome, type ShootoutZone } from "../../types/game";
 import type { MatchMode } from "../../screens/MatchScreen";
 
 type Phase = "idle" | "playing" | "result";
@@ -55,6 +55,8 @@ export function DuelGame({ mode, onModeChange }: Props) {
   const status = useDuelStatus();
   const find = useFindDuel();
   const roundMutation = useDuelRound();
+  const setEmote = useSetDuelEmote();
+  const [chosenEmote, setChosenEmote] = useState<string | null>(null);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [draftId, setDraftId] = useState<string | null>(null);
@@ -86,6 +88,7 @@ export function DuelGame({ mode, onModeChange }: Props) {
         setOppScore(0);
         setRound(1);
         setResult(null);
+        setChosenEmote(null);
         setPhase("playing");
       },
       onError: (e) => setError((e as Error)?.message ?? "Не удалось найти соперника"),
@@ -286,6 +289,30 @@ export function DuelGame({ mode, onModeChange }: Props) {
         <div className="flex flex-col items-center gap-2">
           <p className="text-xs text-white/50">Бонусная карта</p>
           <RarityCard card={result.grantedCard} size="md" />
+        </div>
+      )}
+
+      {chosenEmote ? (
+        <p className="text-4xl">{chosenEmote}</p>
+      ) : (
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs text-white/40">Оставьте реакцию в истории дуэлей</p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {DUEL_EMOTES.map((emote) => (
+              <button
+                key={emote}
+                onClick={() => {
+                  haptics.select();
+                  setChosenEmote(emote);
+                  setEmote.mutate({ duelMatchId: result.duelMatchId, emote });
+                }}
+                disabled={setEmote.isPending}
+                className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1.5 text-xl disabled:opacity-30"
+              >
+                {emote}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
