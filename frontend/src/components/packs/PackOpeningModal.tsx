@@ -134,8 +134,6 @@ export function PackOpeningModal({ pack, onClose, onOpenAnother, canOpenAnother 
     duplicates.forEach((c) => quickSell.mutate(c.id));
   }
 
-  const allFlipped = cards.length > 0 && flippedIds.size === cards.length;
-
   return (
     <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black/80 px-6">
       <AnimatePresence>
@@ -162,12 +160,6 @@ export function PackOpeningModal({ pack, onClose, onOpenAnother, canOpenAnother 
 
       {(phase === "dropping" || phase === "interactive" || phase === "summary") && cards.length > 0 && (
         <div className="flex w-full flex-col items-center gap-6">
-          {phase === "interactive" && !allFlipped && (
-            <p className="flip-hint text-xs font-semibold text-white/60">
-              Нажмите или свайпните карту, чтобы перевернуть
-            </p>
-          )}
-
           <div className="flex flex-wrap items-center justify-center gap-3">
             {cards.map((card, i) => {
               const dropped = i < droppedCount || phase === "interactive" || phase === "summary";
@@ -194,6 +186,17 @@ export function PackOpeningModal({ pack, onClose, onOpenAnother, canOpenAnother 
             })}
           </div>
 
+          {phase === "interactive" && (
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={onClose}
+              className="spin-button-texture relative w-full max-w-xs overflow-hidden rounded-full bg-gold py-3.5 text-sm font-extrabold tracking-widest text-pitch-dark shadow-[0_0_20px_rgba(255,209,102,0.45)]"
+            >
+              СОХРАНИТЬ ВСЁ
+            </motion.button>
+          )}
+
           {phase === "summary" && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -219,9 +222,9 @@ export function PackOpeningModal({ pack, onClose, onOpenAnother, canOpenAnother 
               )}
               <button
                 onClick={onClose}
-                className="rounded-full bg-gold px-5 py-3 text-sm font-extrabold text-pitch-dark"
+                className="spin-button-texture relative overflow-hidden rounded-full bg-gold px-5 py-3 text-sm font-extrabold tracking-wide text-pitch-dark shadow-[0_0_20px_rgba(255,209,102,0.45)]"
               >
-                Сохранить всё
+                СОХРАНИТЬ ВСЁ
               </button>
             </motion.div>
           )}
