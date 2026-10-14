@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { MiniPackIcon } from "./common/MiniPackIcon";
 
-export type TabId = "packs" | "cases" | "team" | "inventory" | "match" | "market" | "profile";
+export type TabId = "packs" | "cases" | "team" | "inventory" | "sbc" | "match" | "market" | "profile";
 
 interface Props {
   tab: TabId;
@@ -13,6 +13,7 @@ const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
   { id: "cases", label: "Кейсы", icon: "🎰" },
   { id: "team", label: "Состав", icon: "👥" },
   { id: "inventory", label: "Карты", icon: "🗂️" },
+  { id: "sbc", label: "Сборки", icon: "🛠️" },
   { id: "match", label: "Матч", icon: "🏟️" },
   { id: "market", label: "Рынок", icon: "🏪" },
   { id: "profile", label: "Профиль", icon: "👤" },

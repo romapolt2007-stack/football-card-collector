@@ -332,3 +332,32 @@ export interface PackDef {
   bonusChance: number;
   isStarter?: boolean;
 }
+
+export interface SbcReward {
+  coins?: number;
+  xp?: number;
+  guaranteedRarity?: Rarity;
+}
+
+export interface SbcDef {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  count: number;
+  minRarity?: Rarity;
+  minOverallSum?: number;
+  sameClub?: boolean;
+  distinctNations?: boolean;
+  reward: SbcReward;
+  repeatable: boolean;
+}
+
+export interface SbcSubmitResult {
+  coins: number;
+  xp: number;
+  level: number;
+  levelUpReward: number;
+  grantedCard: Card | null;
+  consumedCardIds: string[];
+}

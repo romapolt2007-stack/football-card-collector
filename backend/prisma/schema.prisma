@@ -154,6 +154,7 @@ model User {
   transactions Transaction[]
   userQuests  UserQuest[]
   squads      Squad[]
+  sbcCompletions SbcCompletion[]
 
   createdAt DateTime @default(now())
 
@@ -301,6 +302,7 @@ enum TransactionType {
   REFERRAL_BONUS
   STARS_PURCHASE
   LEVEL_UP
+  SBC_SUBMIT
 }
 
 model Transaction {
@@ -346,4 +348,18 @@ model UserQuest {
 
   @@unique([userId, questId, expiresAt])
   @@map("user_quests")
+}
+
+/** Отметка о выполнении одноразового SBC-вызова — определения самих вызовов захардкожены в lib/sbc.ts, как PACKS/CASES. */
+model SbcCompletion {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  sbcId       String
+  completedAt DateTime @default(now())
+
+  @@unique([userId, sbcId])
+  @@index([userId])
+  @@map("sbc_completions")
 }

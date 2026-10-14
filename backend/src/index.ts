@@ -14,6 +14,7 @@ import matchesRouter from "./routes/matches.js";
 import packsRouter from "./routes/packs.js";
 import paymentsRouter from "./routes/payments.js";
 import questsRouter from "./routes/quests.js";
+import sbcRouter from "./routes/sbc.js";
 import teamRouter from "./routes/team.js";
 import userRouter from "./routes/user.js";
 import { startBot } from "./bot.js";
@@ -59,6 +60,8 @@ app.use("/api/cases", casesRouter);
 app.use("/api/lucky-spin/spin", actionLimiter);
 app.use("/api/lucky-spin", luckySpinRouter);
 app.use("/api/user/emergency-bonus", actionLimiter);
+app.use("/api/sbc/submit", actionLimiter);
+app.use("/api/sbc", sbcRouter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {

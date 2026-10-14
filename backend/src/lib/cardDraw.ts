@@ -76,3 +76,10 @@ export async function drawPackCards(
 
   return results;
 }
+
+/** Один гарантированный игрок заданной редкости — для наград SBC и подобных гарантированных выдач. */
+export async function drawGuaranteedCard(rarity: Rarity): Promise<DrawnCard | null> {
+  const player = await randomPlayerByRarity(rarity);
+  if (!player) return null;
+  return { player, rarity };
+}

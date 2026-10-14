@@ -9,6 +9,7 @@ import { MatchScreen } from "./screens/MatchScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
 import { PacksScreen } from "./screens/PacksScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
+import { SbcScreen } from "./screens/SbcScreen";
 import { TeamScreen } from "./screens/TeamScreen";
 import { useAuthStore } from "./store/useAuthStore";
 
@@ -58,6 +59,7 @@ function App() {
       {tab === "cases" && <CasesScreen />}
       {tab === "team" && <TeamScreen />}
       {tab === "inventory" && <InventoryScreen onNavigateToTeam={() => setTab("team")} />}
+      {tab === "sbc" && <SbcScreen />}
       {tab === "match" && <MatchScreen />}
       {tab === "market" && <MarketScreen />}
       {tab === "profile" && <ProfileScreen />}
