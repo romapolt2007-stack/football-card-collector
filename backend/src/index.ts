@@ -9,6 +9,7 @@ import arcadePenaltyRouter from "./routes/arcadePenalty.js";
 import authRouter from "./routes/auth.js";
 import cardsRouter from "./routes/cards.js";
 import casesRouter from "./routes/cases.js";
+import cosmeticPatchesRouter from "./routes/cosmeticPatches.js";
 import luckySpinRouter from "./routes/luckySpin.js";
 import marketRouter from "./routes/market.js";
 import matchesRouter from "./routes/matches.js";
@@ -65,6 +66,8 @@ app.use("/api/sbc/submit", actionLimiter);
 app.use("/api/sbc", sbcRouter);
 app.use("/api/arcade/penalty", actionLimiter);
 app.use("/api/arcade/penalty", arcadePenaltyRouter);
+app.use("/api/cosmetic-patches/apply", actionLimiter);
+app.use("/api/cosmetic-patches", cosmeticPatchesRouter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {

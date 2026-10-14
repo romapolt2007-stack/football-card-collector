@@ -72,6 +72,7 @@ export interface GameUser {
   teamLogo: string | null;
   teamColors: string | null;
   avatarIcon: string | null;
+  cosmeticPatchId: string | null;
   createdAt: string;
 }
 
@@ -360,6 +361,15 @@ export interface SbcSubmitResult {
   levelUpReward: number;
   grantedCard: Card | null;
   consumedCardIds: string[];
+}
+
+export interface CosmeticPatchDef {
+  id: string;
+  title: string;
+  author: string;
+  sizeLabel: string;
+  description: string;
+  accentColor: string;
 }
 
 export type ArcadeDifficulty = "EASY" | "MEDIUM" | "HARD";

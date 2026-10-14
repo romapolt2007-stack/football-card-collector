@@ -1,5 +1,6 @@
 import { useState } from "react";
 import confetti from "canvas-confetti";
+import { CommunityPatchesScreen } from "./CommunityPatchesScreen";
 import { FreeBonusRoulette } from "../components/profile/FreeBonusRoulette";
 import { ProfileHero } from "../components/profile/ProfileHero";
 import { XpBar } from "../components/profile/XpBar";
@@ -30,6 +31,7 @@ export function ProfileScreen() {
   const freeBonus = useFreeBonusStatus();
   const claimFreeBonus = useClaimFreeBonus();
   const [showRoulette, setShowRoulette] = useState(false);
+  const [showPatches, setShowPatches] = useState(false);
   const emergencyBonus = useEmergencyBonusStatus();
   const claimEmergencyBonus = useClaimEmergencyBonus();
   const stats = useUserStats();
@@ -80,6 +82,14 @@ export function ProfileScreen() {
       ) : (
         <>
           <XpBar level={user.level} xp={user.xp} />
+
+          <button
+            onClick={() => setShowPatches(true)}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+          >
+            <span className="text-sm font-semibold">🧩 Патчи сообщества</span>
+            <span className="text-xs text-white/40">Открыть →</span>
+          </button>
 
           {emergencyBonus.data?.eligible && (
             <section
@@ -189,6 +199,8 @@ export function ProfileScreen() {
           </section>
         </>
       )}
+
+      {showPatches && <CommunityPatchesScreen onClose={() => setShowPatches(false)} />}
     </div>
   );
 }
