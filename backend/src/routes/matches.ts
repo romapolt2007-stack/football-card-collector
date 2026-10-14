@@ -20,6 +20,7 @@ import { buildDisciplineOps } from "../lib/applyMatchConsequences.js";
 import { createShootoutSession, deleteShootoutSession, getShootoutSession } from "../lib/shootoutStore.js";
 import { isShootoutDecided, isValidPower, isValidZone, resolveRound, type RoundOutcome } from "../lib/shootout.js";
 import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
+import { effectiveOverall } from "../lib/cardStats.js";
 import type { SquadSlotJson } from "../lib/squadTypes.js";
 import type { Prisma } from "@prisma/client";
 
@@ -135,7 +136,7 @@ router.post("/quick", requireAuth, async (req, res) => {
       userId: req.userId!,
       opponentName,
       opponentOvr,
-      userGkOverall: gk?.player.overall ?? 65,
+      userGkOverall: gk ? effectiveOverall(gk.player.overall, gk.trainingBoost) : 65,
       squad: { strength, avgOvr, chemistry },
       ninetyMin: { userScore: result.userScore, oppScore: result.oppScore, events, stats: result.stats },
       starterCardIds,

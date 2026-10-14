@@ -197,6 +197,10 @@ model Card {
   // команды игрок пропускает. Уменьшается на 1 после каждого сыгранного матча.
   unavailableMatches Int @default(0)
 
+  // Тренировка: сжигание дубля той же карты даёт +1 к OVR этой конкретной карты (потолок — см. cardStats.ts).
+  // Все карты этого игрока в базе по-прежнему делят Player.overall — буст живёт только на этой карте.
+  trainingBoost Int @default(0)
+
   listing Listing?
 
   @@index([ownerId])

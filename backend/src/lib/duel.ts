@@ -1,6 +1,7 @@
 import type { DuelLeague } from "@prisma/client";
 import { prisma } from "./prisma.js";
 import { calcSquadStrength } from "./squadStrength.js";
+import { effectiveOverall } from "./cardStats.js";
 import { generateBotName, generateBotOvr } from "./matchSimulation.js";
 import type { SquadSlotJson } from "./squadTypes.js";
 
@@ -80,7 +81,8 @@ export async function loadSelfSquadInfo(userId: string): Promise<SelfSquadInfo |
 
   const { strength } = calcSquadStrength(starters as Parameters<typeof calcSquadStrength>[0]);
   const gk = starters.find((c) => c.player.position === "GK");
-  return { starterCardIds, userGkOverall: gk?.player.overall ?? 65, strength };
+  const userGkOverall = gk ? effectiveOverall(gk.player.overall, gk.trainingBoost) : 65;
+  return { starterCardIds, userGkOverall, strength };
 }
 
 export interface OpponentInfo {

@@ -61,6 +61,22 @@ export function useQuickSell() {
   });
 }
 
+export function useTrainCard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { cardId: string; duplicateCardId: string }) =>
+      api.post<{ card: Card }>("/api/cards/train", input),
+    onSuccess: (result, input) => {
+      queryClient.setQueryData<Card[]>(["cards"], (prev) =>
+        prev
+          ?.filter((c) => c.id !== input.duplicateCardId)
+          .map((c) => (c.id === result.card.id ? result.card : c)),
+      );
+    },
+  });
+}
+
 export function useQuickSellBulk() {
   const queryClient = useQueryClient();
   const setUser = useAuthStore((s) => s.setUser);

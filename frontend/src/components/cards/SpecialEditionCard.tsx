@@ -2,6 +2,7 @@ import type { Card } from "../../types/game";
 import type { SpecialEditionTheme } from "./specialEditionThemes";
 import { PlayerPortrait } from "./PlayerPortrait";
 import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
+import { effectiveOverall } from "../../lib/cardStats";
 
 interface Props {
   card: Card;
@@ -39,7 +40,7 @@ export function SpecialEditionCard({ card, theme }: Props) {
       <div className="relative flex items-start justify-between pt-3.5">
         <div className="flex flex-col items-center leading-none">
           <span className="text-xl font-extrabold" style={{ textShadow: `0 0 8px ${theme.borderColor}88` }}>
-            {player.overall}
+            {effectiveOverall(card)}
           </span>
           <span className="mt-0.5 text-[0.7em] font-bold opacity-80">{POSITION_RU[player.position]}</span>
         </div>

@@ -3,6 +3,7 @@ import { RARITY_THEME } from "./rarityTheme";
 import { ClubCrest } from "./ClubCrest";
 import { PlayerPortrait } from "./PlayerPortrait";
 import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
+import { effectiveOverall } from "../../lib/cardStats";
 
 interface Props {
   card: Card;
@@ -61,8 +62,11 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
       <div className="relative flex items-start justify-between">
         <div className="flex flex-col items-center leading-none">
           <span className="text-2xl font-extrabold" style={isFull ? { textShadow: `0 0 10px ${theme.borderColor}88` } : undefined}>
-            {player.overall}
+            {effectiveOverall(card)}
           </span>
+          {card.trainingBoost > 0 && (
+            <span className="mt-0.5 text-[0.6em] font-extrabold text-emerald-400">+{card.trainingBoost} ТРН</span>
+          )}
           <span className="mt-0.5 text-[0.7em] font-bold opacity-80">{POSITION_RU[player.position]}</span>
         </div>
         <div className="flex flex-col items-end gap-1 text-right">

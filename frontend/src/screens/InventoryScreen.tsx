@@ -7,7 +7,7 @@ import { SpecialEditionShowcase } from "../components/cards/SpecialEditionShowca
 import { CoinBalance } from "../components/common/CoinBalance";
 import { CrackedBinIcon } from "../components/common/CrackedBinIcon";
 import { GoldCoinIcon } from "../components/common/GoldCoinIcon";
-import { useInventory, useQuickSell, useQuickSellBulk } from "../lib/queries";
+import { useInventory, useQuickSell, useQuickSellBulk, useTrainCard } from "../lib/queries";
 import { haptics } from "../lib/telegram";
 import { useAuthStore } from "../store/useAuthStore";
 import type { Card, Rarity } from "../types/game";
@@ -23,6 +23,7 @@ export function InventoryScreen({ onNavigateToTeam }: Props) {
   const user = useAuthStore((s) => s.user);
   const quickSell = useQuickSell();
   const bulkSell = useQuickSellBulk();
+  const trainCard = useTrainCard();
   const [search, setSearch] = useState("");
   const [rarityFilter, setRarityFilter] = useState<Rarity | null>(null);
   const [viewing, setViewing] = useState<Card | null>(null);
@@ -153,6 +154,16 @@ export function InventoryScreen({ onNavigateToTeam }: Props) {
         onClose={() => setViewing(null)}
         onSell={(c) => setConfirming(c)}
         onAssign={onNavigateToTeam}
+        onTrain={(c, duplicateCardId) => {
+          trainCard.mutate(
+            { cardId: c.id, duplicateCardId },
+            { onSuccess: (res) => setViewing(res.card) },
+          );
+        }}
+        duplicates={(cards ?? []).filter(
+          (c) => viewing && c.player.id === viewing.player.id && c.id !== viewing.id && !c.isListed,
+        )}
+        training={trainCard.isPending}
       />
 
       {confirming && (

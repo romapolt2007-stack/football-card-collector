@@ -1,5 +1,6 @@
 import { Rarity } from "@prisma/client";
 import { rarityIndex } from "./packs.js";
+import { effectiveOverall } from "./cardStats.js";
 
 export interface SbcReward {
   coins?: number;
@@ -96,6 +97,7 @@ export function findSbc(id: string): SbcDef | undefined {
 
 export interface SbcCardLike {
   rarity: Rarity;
+  trainingBoost: number;
   player: { overall: number; nation: string; clubId: string };
 }
 
@@ -111,7 +113,7 @@ export function validateSbcCards(def: SbcDef, cards: SbcCardLike[]): string | nu
   }
 
   if (def.minOverallSum) {
-    const sum = cards.reduce((s, c) => s + c.player.overall, 0);
+    const sum = cards.reduce((s, c) => s + effectiveOverall(c.player.overall, c.trainingBoost), 0);
     if (sum < def.minOverallSum) return `Сумма рейтинга должна быть не меньше ${def.minOverallSum}`;
   }
 

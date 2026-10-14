@@ -4,6 +4,8 @@ import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 import { incrementQuestProgress } from "../lib/quests.js";
 import { clearCardFromSquads } from "../lib/squadCleanup.js";
+import { effectiveOverall, TRAINING_BOOST_CAP } from "../lib/cardStats.js";
+import { quickSellPrice } from "../lib/cardValue.js";
 
 const router = Router();
 
@@ -101,6 +103,59 @@ router.post("/quick-sell-bulk", requireAuth, async (req, res) => {
 
   await incrementQuestProgress(req.userId!, "SELL_CARD", cardIds.length);
   res.json({ coins: updatedUser.coins, soldCount: cardIds.length, total, soldCardIds: cardIds });
+});
+
+const trainSchema = z.object({ cardId: z.string(), duplicateCardId: z.string() });
+
+/**
+ * Тренировка (Блок 10 ГДД): сжигаем дубль той же карты игрока — целевая карта
+ * получает +1 OVR (потолок — TRAINING_BOOST_CAP), буст живёт только на ней,
+ * другие копии той же карты в базе не меняются.
+ */
+router.post("/train", requireAuth, async (req, res) => {
+  const parsed = trainSchema.safeParse(req.body);
+  if (!parsed.success || parsed.data.cardId === parsed.data.duplicateCardId) {
+    res.status(400).json({ error: "Некорректное тело запроса" });
+    return;
+  }
+
+  const [target, duplicate] = await Promise.all([
+    prisma.card.findUnique({ where: { id: parsed.data.cardId }, include: { player: true } }),
+    prisma.card.findUnique({ where: { id: parsed.data.duplicateCardId } }),
+  ]);
+
+  if (!target || target.ownerId !== req.userId || !duplicate || duplicate.ownerId !== req.userId) {
+    res.status(404).json({ error: "Карта не найдена" });
+    return;
+  }
+  if (target.isListed || duplicate.isListed) {
+    res.status(400).json({ error: "Карта выставлена на продажу — сначала снимите с рынка" });
+    return;
+  }
+  if (duplicate.playerId !== target.playerId) {
+    res.status(400).json({ error: "Для тренировки нужен дубль той же карты игрока" });
+    return;
+  }
+  if (target.trainingBoost >= TRAINING_BOOST_CAP) {
+    res.status(400).json({ error: `Карта уже достигла максимума тренировки (+${TRAINING_BOOST_CAP})` });
+    return;
+  }
+
+  await clearCardFromSquads(req.userId!, duplicate.id);
+
+  const newBoost = target.trainingBoost + 1;
+  const newQuickSellPrice = quickSellPrice(target.rarity, effectiveOverall(target.player.overall, newBoost));
+
+  const updated = await prisma.$transaction(async (tx) => {
+    await tx.card.delete({ where: { id: duplicate.id } });
+    return tx.card.update({
+      where: { id: target.id },
+      data: { trainingBoost: newBoost, quickSellPrice: newQuickSellPrice },
+      include: { player: { include: { club: { include: { league: true } } } } },
+    });
+  });
+
+  res.json({ card: updated });
 });
 
 export default router;

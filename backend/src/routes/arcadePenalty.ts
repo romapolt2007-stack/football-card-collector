@@ -12,6 +12,7 @@ import {
   isValidDifficulty,
 } from "../lib/arcadePenalty.js";
 import { FREE_ARCADE_PENALTY_INTERVAL_MS, msUntilFreeArcadePenaltyReady } from "../lib/freeArcadePenalty.js";
+import { effectiveOverall } from "../lib/cardStats.js";
 import { isShootoutDecided, isValidPower, isValidZone, resolveRound } from "../lib/shootout.js";
 import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
 import { drawGuaranteedCard } from "../lib/cardDraw.js";
@@ -45,7 +46,7 @@ router.post("/start", requireAuth, async (req, res) => {
     if (cardIds.length > 0) {
       const cards = await prisma.card.findMany({ where: { id: { in: cardIds } }, include: { player: true } });
       const gk = cards.find((c) => c.player.position === "GK");
-      if (gk) userGkOverall = gk.player.overall;
+      if (gk) userGkOverall = effectiveOverall(gk.player.overall, gk.trainingBoost);
     }
   }
 

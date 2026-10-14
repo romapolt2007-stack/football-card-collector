@@ -50,6 +50,7 @@ export interface Card {
   quickSellPrice: number;
   obtainedAt: string;
   unavailableMatches: number;
+  trainingBoost: number;
   player: Player;
 }
 

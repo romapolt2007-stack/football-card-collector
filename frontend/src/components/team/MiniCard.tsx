@@ -4,6 +4,7 @@ import { RARITY_THEME } from "../cards/rarityTheme";
 import { haptics } from "../../lib/telegram";
 import { sfx } from "../../lib/sfx";
 import { POSITION_RU } from "../../lib/ruLabels";
+import { effectiveOverall } from "../../lib/cardStats";
 
 interface Props {
   card: Card;
@@ -81,7 +82,7 @@ export function MiniCard({ card, onTap, onDragEnd }: Props) {
                 boxShadow: "0 1px 1px rgba(0,0,0,0.4)",
               }}
             >
-              {card.player.overall}
+              {effectiveOverall(card)}
             </span>
             <span
               className="text-[7px] font-bold leading-none opacity-90"
