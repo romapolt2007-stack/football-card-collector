@@ -18,6 +18,7 @@ import packsRouter from "./routes/packs.js";
 import paymentsRouter from "./routes/payments.js";
 import questsRouter from "./routes/quests.js";
 import sbcRouter from "./routes/sbc.js";
+import stadiumRouter from "./routes/stadium.js";
 import teamRouter from "./routes/team.js";
 import userRouter from "./routes/user.js";
 import { startBot } from "./bot.js";
@@ -71,6 +72,9 @@ app.use("/api/cosmetic-patches/apply", actionLimiter);
 app.use("/api/cosmetic-patches", cosmeticPatchesRouter);
 app.use("/api/duel/find", actionLimiter);
 app.use("/api/duel", duelRouter);
+app.use("/api/stadium/upgrade", actionLimiter);
+app.use("/api/stadium/collect", actionLimiter);
+app.use("/api/stadium", stadiumRouter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {

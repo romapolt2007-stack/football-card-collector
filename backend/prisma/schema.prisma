@@ -166,6 +166,10 @@ model User {
   // Flash-челлендж: номер 3-дневного цикла, за который уже забрана награда (см. lib/flashChallenge.ts)
   flashChallengeClaimedCycle Int?
 
+  // Трофейная комната / стадион: пассивный доход, копится лениво по времени (см. lib/stadium.ts)
+  stadiumLevel         Int      @default(1)
+  stadiumCollectedAt   DateTime @default(now())
+
   duelTrophy DuelTrophy?
   careerTrophy CareerTrophy?
 
@@ -336,6 +340,7 @@ enum TransactionType {
   ARCADE_PENALTY
   DUEL
   ACADEMY
+  STADIUM
 }
 
 model Transaction {

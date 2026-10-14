@@ -1,6 +1,7 @@
 import { useState } from "react";
 import confetti from "canvas-confetti";
 import { CommunityPatchesScreen } from "./CommunityPatchesScreen";
+import { StadiumScreen } from "./StadiumScreen";
 import { FreeBonusRoulette } from "../components/profile/FreeBonusRoulette";
 import { ProfileHero } from "../components/profile/ProfileHero";
 import { XpBar } from "../components/profile/XpBar";
@@ -14,6 +15,7 @@ import { useClaimFreeBonus, useFreeBonusStatus, formatCountdown } from "../lib/u
 import { useClaimEmergencyBonus, useEmergencyBonusStatus } from "../lib/useLuckySpin";
 import { useDuelStatus } from "../lib/useDuel";
 import { useInsureStreak, useStreakStatus } from "../lib/useStreakInsurance";
+import { useStadiumStatus } from "../lib/useStadium";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import { useAuthStore } from "../store/useAuthStore";
@@ -34,6 +36,8 @@ export function ProfileScreen() {
   const claimFreeBonus = useClaimFreeBonus();
   const [showRoulette, setShowRoulette] = useState(false);
   const [showPatches, setShowPatches] = useState(false);
+  const [showStadium, setShowStadium] = useState(false);
+  const stadiumStatus = useStadiumStatus();
   const emergencyBonus = useEmergencyBonusStatus();
   const duelStatus = useDuelStatus();
   const streakStatus = useStreakStatus();
@@ -99,6 +103,18 @@ export function ProfileScreen() {
           >
             <span className="text-sm font-semibold">🧩 Патчи сообщества</span>
             <span className="text-xs text-white/40">Открыть →</span>
+          </button>
+
+          <button
+            onClick={() => setShowStadium(true)}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+          >
+            <span className="text-sm font-semibold">
+              🏟️ Трофейная комната {stadiumStatus.data && `· Ур. ${stadiumStatus.data.level}`}
+            </span>
+            <span className="text-xs text-white/40">
+              {stadiumStatus.data?.pending ? `+${stadiumStatus.data.pending} 🪙` : "Открыть →"}
+            </span>
           </button>
 
           {emergencyBonus.data?.eligible && (
@@ -224,6 +240,7 @@ export function ProfileScreen() {
       )}
 
       {showPatches && <CommunityPatchesScreen onClose={() => setShowPatches(false)} />}
+      {showStadium && <StadiumScreen onClose={() => setShowStadium(false)} />}
     </div>
   );
 }
