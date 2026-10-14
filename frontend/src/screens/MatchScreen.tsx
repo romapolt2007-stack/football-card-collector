@@ -9,13 +9,13 @@ import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import type { MatchEvent, QuickMatchResponse, QuickMatchResult } from "../types/game";
 
-const EVENT_LABEL: Record<string, string> = {
-  GOAL: "⚽ Гол!",
-  POST: "🥅 Штанга",
-  SAVE: "🧤 Сейв",
-  YELLOW: "🟨 Жёлтая карточка",
-  RED: "🟥 Красная карточка",
-  INJURY: "🚑 Травма",
+const EVENT_META: Record<string, { emoji: string; label: string; badgeBg: string }> = {
+  GOAL: { emoji: "⚽", label: "Гол!", badgeBg: "linear-gradient(160deg, #fff1c2 0%, #e3a825 70%, #8a5a06 100%)" },
+  POST: { emoji: "🥅", label: "Штанга", badgeBg: "linear-gradient(160deg, #d9dde3 0%, #8a8f99 70%, #4a4e57 100%)" },
+  SAVE: { emoji: "🧤", label: "Сейв", badgeBg: "linear-gradient(160deg, #7db8ff 0%, #2f6fcc 70%, #123a73 100%)" },
+  YELLOW: { emoji: "🟨", label: "Жёлтая карточка", badgeBg: "linear-gradient(160deg, #fff3a0 0%, #eab308 70%, #8a6400 100%)" },
+  RED: { emoji: "🟥", label: "Красная карточка", badgeBg: "linear-gradient(160deg, #ff8f8f 0%, #dc2626 70%, #7a0d0d 100%)" },
+  INJURY: { emoji: "🚑", label: "Травма", badgeBg: "linear-gradient(160deg, #7db8ff 0%, #2f6fcc 70%, #123a73 100%)" },
 };
 
 type Phase = "idle" | "walkout" | "playing" | "shootout" | "result";
@@ -132,9 +132,9 @@ export function MatchScreen() {
         {error && <p className="max-w-xs text-sm text-red-400">{error}</p>}
         <button
           onClick={start}
-          className="rounded-full bg-gold px-8 py-3.5 text-sm font-extrabold text-pitch-dark"
+          className="spin-button-texture relative flex items-center gap-2 overflow-hidden rounded-full bg-gold px-8 py-3.5 text-sm font-extrabold tracking-wider text-pitch-dark shadow-[0_0_20px_rgba(255,209,102,0.4)]"
         >
-          Играть
+          ИГРАТЬ <span className="text-base">⚽</span>
         </button>
       </div>
     );
@@ -146,11 +146,11 @@ export function MatchScreen() {
 
   if (phase === "playing") {
     return (
-      <div className="flex min-h-dvh flex-col gap-4 px-5 pt-[calc(env(safe-area-inset-top)+24px)] pb-10">
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+      <div className="velvet-texture flex min-h-dvh flex-col gap-4 px-5 pt-[calc(env(safe-area-inset-top)+24px)] pb-10">
+        <div className="metal-banner overflow-hidden rounded-2xl border border-white/15 px-4 py-3">
           <div className="flex items-center justify-center gap-6">
             <span className="text-sm font-semibold text-white/70">Вы</span>
-            <span className="text-3xl font-extrabold">
+            <span className="text-3xl font-extrabold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
               {liveScore[0]} : {liveScore[1]}
             </span>
             <span className="text-sm font-semibold text-white/70">{opponentNameOf(response)}</span>
@@ -161,30 +161,39 @@ export function MatchScreen() {
         <div className="flex-1 overflow-y-auto">
           <div className="flex flex-col gap-1.5">
             <AnimatePresence initial={false}>
-              {events.slice(0, revealedCount).map((e, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2 rounded-lg px-2 py-1 text-xs"
-                  style={{
-                    background:
-                      e.type === "RED"
-                        ? "rgba(239,68,68,0.15)"
-                        : e.type === "YELLOW"
-                          ? "rgba(234,179,8,0.15)"
-                          : e.type === "INJURY"
-                            ? "rgba(96,165,250,0.12)"
-                            : "transparent",
-                  }}
-                >
-                  <span className="w-8 shrink-0 text-right text-white/40">{e.minute}&apos;</span>
-                  <span>{EVENT_LABEL[e.type]}</span>
-                  <span className="text-white/40">
-                    — {e.team === "user" ? e.playerName ?? "вы" : e.playerName ?? opponentNameOf(response)}
-                  </span>
-                </motion.div>
-              ))}
+              {events.slice(0, revealedCount).map((e, i) => {
+                const meta = EVENT_META[e.type];
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs"
+                    style={{
+                      background:
+                        e.type === "RED"
+                          ? "rgba(239,68,68,0.15)"
+                          : e.type === "YELLOW"
+                            ? "rgba(234,179,8,0.15)"
+                            : e.type === "INJURY"
+                              ? "rgba(96,165,250,0.12)"
+                              : "transparent",
+                    }}
+                  >
+                    <span className="w-8 shrink-0 text-right text-white/40">{e.minute}&apos;</span>
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] shadow"
+                      style={{ background: meta.badgeBg, boxShadow: "0 1px 2px rgba(0,0,0,0.4)" }}
+                    >
+                      {meta.emoji}
+                    </span>
+                    <span className="font-semibold">{meta.label}</span>
+                    <span className="text-white/40">
+                      — {e.team === "user" ? e.playerName ?? "вы" : e.playerName ?? opponentNameOf(response)}
+                    </span>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>
