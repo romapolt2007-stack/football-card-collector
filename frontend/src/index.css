@@ -461,4 +461,28 @@
       repeating-linear-gradient(0deg, rgba(120, 220, 255, 0.1) 0px, rgba(120, 220, 255, 0.1) 1px, transparent 1px, transparent 8px),
       repeating-linear-gradient(90deg, rgba(120, 220, 255, 0.1) 0px, rgba(120, 220, 255, 0.1) 1px, transparent 1px, transparent 8px);
   }
+
+  /* ─── Витрина изданий: материалы премиальных карт ─── */
+
+  .filigree-texture {
+    background-image: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.06) 0deg 4deg, transparent 4deg 16deg);
+  }
+
+  .crystal-texture {
+    background-image:
+      repeating-linear-gradient(55deg, rgba(255, 255, 255, 0.07) 0px, rgba(255, 255, 255, 0.07) 2px, transparent 2px, transparent 18px),
+      repeating-linear-gradient(-55deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 2px, transparent 2px, transparent 18px);
+  }
+
+  .wave-texture {
+    background-image:
+      repeating-linear-gradient(8deg, rgba(255, 255, 255, 0.06) 0px, rgba(255, 255, 255, 0.06) 3px, transparent 3px, transparent 14px),
+      repeating-linear-gradient(-6deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 3px, transparent 3px, transparent 20px);
+  }
+
+  .carbon-texture {
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.07) 0px, rgba(255, 255, 255, 0.07) 2px, transparent 2px, transparent 6px),
+      repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.07) 0px, rgba(255, 255, 255, 0.07) 2px, transparent 2px, transparent 6px);
+  }
 }

@@ -23,7 +23,11 @@ export function RarityFilterChip({ active, label, background, borderColor, onCli
       <div className="foil-texture pointer-events-none absolute inset-0" />
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 30%)" }}
+        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 34%)" }}
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2"
+        style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.3) 0%, transparent 100%)" }}
       />
       <span
         className="relative px-0.5 text-center text-[8.5px] font-extrabold leading-tight text-white"
