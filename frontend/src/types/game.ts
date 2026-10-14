@@ -378,6 +378,7 @@ export interface PackDef {
   id: string;
   title: string;
   priceCoins: number;
+  effectivePrice: number;
   cardCount: number;
   minRarity: Rarity;
   bonusChance: number;

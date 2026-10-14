@@ -7,13 +7,16 @@ import { drawPackCards } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import { incrementQuestProgress } from "../lib/quests.js";
 import { addXp } from "../lib/xp.js";
+import { HAPPY_HOUR_DISCOUNT, isHappyHour, packPrice } from "../lib/happyHours.js";
 
 const PACK_OPEN_XP = 20;
 
 const router = Router();
 
 router.get("/", (_req, res) => {
-  res.json({ packs: PACKS });
+  const happyHour = isHappyHour();
+  const packs = PACKS.map((p) => ({ ...p, effectivePrice: packPrice(p.priceCoins) }));
+  res.json({ packs, happyHour, happyHourDiscount: HAPPY_HOUR_DISCOUNT });
 });
 
 const openSchema = z.object({ packId: z.string() });
@@ -37,7 +40,8 @@ router.post("/open", requireAuth, async (req, res) => {
     res.status(400).json({ error: "Starter Pack уже был получен" });
     return;
   }
-  if (!pack.isStarter && user.coins < pack.priceCoins) {
+  const price = packPrice(pack.priceCoins);
+  if (!pack.isStarter && user.coins < price) {
     res.status(400).json({ error: "Недостаточно монет" });
     return;
   }
@@ -52,7 +56,7 @@ router.post("/open", requireAuth, async (req, res) => {
     const updatedUser = await tx.user.update({
       where: { id: user.id },
       data: {
-        coins: pack.isStarter ? undefined : { decrement: pack.priceCoins },
+        coins: pack.isStarter ? undefined : { decrement: price },
         hasClaimedStarter: pack.isStarter ? true : undefined,
       },
     });
@@ -61,8 +65,8 @@ router.post("/open", requireAuth, async (req, res) => {
       data: {
         userId: user.id,
         type: "PACK_OPEN",
-        amount: -pack.priceCoins,
-        meta: { packId: pack.id },
+        amount: -price,
+        meta: { packId: pack.id, happyHour: isHappyHour() },
       },
     });
 

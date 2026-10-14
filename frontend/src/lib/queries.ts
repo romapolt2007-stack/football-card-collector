@@ -19,7 +19,7 @@ import type {
 export function usePacks() {
   return useQuery({
     queryKey: ["packs"],
-    queryFn: () => api.get<{ packs: PackDef[] }>("/api/packs").then((r) => r.packs),
+    queryFn: () => api.get<{ packs: PackDef[]; happyHour: boolean; happyHourDiscount: number }>("/api/packs"),
   });
 }
 

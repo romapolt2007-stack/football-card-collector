@@ -57,9 +57,15 @@ export function PackTile({ pack, disabled, onOpen }: Props) {
       />
 
       <span className="relative text-xs font-medium text-white/80">{pack.cardCount} карт</span>
-      <span className="relative mt-0.5 flex items-center gap-1 rounded-full bg-black/40 px-3 py-1 text-xs font-bold text-white">
+      <span className="relative mt-0.5 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 text-xs font-bold text-white">
         {pack.isStarter ? (
           "Бесплатно"
+        ) : pack.effectivePrice < pack.priceCoins ? (
+          <>
+            <span className="text-white/40 line-through">{pack.priceCoins.toLocaleString("ru-RU")}</span>
+            {pack.effectivePrice.toLocaleString("ru-RU")}
+            <span className="text-gold">🪙</span>
+          </>
         ) : (
           <>
             {pack.priceCoins.toLocaleString("ru-RU")}
