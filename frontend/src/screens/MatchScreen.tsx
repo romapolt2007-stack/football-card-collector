@@ -2,12 +2,16 @@ import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { RarityCard } from "../components/cards/RarityCard";
+import { ArcadePenaltyGame } from "../components/match/ArcadePenaltyGame";
 import { ShootoutMiniGame } from "../components/match/ShootoutMiniGame";
 import { TeamWalkout } from "../components/match/TeamWalkout";
+import { PillTabs } from "../components/common/PillTabs";
 import { usePlayQuickMatch } from "../lib/queries";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import type { MatchEvent, QuickMatchResponse, QuickMatchResult } from "../types/game";
+
+export type MatchMode = "quick" | "penalty";
 
 const EVENT_META: Record<string, { emoji: string; label: string; badgeBg: string }> = {
   GOAL: { emoji: "⚽", label: "Гол!", badgeBg: "linear-gradient(160deg, #fff1c2 0%, #e3a825 70%, #8a5a06 100%)" },
@@ -36,6 +40,20 @@ function opponentNameOf(response: QuickMatchResponse | null): string {
 }
 
 export function MatchScreen() {
+  const [mode, setMode] = useState<MatchMode>("quick");
+  return mode === "quick" ? (
+    <QuickMatchScreen mode={mode} onModeChange={setMode} />
+  ) : (
+    <ArcadePenaltyGame mode={mode} onModeChange={setMode} />
+  );
+}
+
+interface QuickMatchProps {
+  mode: MatchMode;
+  onModeChange: (mode: MatchMode) => void;
+}
+
+function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
   const playMatch = usePlayQuickMatch();
   const [phase, setPhase] = useState<Phase>("idle");
   const [minute, setMinute] = useState(0);
@@ -124,18 +142,31 @@ export function MatchScreen() {
 
   if (phase === "idle") {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="flex min-h-dvh flex-col gap-5 px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-28">
         <h1 className="text-lg font-extrabold">🏟️ Быстрый матч</h1>
-        <p className="text-sm text-white/50">
-          Сыграйте против случайного соперника на основе силы вашего активного состава
-        </p>
-        {error && <p className="max-w-xs text-sm text-red-400">{error}</p>}
-        <button
-          onClick={start}
-          className="spin-button-texture relative flex items-center gap-2 overflow-hidden rounded-full bg-gold px-8 py-3.5 text-sm font-extrabold tracking-wider text-pitch-dark shadow-[0_0_20px_rgba(255,209,102,0.4)]"
-        >
-          ИГРАТЬ <span className="text-base">⚽</span>
-        </button>
+
+        <PillTabs
+          layoutId="match-mode"
+          active={mode}
+          onChange={(id) => onModeChange(id as MatchMode)}
+          tabs={[
+            { id: "quick", label: "Быстрый матч" },
+            { id: "penalty", label: "Пенальти" },
+          ]}
+        />
+
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+          <p className="text-sm text-white/50">
+            Сыграйте против случайного соперника на основе силы вашего активного состава
+          </p>
+          {error && <p className="max-w-xs text-sm text-red-400">{error}</p>}
+          <button
+            onClick={start}
+            className="spin-button-texture relative flex items-center gap-2 overflow-hidden rounded-full bg-gold px-8 py-3.5 text-sm font-extrabold tracking-wider text-pitch-dark shadow-[0_0_20px_rgba(255,209,102,0.4)]"
+          >
+            ИГРАТЬ <span className="text-base">⚽</span>
+          </button>
+        </div>
       </div>
     );
   }

@@ -5,6 +5,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { Server as SocketIOServer } from "socket.io";
+import arcadePenaltyRouter from "./routes/arcadePenalty.js";
 import authRouter from "./routes/auth.js";
 import cardsRouter from "./routes/cards.js";
 import casesRouter from "./routes/cases.js";
@@ -62,6 +63,8 @@ app.use("/api/lucky-spin", luckySpinRouter);
 app.use("/api/user/emergency-bonus", actionLimiter);
 app.use("/api/sbc/submit", actionLimiter);
 app.use("/api/sbc", sbcRouter);
+app.use("/api/arcade/penalty", actionLimiter);
+app.use("/api/arcade/penalty", arcadePenaltyRouter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {

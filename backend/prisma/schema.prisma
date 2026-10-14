@@ -147,6 +147,9 @@ model User {
   // Один бесплатный спин «Удачи» раз в сутки — чтобы можно было пробовать удачу не только за монеты
   lastFreeLuckySpinAt DateTime?
 
+  // Аркадный режим «Пенальти» — одна бесплатная серия в сутки, дальше за монеты
+  lastFreeArcadePenaltyAt DateTime?
+
   cards       Card[]
   listings    Listing[]
   marketBids  MarketBid[]
@@ -303,6 +306,7 @@ enum TransactionType {
   STARS_PURCHASE
   LEVEL_UP
   SBC_SUBMIT
+  ARCADE_PENALTY
 }
 
 model Transaction {

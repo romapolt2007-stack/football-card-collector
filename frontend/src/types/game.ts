@@ -361,3 +361,38 @@ export interface SbcSubmitResult {
   grantedCard: Card | null;
   consumedCardIds: string[];
 }
+
+export type ArcadeDifficulty = "EASY" | "MEDIUM" | "HARD";
+
+export interface ArcadeFreeStatus {
+  ready: boolean;
+  msLeft: number;
+  intervalMs: number;
+  paidCost: number;
+}
+
+export interface ArcadeStartResponse {
+  draftId: string;
+  opponentOvr: number;
+  difficulty: ArcadeDifficulty;
+}
+
+export interface ArcadeResult {
+  won: boolean;
+  rewardCoins: number;
+  rewardXp: number;
+  coins: number;
+  xp: number;
+  level: number;
+  levelUpReward: number;
+  grantedCard: Card | null;
+}
+
+export interface ArcadeRoundResponse {
+  outcome: ShootoutRoundOutcome;
+  userScore: number;
+  oppScore: number;
+  round: number;
+  finished: boolean;
+  result?: ArcadeResult;
+}
