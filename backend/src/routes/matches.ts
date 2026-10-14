@@ -19,6 +19,7 @@ import { addXp } from "../lib/xp.js";
 import { buildDisciplineOps } from "../lib/applyMatchConsequences.js";
 import { createShootoutSession, deleteShootoutSession, getShootoutSession } from "../lib/shootoutStore.js";
 import { isShootoutDecided, isValidPower, isValidZone, resolveRound, type RoundOutcome } from "../lib/shootout.js";
+import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
 import type { SquadSlotJson } from "../lib/squadTypes.js";
 import type { Prisma } from "@prisma/client";
 
@@ -221,6 +222,7 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
   session.rounds.push(outcome);
   const roundJustPlayed = session.round;
   session.round++;
+  await recordPenaltyOutcome(req.userId!, outcome);
 
   const decided = isShootoutDecided(session.userScore, session.oppScore, roundJustPlayed);
 

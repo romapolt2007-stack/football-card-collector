@@ -1,7 +1,36 @@
 import { ClubCrest } from "../cards/ClubCrest";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import { POSITION_RU } from "../../lib/ruLabels";
-import type { UserStats } from "../../types/game";
+import type { PenaltyTierInfo, UserStats } from "../../types/game";
+
+const TIER_GRADIENTS = [
+  "linear-gradient(160deg, #3a3a3a 0%, #1c1c1c 100%)",
+  "linear-gradient(160deg, #e3a825 0%, #8a5a06 100%)",
+  "linear-gradient(160deg, #d9dde3 0%, #8a8f99 100%)",
+  "linear-gradient(160deg, #fff6d8 0%, #e3a825 70%, #8a5a06 100%)",
+  "linear-gradient(160deg, #e0c3ff 0%, #8a4fff 60%, #4a1f99 100%)",
+];
+
+function PenaltyBadge({ label, icon, count, info }: { label: string; icon: string; count: number; info: PenaltyTierInfo }) {
+  return (
+    <div
+      className={`flex flex-1 flex-col items-center gap-1 rounded-xl border p-3 text-center ${info.tier >= 4 ? "icon-pulse" : ""}`}
+      style={{
+        borderColor: info.tier > 0 ? "#ffd166" : "rgba(255,255,255,0.1)",
+        background: TIER_GRADIENTS[info.tier],
+        boxShadow: info.tier > 0 ? "0 0 14px rgba(255,209,102,0.35)" : undefined,
+      }}
+    >
+      <span className="text-2xl">{icon}</span>
+      <span className="text-[10px] font-extrabold uppercase tracking-wide text-white">{label}</span>
+      <span className="text-xs font-bold text-white">{info.tierLabel ?? "Нет уровня"}</span>
+      <span className="text-[9px] text-white/60">
+        {count}
+        {info.nextThreshold ? ` / ${info.nextThreshold}` : " · максимум"}
+      </span>
+    </div>
+  );
+}
 
 interface Achievement {
   id: string;
@@ -102,6 +131,14 @@ export function StatsTab({ stats }: Props) {
           </div>
         </div>
       )}
+
+      <div>
+        <p className="mb-2 text-sm font-semibold text-white/70">Пенальти-мастерство</p>
+        <div className="flex gap-2.5">
+          <PenaltyBadge label="Снайпер" icon="🎯" count={stats.penaltyGoals} info={stats.penaltySniperTier} />
+          <PenaltyBadge label="Стена" icon="🧤" count={stats.penaltySaves} info={stats.penaltyWallTier} />
+        </div>
+      </div>
 
       <div>
         <p className="mb-2 text-sm font-semibold text-white/70">Достижения</p>

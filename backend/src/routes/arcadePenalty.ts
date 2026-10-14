@@ -13,6 +13,7 @@ import {
 } from "../lib/arcadePenalty.js";
 import { FREE_ARCADE_PENALTY_INTERVAL_MS, msUntilFreeArcadePenaltyReady } from "../lib/freeArcadePenalty.js";
 import { isShootoutDecided, isValidPower, isValidZone, resolveRound } from "../lib/shootout.js";
+import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
 import { drawGuaranteedCard } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import { addXp } from "../lib/xp.js";
@@ -115,6 +116,7 @@ router.post("/:draftId/round", requireAuth, async (req, res) => {
   session.rounds.push(outcome);
   const roundJustPlayed = session.round;
   session.round++;
+  await recordPenaltyOutcome(req.userId!, outcome);
 
   const decided = isShootoutDecided(session.userScore, session.oppScore, roundJustPlayed);
   if (!decided) {

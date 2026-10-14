@@ -126,6 +126,12 @@ export interface DuelRoundResponse {
   result?: DuelResult;
 }
 
+export interface PenaltyTierInfo {
+  tier: number;
+  tierLabel: string | null;
+  nextThreshold: number | null;
+}
+
 export interface UserStats {
   totalMatches: number;
   wins: number;
@@ -136,6 +142,10 @@ export interface UserStats {
   marketSales: number;
   daysPlayed: number;
   bestCard: Card | null;
+  penaltyGoals: number;
+  penaltySaves: number;
+  penaltySniperTier: PenaltyTierInfo;
+  penaltyWallTier: PenaltyTierInfo;
 }
 
 export type Formation = "4-4-2" | "4-3-3" | "3-5-2" | "4-2-3-1" | "5-3-2";

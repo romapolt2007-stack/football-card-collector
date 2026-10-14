@@ -18,6 +18,7 @@ import {
 import { drawPackCards } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import { settleEnergy } from "../lib/energy.js";
+import { tierFor } from "../lib/penaltyStats.js";
 import type { Rarity } from "@prisma/client";
 
 const router = Router();
@@ -311,6 +312,10 @@ router.get("/stats", requireAuth, async (req, res) => {
     marketSales,
     daysPlayed,
     bestCard,
+    penaltyGoals: user.penaltyGoals,
+    penaltySaves: user.penaltySaves,
+    penaltySniperTier: tierFor(user.penaltyGoals),
+    penaltyWallTier: tierFor(user.penaltySaves),
   });
 });
 

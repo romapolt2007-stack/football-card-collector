@@ -19,6 +19,7 @@ import { drawGuaranteedCard } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import { addXp } from "../lib/xp.js";
 import { incrementQuestProgress } from "../lib/quests.js";
+import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
 
 const router = Router();
 
@@ -114,6 +115,7 @@ router.post("/:draftId/round", requireAuth, async (req, res) => {
   session.rounds.push(outcome);
   const roundJustPlayed = session.round;
   session.round++;
+  await recordPenaltyOutcome(req.userId!, outcome);
 
   const decided = isShootoutDecided(session.userScore, session.oppScore, roundJustPlayed);
   if (!decided) {

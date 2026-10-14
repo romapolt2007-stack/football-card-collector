@@ -159,6 +159,10 @@ model User {
   energy          Int      @default(20)
   energyUpdatedAt DateTime @default(now())
 
+  // Карьерная статистика пенальти (во всех 3 режимах: послематчевая серия, аркада, Дуэль) — для тиерных ачивок
+  penaltyGoals Int @default(0)
+  penaltySaves Int @default(0)
+
   duelTrophy DuelTrophy?
 
   cards       Card[]
