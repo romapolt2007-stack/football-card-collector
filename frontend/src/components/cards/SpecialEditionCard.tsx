@@ -47,7 +47,7 @@ export function SpecialEditionCard({ card, theme }: Props) {
       </div>
 
       <div className="relative mt-1 flex flex-col items-center">
-        <PlayerPortrait accent={theme.borderColor} size={54} />
+        <PlayerPortrait accent={theme.borderColor} size={54} nation={player.nation} />
         <p className="mt-1 truncate text-center text-[0.8em] font-bold tracking-wide uppercase">{player.name}</p>
         <p className="truncate text-center text-[0.65em] font-semibold opacity-70">{theme.label}</p>
       </div>

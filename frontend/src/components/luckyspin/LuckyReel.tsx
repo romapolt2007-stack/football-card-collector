@@ -293,7 +293,7 @@ export function LuckyReel({ card, wasPity, onDone }: Props) {
           <div className="lucky-card-frame relative overflow-hidden rounded-[28px] p-2.5">
             <div className="holo-sweep pointer-events-none absolute inset-0" />
             <div className="foil-texture pointer-events-none absolute inset-0" />
-            <FlippableCard card={card} revealed={revealed} size="md" showRarityBack portrait />
+            <FlippableCard card={card} revealed={revealed} size="md" showRarityBack />
           </div>
 
           {revealed && (

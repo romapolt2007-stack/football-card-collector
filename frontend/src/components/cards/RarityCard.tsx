@@ -8,8 +8,6 @@ interface Props {
   card: Card;
   size?: "sm" | "md" | "lg" | "full";
   onClick?: () => void;
-  /** Стилизованный SVG-портрет вместо герба клуба в центре — для "парадного" раскрытия (рулетка «Удача»). */
-  portrait?: boolean;
 }
 
 const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
@@ -23,7 +21,7 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
 const PENNANT_CLIP =
   "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
 
-export function RarityCard({ card, size = "md", onClick, portrait }: Props) {
+export function RarityCard({ card, size = "md", onClick }: Props) {
   const theme = RARITY_THEME[card.rarity];
   const { player } = card;
   const isIcon = card.rarity === "ICON";
@@ -79,19 +77,15 @@ export function RarityCard({ card, size = "md", onClick, portrait }: Props) {
       </div>
 
       <div className="relative mt-1 flex flex-col items-center">
-        {portrait ? (
-          <div className="relative">
-            <PlayerPortrait accent={theme.borderColor} size={isFull ? 84 : 64} />
-            <div
-              className="absolute -bottom-1 -right-1 rounded-full border-2 bg-black/50 p-0.5"
-              style={{ borderColor: theme.borderColor }}
-            >
-              <ClubCrest club={player.club} size={20} />
-            </div>
+        <div className="relative">
+          <PlayerPortrait accent={theme.borderColor} size={isFull ? 84 : 64} nation={player.nation} />
+          <div
+            className="absolute -bottom-1 -right-1 rounded-full border-2 bg-black/50 p-0.5"
+            style={{ borderColor: theme.borderColor }}
+          >
+            <ClubCrest club={player.club} size={20} />
           </div>
-        ) : (
-          <ClubCrest club={player.club} size={isFull ? 68 : 56} />
-        )}
+        </div>
         <p className="mt-1.5 truncate text-center text-[0.85em] font-bold tracking-wide uppercase">
           {player.name}
         </p>
