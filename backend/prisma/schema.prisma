@@ -132,6 +132,8 @@ model User {
   hasClaimedStarter Boolean   @default(false)
   dailyStreak       Int       @default(0)
   lastDailyClaimAt  DateTime?
+  // Куплена ли "страховка" пропущенного дня — сохраняет стрик при следующем клейме вместо сброса на 1
+  streakInsuredAt   DateTime?
 
   // Короткий таймер-бонус для удержания (каждые N минут) + отметка,
   // чтобы не слать уведомление повторно, пока бонус лежит неполученным

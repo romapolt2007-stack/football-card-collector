@@ -13,6 +13,7 @@ import { useClaimQuest, useDailyClaim, useQuests, useUserStats } from "../lib/qu
 import { useClaimFreeBonus, useFreeBonusStatus, formatCountdown } from "../lib/useFreeBonus";
 import { useClaimEmergencyBonus, useEmergencyBonusStatus } from "../lib/useLuckySpin";
 import { useDuelStatus } from "../lib/useDuel";
+import { useInsureStreak, useStreakStatus } from "../lib/useStreakInsurance";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import { useAuthStore } from "../store/useAuthStore";
@@ -35,6 +36,8 @@ export function ProfileScreen() {
   const [showPatches, setShowPatches] = useState(false);
   const emergencyBonus = useEmergencyBonusStatus();
   const duelStatus = useDuelStatus();
+  const streakStatus = useStreakStatus();
+  const insureStreak = useInsureStreak();
   const claimEmergencyBonus = useClaimEmergencyBonus();
   const stats = useUserStats();
 
@@ -189,6 +192,19 @@ export function ProfileScreen() {
             {dailyClaim.isSuccess && (
               <p className="mt-2 text-xs text-gold">+{dailyClaim.data.reward.toLocaleString("ru-RU")} монет!</p>
             )}
+            {streakStatus.data?.canInsure && (
+              <div className="mt-3 flex items-center justify-between rounded-lg border border-red-400/30 bg-red-400/5 px-3 py-2">
+                <p className="text-xs text-white/70">Пропущен день — застрахуйте серию, пока не сгорела</p>
+                <button
+                  onClick={() => insureStreak.mutate()}
+                  disabled={insureStreak.isPending || (user.coins < streakStatus.data.cost)}
+                  className="shrink-0 rounded-full border border-gold/40 px-3 py-1.5 text-xs font-bold text-gold disabled:opacity-30"
+                >
+                  −{streakStatus.data.cost} 🪙
+                </button>
+              </div>
+            )}
+            {insureStreak.isSuccess && <p className="mt-2 text-xs text-emerald-400">Серия застрахована ✓</p>}
           </section>
 
           <section>

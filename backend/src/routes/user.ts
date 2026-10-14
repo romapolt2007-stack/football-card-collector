@@ -74,6 +74,7 @@ function utcDay(date: Date): number {
 }
 
 const DAILY_XP_REWARD = 50;
+const STREAK_INSURANCE_COST = 50;
 
 router.post("/daily-claim", requireAuth, async (req, res) => {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
@@ -85,22 +86,71 @@ router.post("/daily-claim", requireAuth, async (req, res) => {
     return;
   }
 
-  const wasConsecutive = user.lastDailyClaimAt && utcDay(user.lastDailyClaimAt) === today - 1;
+  const missedOneDay = user.lastDailyClaimAt && utcDay(user.lastDailyClaimAt) === today - 2;
+  const wasInsured = missedOneDay && user.streakInsuredAt && utcDay(user.streakInsuredAt) >= today - 2;
+  const wasConsecutive = (user.lastDailyClaimAt && utcDay(user.lastDailyClaimAt) === today - 1) || wasInsured;
   const streak = wasConsecutive ? (user.dailyStreak % 7) + 1 : 1;
   const reward = 300 * streak * (streak === 7 ? 3 : 1);
 
   await prisma.$transaction([
     prisma.user.update({
       where: { id: user.id },
-      data: { coins: { increment: reward }, dailyStreak: streak, lastDailyClaimAt: now },
+      data: { coins: { increment: reward }, dailyStreak: streak, lastDailyClaimAt: now, streakInsuredAt: null },
     }),
     prisma.transaction.create({
-      data: { userId: user.id, type: "DAILY_BONUS", amount: reward, meta: { streak } },
+      data: { userId: user.id, type: "DAILY_BONUS", amount: reward, meta: { streak, wasInsured: Boolean(wasInsured) } },
     }),
   ]);
 
   const { xp, level, coins, levelUpReward } = await addXp(user.id, DAILY_XP_REWARD);
   res.json({ coins, streak, reward, xp, level, levelUpReward });
+});
+
+// "Окно спасения" стрика: пропустили ровно 1 день — до следующего клейма можно
+// заплатить вместо сброса стрика на День 1 (см. Блок 1 ГДД — DailyBonusRoadmap уже
+// существует, это расширение, а не новая механика).
+router.get("/streak/status", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  const today = utcDay(new Date());
+  const missedOneDay = Boolean(user.lastDailyClaimAt && utcDay(user.lastDailyClaimAt) === today - 2);
+  const alreadyInsured = Boolean(user.streakInsuredAt && utcDay(user.streakInsuredAt) >= today - 2);
+  res.json({
+    canInsure: missedOneDay && !alreadyInsured,
+    alreadyInsured,
+    cost: STREAK_INSURANCE_COST,
+    streak: user.dailyStreak,
+  });
+});
+
+router.post("/streak/insure", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  const today = utcDay(new Date());
+  const missedOneDay = user.lastDailyClaimAt && utcDay(user.lastDailyClaimAt) === today - 2;
+
+  if (!missedOneDay) {
+    res.status(400).json({ error: "Страховка стрика сейчас недоступна" });
+    return;
+  }
+  if (user.streakInsuredAt && utcDay(user.streakInsuredAt) >= today - 2) {
+    res.status(400).json({ error: "Стрик уже застрахован" });
+    return;
+  }
+  if (user.coins < STREAK_INSURANCE_COST) {
+    res.status(400).json({ error: "Недостаточно монет" });
+    return;
+  }
+
+  const updated = await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { coins: { decrement: STREAK_INSURANCE_COST }, streakInsuredAt: new Date() },
+    }),
+    prisma.transaction.create({
+      data: { userId: user.id, type: "DAILY_BONUS", amount: -STREAK_INSURANCE_COST, meta: { action: "streak_insure" } },
+    }),
+  ]);
+
+  res.json({ coins: updated[0].coins, insured: true });
 });
 
 router.get("/free-bonus", requireAuth, async (req, res) => {
