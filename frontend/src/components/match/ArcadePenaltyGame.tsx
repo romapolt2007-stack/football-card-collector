@@ -153,6 +153,7 @@ export function ArcadePenaltyGame({ mode, onModeChange }: Props) {
           tabs={[
             { id: "quick", label: "Быстрый матч" },
             { id: "penalty", label: "Пенальти" },
+            { id: "duel", label: "Дуэль" },
           ]}
         />
 

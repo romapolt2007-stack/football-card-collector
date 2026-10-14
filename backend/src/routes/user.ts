@@ -17,6 +17,7 @@ import {
 } from "../lib/emergencyBonus.js";
 import { drawPackCards } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
+import { settleEnergy } from "../lib/energy.js";
 import type { Rarity } from "@prisma/client";
 
 const router = Router();
@@ -27,7 +28,8 @@ router.get("/me", requireAuth, async (req, res) => {
     res.status(404).json({ error: "Пользователь не найден" });
     return;
   }
-  res.json({ user });
+  const { energy, energyUpdatedAt } = await settleEnergy(req.userId!);
+  res.json({ user: { ...user, energy, energyUpdatedAt } });
 });
 
 const teamProfileSchema = z.object({

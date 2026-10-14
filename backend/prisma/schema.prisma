@@ -153,6 +153,12 @@ model User {
   // Косметическая тема интерфейса из «Патчей сообщества» — только акцентный цвет, без игровой логики
   cosmeticPatchId String?
 
+  // Энергия — ограничивает платные/PvP-режимы (Дуэль), восстанавливается лениво по времени
+  energy          Int      @default(20)
+  energyUpdatedAt DateTime @default(now())
+
+  duelTrophy DuelTrophy?
+
   cards       Card[]
   listings    Listing[]
   marketBids  MarketBid[]
@@ -161,6 +167,7 @@ model User {
   userQuests  UserQuest[]
   squads      Squad[]
   sbcCompletions SbcCompletion[]
+  duelMatchesAsAttacker DuelMatch[] @relation("DuelAttacker")
 
   createdAt DateTime @default(now())
 
@@ -310,6 +317,7 @@ enum TransactionType {
   LEVEL_UP
   SBC_SUBMIT
   ARCADE_PENALTY
+  DUEL
 }
 
 model Transaction {
@@ -369,4 +377,52 @@ model SbcCompletion {
   @@unique([userId, sbcId])
   @@index([userId])
   @@map("sbc_completions")
+}
+
+// ──────────────────────────────────────────
+// PvP «Дуэль» (пенальти против реального состава соперника)
+// ──────────────────────────────────────────
+
+enum DuelLeague {
+  BRONZE
+  SILVER
+  GOLD
+  CHAMPION
+}
+
+/** Одна строка на пользователя — текущая лига и очки кубков. */
+model DuelTrophy {
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @id
+
+  league DuelLeague @default(BRONZE)
+  points Int        @default(0)
+  wins   Int        @default(0)
+  losses Int         @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@map("duel_trophies")
+}
+
+/** История завершённых дуэлей — для ELO-пересчёта и будущего лидерборда. */
+model DuelMatch {
+  id String @id @default(cuid())
+
+  attacker   User   @relation("DuelAttacker", fields: [attackerId], references: [id])
+  attackerId String
+
+  opponentName String
+  opponentOvr  Int
+  isRealOpponent Boolean @default(false)
+
+  attackerScore Int
+  defenderScore Int
+  won           Boolean
+  pointsDelta   Int
+
+  createdAt DateTime @default(now())
+
+  @@index([attackerId])
+  @@map("duel_matches")
 }

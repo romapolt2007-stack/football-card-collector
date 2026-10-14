@@ -12,6 +12,7 @@ import { PillTabs } from "../components/common/PillTabs";
 import { useClaimQuest, useDailyClaim, useQuests, useUserStats } from "../lib/queries";
 import { useClaimFreeBonus, useFreeBonusStatus, formatCountdown } from "../lib/useFreeBonus";
 import { useClaimEmergencyBonus, useEmergencyBonusStatus } from "../lib/useLuckySpin";
+import { useDuelStatus } from "../lib/useDuel";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import { useAuthStore } from "../store/useAuthStore";
@@ -33,6 +34,7 @@ export function ProfileScreen() {
   const [showRoulette, setShowRoulette] = useState(false);
   const [showPatches, setShowPatches] = useState(false);
   const emergencyBonus = useEmergencyBonusStatus();
+  const duelStatus = useDuelStatus();
   const claimEmergencyBonus = useClaimEmergencyBonus();
   const stats = useUserStats();
 
@@ -57,7 +59,12 @@ export function ProfileScreen() {
 
   return (
     <div className="flex min-h-dvh flex-col gap-4 px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-28">
-      <header className="flex items-center justify-end">
+      <header className="flex items-center justify-end gap-2">
+        {duelStatus.data && (
+          <span className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-bold text-gold">
+            ⚡ {duelStatus.data.energy}/{duelStatus.data.energyMax}
+          </span>
+        )}
         <CoinBalance coins={user.coins} />
       </header>
 

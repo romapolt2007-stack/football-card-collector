@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { RarityCard } from "../components/cards/RarityCard";
 import { ArcadePenaltyGame } from "../components/match/ArcadePenaltyGame";
+import { DuelGame } from "../components/match/DuelGame";
 import { ShootoutMiniGame } from "../components/match/ShootoutMiniGame";
 import { TeamWalkout } from "../components/match/TeamWalkout";
 import { PillTabs } from "../components/common/PillTabs";
@@ -11,7 +12,7 @@ import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import type { MatchEvent, QuickMatchResponse, QuickMatchResult } from "../types/game";
 
-export type MatchMode = "quick" | "penalty";
+export type MatchMode = "quick" | "penalty" | "duel";
 
 const EVENT_META: Record<string, { emoji: string; label: string; badgeBg: string }> = {
   GOAL: { emoji: "⚽", label: "Гол!", badgeBg: "linear-gradient(160deg, #fff1c2 0%, #e3a825 70%, #8a5a06 100%)" },
@@ -41,11 +42,9 @@ function opponentNameOf(response: QuickMatchResponse | null): string {
 
 export function MatchScreen() {
   const [mode, setMode] = useState<MatchMode>("quick");
-  return mode === "quick" ? (
-    <QuickMatchScreen mode={mode} onModeChange={setMode} />
-  ) : (
-    <ArcadePenaltyGame mode={mode} onModeChange={setMode} />
-  );
+  if (mode === "quick") return <QuickMatchScreen mode={mode} onModeChange={setMode} />;
+  if (mode === "duel") return <DuelGame mode={mode} onModeChange={setMode} />;
+  return <ArcadePenaltyGame mode={mode} onModeChange={setMode} />;
 }
 
 interface QuickMatchProps {
@@ -152,6 +151,7 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
           tabs={[
             { id: "quick", label: "Быстрый матч" },
             { id: "penalty", label: "Пенальти" },
+            { id: "duel", label: "Дуэль" },
           ]}
         />
 

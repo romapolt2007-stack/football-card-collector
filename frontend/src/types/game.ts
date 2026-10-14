@@ -73,7 +73,57 @@ export interface GameUser {
   teamColors: string | null;
   avatarIcon: string | null;
   cosmeticPatchId: string | null;
+  energy: number;
+  energyUpdatedAt: string;
   createdAt: string;
+}
+
+export type DuelLeague = "BRONZE" | "SILVER" | "GOLD" | "CHAMPION";
+
+export interface DuelStatus {
+  energy: number;
+  energyUpdatedAt: string;
+  energyMax: number;
+  energyCost: number;
+  league: DuelLeague;
+  leagueLabel: string;
+  points: number;
+  wins: number;
+  losses: number;
+}
+
+export interface DuelFindResponse {
+  draftId: string;
+  opponentName: string;
+  opponentOvr: number;
+  isRealOpponent: boolean;
+  energy: number;
+}
+
+export interface DuelResult {
+  won: boolean;
+  rewardCoins: number;
+  rewardXp: number;
+  coins: number;
+  xp: number;
+  level: number;
+  levelUpReward: number;
+  grantedCard: Card | null;
+  pointsDelta: number;
+  points: number;
+  league: DuelLeague;
+  leagueLabel: string;
+  opponentName: string;
+  isRealOpponent: boolean;
+}
+
+export interface DuelRoundResponse {
+  outcome: ShootoutRoundOutcome;
+  userScore: number;
+  oppScore: number;
+  round: number;
+  finished: boolean;
+  result?: DuelResult;
 }
 
 export interface UserStats {
