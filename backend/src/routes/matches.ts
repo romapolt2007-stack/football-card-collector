@@ -22,6 +22,7 @@ import { isShootoutDecided, isValidPower, isValidZone, resolveRound, type RoundO
 import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
 import { effectiveOverall } from "../lib/cardStats.js";
 import { applyCareerResult, CAREER_LEAGUE_LABEL_RU, ensureCareerTrophy } from "../lib/careerLeague.js";
+import { activeChallenge, currentCycleIndex, msLeftInCycle, tryClaimFlashChallenge } from "../lib/flashChallenge.js";
 import type { SquadSlotJson } from "../lib/squadTypes.js";
 import type { Prisma } from "@prisma/client";
 
@@ -173,19 +174,27 @@ router.post("/quick", requireAuth, async (req, res) => {
     await incrementQuestProgress(req.userId!, "WIN_MATCH");
   }
   const { xp, level, coins, levelUpReward } = await addXp(req.userId!, rewards.xp);
-  const career = await applyCareerResult(req.userId!, result.userScore > result.oppScore);
+  const userWonRegulation = result.userScore > result.oppScore;
+  const career = await applyCareerResult(req.userId!, userWonRegulation);
+  const flashChallenge = await tryClaimFlashChallenge(req.userId!, {
+    userScore: result.userScore,
+    oppScore: result.oppScore,
+    won: userWonRegulation,
+    wonViaShootout: false,
+  });
 
   res.json({
     match,
     stats: result.stats,
     squad: { strength, avgOvr, chemistry },
-    coins,
+    coins: flashChallenge ? coins + flashChallenge.rewardCoins : coins,
     xp,
     level,
     wonCard,
     shootout: null,
     levelUpReward,
     career,
+    flashChallenge,
   });
 });
 
@@ -261,6 +270,12 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
   if (userWon) await incrementQuestProgress(req.userId!, "WIN_MATCH");
   const { xp, level, coins, levelUpReward } = await addXp(req.userId!, rewards.xp);
   const career = await applyCareerResult(req.userId!, userWon);
+  const flashChallenge = await tryClaimFlashChallenge(req.userId!, {
+    userScore: session.ninetyMin.userScore,
+    oppScore: session.ninetyMin.oppScore,
+    won: userWon,
+    wonViaShootout: userWon,
+  });
 
   deleteShootoutSession(session.draftId);
 
@@ -274,14 +289,28 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
       match,
       stats: session.ninetyMin.stats,
       squad: session.squad,
-      coins,
+      coins: flashChallenge ? coins + flashChallenge.rewardCoins : coins,
       xp,
       level,
       wonCard,
       levelUpReward,
       shootout: { userScore: session.userScore, oppScore: session.oppScore, won: userWon },
       career,
+      flashChallenge,
     },
+  });
+});
+
+router.get("/flash-challenge", requireAuth, async (req, res) => {
+  const challenge = activeChallenge();
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId }, select: { flashChallengeClaimedCycle: true } });
+  res.json({
+    code: challenge.code,
+    title: challenge.title,
+    description: challenge.description,
+    rewardCoins: challenge.rewardCoins,
+    claimed: user.flashChallengeClaimedCycle === currentCycleIndex(),
+    msLeft: msLeftInCycle(),
   });
 });
 

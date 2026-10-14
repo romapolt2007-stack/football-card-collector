@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import type {
   Card,
   CareerStatus,
+  FlashChallengeStatus,
   Formation,
   GameUser,
   PackDef,
@@ -22,6 +23,15 @@ export function useCareerStatus() {
   return useQuery({
     queryKey: ["career-status"],
     queryFn: () => api.get<CareerStatus>("/api/matches/career"),
+    enabled: Boolean(token),
+  });
+}
+
+export function useFlashChallengeStatus() {
+  const token = useAuthStore((s) => s.token);
+  return useQuery({
+    queryKey: ["flash-challenge-status"],
+    queryFn: () => api.get<FlashChallengeStatus>("/api/matches/flash-challenge"),
     enabled: Boolean(token),
   });
 }
@@ -205,6 +215,7 @@ export function usePlayQuickMatch() {
         queryClient.setQueryData<Card[]>(["cards"], (prev) => [result.wonCard!, ...(prev ?? [])]);
       }
       queryClient.invalidateQueries({ queryKey: ["career-status"] });
+      queryClient.invalidateQueries({ queryKey: ["flash-challenge-status"] });
     },
   });
 }
@@ -229,6 +240,7 @@ export function useShootoutRound() {
         queryClient.setQueryData<Card[]>(["cards"], (prev) => [result.wonCard!, ...(prev ?? [])]);
       }
       queryClient.invalidateQueries({ queryKey: ["career-status"] });
+      queryClient.invalidateQueries({ queryKey: ["flash-challenge-status"] });
     },
   });
 }

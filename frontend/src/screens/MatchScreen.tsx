@@ -7,7 +7,8 @@ import { DuelGame } from "../components/match/DuelGame";
 import { ShootoutMiniGame } from "../components/match/ShootoutMiniGame";
 import { TeamWalkout } from "../components/match/TeamWalkout";
 import { PillTabs } from "../components/common/PillTabs";
-import { useCareerStatus, usePlayQuickMatch } from "../lib/queries";
+import { useCareerStatus, useFlashChallengeStatus, usePlayQuickMatch } from "../lib/queries";
+import { formatLongCountdown } from "../lib/useLuckySpin";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import type { MatchEvent, QuickMatchResponse, QuickMatchResult } from "../types/game";
@@ -55,6 +56,7 @@ interface QuickMatchProps {
 function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
   const playMatch = usePlayQuickMatch();
   const careerStatus = useCareerStatus();
+  const flashChallenge = useFlashChallengeStatus();
   const [phase, setPhase] = useState<Phase>("idle");
   const [minute, setMinute] = useState(0);
   const [revealedCount, setRevealedCount] = useState(0);
@@ -166,6 +168,26 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
           </div>
         )}
 
+        {flashChallenge.data && (
+          <div
+            className="overflow-hidden rounded-xl border px-4 py-3 text-center"
+            style={{
+              borderColor: flashChallenge.data.claimed ? "rgba(255,255,255,0.1)" : "rgba(90,209,255,0.4)",
+              background: flashChallenge.data.claimed ? "rgba(255,255,255,0.03)" : "rgba(90,209,255,0.08)",
+              opacity: flashChallenge.data.claimed ? 0.5 : 1,
+            }}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-wide text-sky-300">
+              ⚡ Flash-челлендж · {formatLongCountdown(flashChallenge.data.msLeft)}
+            </p>
+            <p className="mt-1 text-sm font-bold">{flashChallenge.data.title}</p>
+            <p className="mt-0.5 text-xs text-white/50">{flashChallenge.data.description}</p>
+            <p className="mt-1 text-xs font-semibold text-gold">
+              {flashChallenge.data.claimed ? "Выполнено ✓" : `Награда: ${flashChallenge.data.rewardCoins} 🪙`}
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
           <p className="text-sm text-white/50">
             Сыграйте против случайного соперника на основе силы вашего активного состава
@@ -257,7 +279,7 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
   }
 
   if (!finalResult) return null;
-  const { match, squad, wonCard, shootout, career } = finalResult;
+  const { match, squad, wonCard, shootout, career, flashChallenge: flashClaim } = finalResult;
 
   return (
     <div className="flex min-h-dvh flex-col gap-5 px-5 pt-[calc(env(safe-area-inset-top)+24px)] pb-28">
@@ -303,6 +325,14 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
         <div className="flex flex-col items-center gap-2">
           <p className="text-xs text-white/50">Бонусная карта за матч</p>
           <RarityCard card={wonCard} size="md" />
+        </div>
+      )}
+
+      {flashClaim?.claimed && (
+        <div className="rounded-xl border border-sky-400/40 bg-sky-400/10 p-4 text-center">
+          <p className="text-xs font-bold uppercase tracking-wide text-sky-300">⚡ Flash-челлендж выполнен</p>
+          <p className="mt-1 text-sm font-bold">{flashClaim.title}</p>
+          <p className="mt-0.5 text-xs text-gold">+{flashClaim.rewardCoins.toLocaleString("ru-RU")} монет</p>
         </div>
       )}
 

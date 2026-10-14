@@ -163,6 +163,9 @@ model User {
   penaltyGoals Int @default(0)
   penaltySaves Int @default(0)
 
+  // Flash-челлендж: номер 3-дневного цикла, за который уже забрана награда (см. lib/flashChallenge.ts)
+  flashChallengeClaimedCycle Int?
+
   duelTrophy DuelTrophy?
   careerTrophy CareerTrophy?
 

@@ -225,6 +225,22 @@ export interface CareerStatus {
   losses: number;
 }
 
+export interface FlashChallengeStatus {
+  code: string;
+  title: string;
+  description: string;
+  rewardCoins: number;
+  claimed: boolean;
+  msLeft: number;
+}
+
+export interface FlashChallengeClaim {
+  claimed: boolean;
+  code: string;
+  title: string;
+  rewardCoins: number;
+}
+
 export interface QuickMatchResult {
   match: MatchRecord;
   stats: MatchStats;
@@ -235,6 +251,7 @@ export interface QuickMatchResult {
   wonCard: Card | null;
   shootout: ShootoutSummary | null;
   career: CareerResult;
+  flashChallenge: FlashChallengeClaim | null;
 }
 
 export interface ShootoutPending {
