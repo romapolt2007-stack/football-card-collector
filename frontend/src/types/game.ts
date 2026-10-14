@@ -244,6 +244,13 @@ export interface FlashChallengeClaim {
   rewardCoins: number;
 }
 
+export interface WeatherDef {
+  code: string;
+  label: string;
+  emoji: string;
+  goalMultiplier: number;
+}
+
 export interface QuickMatchResult {
   match: MatchRecord;
   stats: MatchStats;
@@ -253,6 +260,7 @@ export interface QuickMatchResult {
   level: number;
   wonCard: Card | null;
   shootout: ShootoutSummary | null;
+  weather: WeatherDef;
   career: CareerResult;
   flashChallenge: FlashChallengeClaim | null;
 }
@@ -264,6 +272,7 @@ export interface ShootoutPending {
   opponentName: string;
   opponentOvr: number;
   squad: { strength: number; avgOvr: number; chemistry: number };
+  weather: WeatherDef;
 }
 
 export type QuickMatchResponse = QuickMatchResult | ShootoutPending;

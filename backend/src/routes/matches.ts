@@ -23,6 +23,7 @@ import { recordPenaltyOutcome } from "../lib/penaltyStats.js";
 import { effectiveOverall } from "../lib/cardStats.js";
 import { applyCareerResult, CAREER_LEAGUE_LABEL_RU, ensureCareerTrophy } from "../lib/careerLeague.js";
 import { activeChallenge, currentCycleIndex, msLeftInCycle, tryClaimFlashChallenge } from "../lib/flashChallenge.js";
+import { weatherForDate } from "../lib/weather.js";
 import type { SquadSlotJson } from "../lib/squadTypes.js";
 import type { Prisma } from "@prisma/client";
 
@@ -128,7 +129,8 @@ router.post("/quick", requireAuth, async (req, res) => {
   const opponentName = generateBotName();
   const opponentOvr = generateBotOvr(strength);
 
-  const result = simulateMatch(strength, opponentOvr);
+  const weather = weatherForDate();
+  const result = simulateMatch(strength, opponentOvr, weather.goalMultiplier);
   const disciplineEvents = rollDisciplineEvents(starters.map((c) => ({ cardId: c.id, name: c.player.name })));
   const events = [...result.events, ...disciplineEvents].sort((a, b) => a.minute - b.minute);
 
@@ -151,6 +153,7 @@ router.post("/quick", requireAuth, async (req, res) => {
       opponentName,
       opponentOvr,
       squad: session.squad,
+      weather,
     });
     return;
   }
@@ -193,6 +196,7 @@ router.post("/quick", requireAuth, async (req, res) => {
     wonCard,
     shootout: null,
     levelUpReward,
+    weather,
     career,
     flashChallenge,
   });
@@ -295,10 +299,15 @@ router.post("/shootout/:draftId/round", requireAuth, async (req, res) => {
       wonCard,
       levelUpReward,
       shootout: { userScore: session.userScore, oppScore: session.oppScore, won: userWon },
+      weather: weatherForDate(),
       career,
       flashChallenge,
     },
   });
+});
+
+router.get("/weather", requireAuth, (_req, res) => {
+  res.json(weatherForDate());
 });
 
 router.get("/flash-challenge", requireAuth, async (req, res) => {

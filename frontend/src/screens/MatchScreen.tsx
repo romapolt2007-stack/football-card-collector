@@ -7,7 +7,7 @@ import { DuelGame } from "../components/match/DuelGame";
 import { ShootoutMiniGame } from "../components/match/ShootoutMiniGame";
 import { TeamWalkout } from "../components/match/TeamWalkout";
 import { PillTabs } from "../components/common/PillTabs";
-import { useCareerStatus, useFlashChallengeStatus, usePlayQuickMatch } from "../lib/queries";
+import { useCareerStatus, useFlashChallengeStatus, usePlayQuickMatch, useWeather } from "../lib/queries";
 import { formatLongCountdown } from "../lib/useLuckySpin";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
@@ -57,6 +57,7 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
   const playMatch = usePlayQuickMatch();
   const careerStatus = useCareerStatus();
   const flashChallenge = useFlashChallengeStatus();
+  const weather = useWeather();
   const [phase, setPhase] = useState<Phase>("idle");
   const [minute, setMinute] = useState(0);
   const [revealedCount, setRevealedCount] = useState(0);
@@ -189,6 +190,18 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
         )}
 
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+          {weather.data && (
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/50">
+              Погода сегодня: {weather.data.emoji} {weather.data.label}
+              {weather.data.goalMultiplier !== 1 && (
+                <span className={weather.data.goalMultiplier > 1 ? "text-emerald-300" : "text-orange-300"}>
+                  {" "}
+                  ({weather.data.goalMultiplier > 1 ? "+" : ""}
+                  {Math.round((weather.data.goalMultiplier - 1) * 100)}% к голам)
+                </span>
+              )}
+            </span>
+          )}
           <p className="text-sm text-white/50">
             Сыграйте против случайного соперника на основе силы вашего активного состава
           </p>

@@ -41,10 +41,10 @@ export function generateBotOvr(userStrength: number): number {
   return clamp(Math.round(userStrength + randInt(-6, 6)), 40, 99);
 }
 
-export function simulateMatch(userStrength: number, opponentOvr: number): MatchResult {
+export function simulateMatch(userStrength: number, opponentOvr: number, goalMultiplier = 1): MatchResult {
   const diff = userStrength - opponentOvr;
-  const userXg = clamp(1.3 + diff / 15, 0.3, 4.5);
-  const oppXg = clamp(1.3 - diff / 15, 0.3, 4.5);
+  const userXg = clamp((1.3 + diff / 15) * goalMultiplier, 0.3, 4.5);
+  const oppXg = clamp((1.3 - diff / 15) * goalMultiplier, 0.3, 4.5);
 
   const events: MatchEvent[] = [];
   let userScore = 0;

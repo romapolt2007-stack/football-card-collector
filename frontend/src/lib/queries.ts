@@ -16,7 +16,18 @@ import type {
   SquadSlot,
   UserQuest,
   UserStats,
+  WeatherDef,
 } from "../types/game";
+
+export function useWeather() {
+  const token = useAuthStore((s) => s.token);
+  return useQuery({
+    queryKey: ["weather"],
+    queryFn: () => api.get<WeatherDef>("/api/matches/weather"),
+    enabled: Boolean(token),
+    staleTime: 10 * 60_000,
+  });
+}
 
 export function useCareerStatus() {
   const token = useAuthStore((s) => s.token);
