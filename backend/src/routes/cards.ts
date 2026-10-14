@@ -6,6 +6,7 @@ import { incrementQuestProgress } from "../lib/quests.js";
 import { clearCardFromSquads } from "../lib/squadCleanup.js";
 import { effectiveOverall, TRAINING_BOOST_CAP } from "../lib/cardStats.js";
 import { quickSellPrice } from "../lib/cardValue.js";
+import { ACADEMY_DURATION_MS, ACADEMY_ENROLL_COST, isAcademyEligible, msUntilGraduation, nextRarity } from "../lib/academy.js";
 
 const router = Router();
 
@@ -153,6 +154,95 @@ router.post("/train", requireAuth, async (req, res) => {
       data: { trainingBoost: newBoost, quickSellPrice: newQuickSellPrice },
       include: { player: { include: { club: { include: { league: true } } } } },
     });
+  });
+
+  res.json({ card: updated });
+});
+
+router.get("/:cardId/academy", requireAuth, async (req, res) => {
+  const card = await prisma.card.findUnique({ where: { id: req.params.cardId } });
+  if (!card || card.ownerId !== req.userId) {
+    res.status(404).json({ error: "Карта не найдена" });
+    return;
+  }
+
+  const eligible = isAcademyEligible(card.rarity);
+  const msLeft = msUntilGraduation(card.academyEnrolledAt);
+  res.json({
+    eligible,
+    enrolled: Boolean(card.academyEnrolledAt),
+    msLeft: Number.isFinite(msLeft) ? msLeft : null,
+    durationMs: ACADEMY_DURATION_MS,
+    nextRarity: nextRarity(card.rarity),
+    enrollCost: ACADEMY_ENROLL_COST[card.rarity] ?? null,
+  });
+});
+
+router.post("/:cardId/academy/enroll", requireAuth, async (req, res) => {
+  const card = await prisma.card.findUnique({ where: { id: req.params.cardId } });
+  if (!card || card.ownerId !== req.userId) {
+    res.status(404).json({ error: "Карта не найдена" });
+    return;
+  }
+  if (card.isListed) {
+    res.status(400).json({ error: "Карта выставлена на продажу — сначала снимите с рынка" });
+    return;
+  }
+  if (!isAcademyEligible(card.rarity)) {
+    res.status(400).json({ error: "В академию берут только BRONZE/SILVER карты" });
+    return;
+  }
+  if (card.academyEnrolledAt) {
+    res.status(400).json({ error: "Карта уже в академии" });
+    return;
+  }
+
+  const cost = ACADEMY_ENROLL_COST[card.rarity]!;
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  if (user.coins < cost) {
+    res.status(400).json({ error: "Недостаточно монет" });
+    return;
+  }
+
+  const [, updatedCard] = await prisma.$transaction([
+    prisma.user.update({ where: { id: req.userId }, data: { coins: { decrement: cost } } }),
+    prisma.card.update({
+      where: { id: card.id },
+      data: { academyEnrolledAt: new Date() },
+      include: { player: { include: { club: { include: { league: true } } } } },
+    }),
+    prisma.transaction.create({
+      data: { userId: req.userId!, type: "ACADEMY", amount: -cost, meta: { action: "enroll", cardId: card.id } },
+    }),
+  ]);
+
+  res.json({ card: updatedCard, coins: user.coins - cost });
+});
+
+router.post("/:cardId/academy/graduate", requireAuth, async (req, res) => {
+  const card = await prisma.card.findUnique({ where: { id: req.params.cardId }, include: { player: true } });
+  if (!card || card.ownerId !== req.userId) {
+    res.status(404).json({ error: "Карта не найдена" });
+    return;
+  }
+  if (!card.academyEnrolledAt || msUntilGraduation(card.academyEnrolledAt) > 0) {
+    res.status(400).json({ error: "Карта ещё не готова к выпуску" });
+    return;
+  }
+
+  const promoted = nextRarity(card.rarity);
+  if (!promoted) {
+    res.status(400).json({ error: "Дальше расти некуда" });
+    return;
+  }
+
+  const newBoost = Math.min(TRAINING_BOOST_CAP, card.trainingBoost + 1);
+  const newQuickSellPrice = quickSellPrice(promoted, effectiveOverall(card.player.overall, newBoost));
+
+  const updated = await prisma.card.update({
+    where: { id: card.id },
+    data: { rarity: promoted, trainingBoost: newBoost, academyEnrolledAt: null, quickSellPrice: newQuickSellPrice },
+    include: { player: { include: { club: { include: { league: true } } } } },
   });
 
   res.json({ card: updated });

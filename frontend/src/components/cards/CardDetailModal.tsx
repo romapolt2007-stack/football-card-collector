@@ -5,6 +5,8 @@ import { RARITY_THEME } from "./rarityTheme";
 import { haptics } from "../../lib/telegram";
 import { sfx } from "../../lib/sfx";
 import { TRAINING_BOOST_CAP } from "../../lib/cardStats";
+import { formatLongCountdown } from "../../lib/useLuckySpin";
+import { useAcademyStatus, useEnrollAcademy, useGraduateAcademy } from "../../lib/useAcademy";
 import type { Card } from "../../types/game";
 
 interface Props {
@@ -21,6 +23,9 @@ interface Props {
 export function CardDetailModal({ card, onClose, onSell, onAssign, onTrain, duplicates, selling, training }: Props) {
   const [picking, setPicking] = useState(false);
   const atCap = (card?.trainingBoost ?? 0) >= TRAINING_BOOST_CAP;
+  const academy = useAcademyStatus(card?.id);
+  const enrollAcademy = useEnrollAcademy();
+  const graduateAcademy = useGraduateAcademy();
 
   useEffect(() => {
     setPicking(false);
@@ -112,6 +117,37 @@ export function CardDetailModal({ card, onClose, onSell, onAssign, onTrain, dupl
                       ? "Нет дублей для тренировки"
                       : `🏋️ Тренировать (дублей: ${duplicates.length})`}
                 </button>
+                {academy.data?.eligible && (
+                  academy.data.enrolled ? (
+                    (academy.data.msLeft ?? 0) > 0 ? (
+                      <div className="rounded-full border border-sky-400/30 bg-sky-400/10 py-3 text-center text-sm font-semibold text-sky-300">
+                        🎓 Выпуск через {formatLongCountdown(academy.data.msLeft ?? 0)}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          haptics.notify("success");
+                          graduateAcademy.mutate(card.id);
+                        }}
+                        disabled={graduateAcademy.isPending}
+                        className="rounded-full border border-sky-400/40 bg-sky-400/10 py-3 text-sm font-semibold text-sky-300 disabled:opacity-30"
+                      >
+                        🎓 Выпустить → {academy.data.nextRarity}
+                      </button>
+                    )
+                  ) : (
+                    <button
+                      onClick={() => {
+                        haptics.select();
+                        enrollAcademy.mutate(card.id);
+                      }}
+                      disabled={card.isListed || enrollAcademy.isPending}
+                      className="rounded-full border border-sky-400/40 bg-sky-400/10 py-3 text-sm font-semibold text-sky-300 disabled:opacity-30"
+                    >
+                      🎓 Академия → {academy.data.nextRarity} ({academy.data.enrollCost?.toLocaleString("ru-RU")} 🪙)
+                    </button>
+                  )
+                )}
                 <button
                   onClick={() => {
                     haptics.impact("medium");

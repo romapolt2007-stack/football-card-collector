@@ -201,6 +201,9 @@ model Card {
   // Все карты этого игрока в базе по-прежнему делят Player.overall — буст живёт только на этой карте.
   trainingBoost Int @default(0)
 
+  // Академия молодёжи: BRONZE/SILVER карта растёт на 1 уровень редкости за время + монеты (см. lib/academy.ts)
+  academyEnrolledAt DateTime?
+
   listing Listing?
 
   @@index([ownerId])
@@ -328,6 +331,7 @@ enum TransactionType {
   SBC_SUBMIT
   ARCADE_PENALTY
   DUEL
+  ACADEMY
 }
 
 model Transaction {

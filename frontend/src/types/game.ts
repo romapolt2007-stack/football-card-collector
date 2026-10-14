@@ -51,6 +51,7 @@ export interface Card {
   obtainedAt: string;
   unavailableMatches: number;
   trainingBoost: number;
+  academyEnrolledAt: string | null;
   player: Player;
 }
 
