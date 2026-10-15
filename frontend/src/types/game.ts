@@ -515,3 +515,39 @@ export interface ArcadeRoundResponse {
   finished: boolean;
   result?: ArcadeResult;
 }
+
+export interface CupFreeStatus {
+  ready: boolean;
+  msLeft: number;
+  intervalMs: number;
+}
+
+export interface CupStartResponse {
+  draftId: string;
+  round: number;
+  roundLabel: string;
+  strength: number;
+}
+
+export interface CupRoundResult {
+  rewardCoins: number;
+  rewardXp: number;
+  coins: number;
+  xp: number;
+  level: number;
+  levelUpReward: number;
+  grantedCard: Card | null;
+}
+
+export interface CupRoundResponse {
+  userScore: number;
+  oppScore: number;
+  opponentName: string;
+  opponentOvr: number;
+  won: boolean;
+  roundLabel: string;
+  finished: boolean;
+  champion: boolean;
+  nextRound: { round: number; label: string } | null;
+  result: CupRoundResult;
+}

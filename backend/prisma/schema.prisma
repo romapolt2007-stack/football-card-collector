@@ -152,6 +152,9 @@ model User {
   // Аркадный режим «Пенальти» — одна бесплатная серия в сутки, дальше за монеты
   lastFreeArcadePenaltyAt DateTime?
 
+  // Кубок на выбывание — одна бесплатная попытка в сутки (см. lib/cup.ts)
+  lastFreeCupAt DateTime?
+
   // Косметическая тема интерфейса из «Патчей сообщества» — только акцентный цвет, без игровой логики
   cosmeticPatchId String?
 
@@ -341,6 +344,7 @@ enum TransactionType {
   DUEL
   ACADEMY
   STADIUM
+  CUP
 }
 
 model Transaction {

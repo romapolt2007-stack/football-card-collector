@@ -154,6 +154,7 @@ export function ArcadePenaltyGame({ mode, onModeChange }: Props) {
             { id: "quick", label: "Быстрый матч" },
             { id: "penalty", label: "Пенальти" },
             { id: "duel", label: "Дуэль" },
+            { id: "cup", label: "Кубок" },
           ]}
         />
 
