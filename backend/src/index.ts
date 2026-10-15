@@ -10,6 +10,7 @@ import authRouter from "./routes/auth.js";
 import cardsRouter from "./routes/cards.js";
 import casesRouter from "./routes/cases.js";
 import cupRouter from "./routes/cup.js";
+import worldTourRouter from "./routes/worldTour.js";
 import cosmeticPatchesRouter from "./routes/cosmeticPatches.js";
 import duelRouter from "./routes/duel.js";
 import luckySpinRouter from "./routes/luckySpin.js";
@@ -78,6 +79,8 @@ app.use("/api/stadium/collect", actionLimiter);
 app.use("/api/stadium", stadiumRouter);
 app.use("/api/cup/start", actionLimiter);
 app.use("/api/cup", cupRouter);
+app.use("/api/world-tour/play", actionLimiter);
+app.use("/api/world-tour", worldTourRouter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {

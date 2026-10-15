@@ -3,6 +3,7 @@ import confetti from "canvas-confetti";
 import { CommunityPatchesScreen } from "./CommunityPatchesScreen";
 import { StadiumScreen } from "./StadiumScreen";
 import { ReferralScreen } from "./ReferralScreen";
+import { WorldTourScreen } from "./WorldTourScreen";
 import { FreeBonusRoulette } from "../components/profile/FreeBonusRoulette";
 import { ProfileHero } from "../components/profile/ProfileHero";
 import { XpBar } from "../components/profile/XpBar";
@@ -39,6 +40,7 @@ export function ProfileScreen() {
   const [showPatches, setShowPatches] = useState(false);
   const [showStadium, setShowStadium] = useState(false);
   const [showReferrals, setShowReferrals] = useState(false);
+  const [showWorldTour, setShowWorldTour] = useState(false);
   const stadiumStatus = useStadiumStatus();
   const emergencyBonus = useEmergencyBonusStatus();
   const duelStatus = useDuelStatus();
@@ -124,6 +126,14 @@ export function ProfileScreen() {
             className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
           >
             <span className="text-sm font-semibold">🤝 Пригласи друга</span>
+            <span className="text-xs text-white/40">Открыть →</span>
+          </button>
+
+          <button
+            onClick={() => setShowWorldTour(true)}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+          >
+            <span className="text-sm font-semibold">🗺️ World Tour</span>
             <span className="text-xs text-white/40">Открыть →</span>
           </button>
 
@@ -252,6 +262,7 @@ export function ProfileScreen() {
       {showPatches && <CommunityPatchesScreen onClose={() => setShowPatches(false)} />}
       {showStadium && <StadiumScreen onClose={() => setShowStadium(false)} />}
       {showReferrals && <ReferralScreen onClose={() => setShowReferrals(false)} />}
+      {showWorldTour && <WorldTourScreen onClose={() => setShowWorldTour(false)} />}
     </div>
   );
 }

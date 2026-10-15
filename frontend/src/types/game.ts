@@ -561,3 +561,39 @@ export interface CupRoundResponse {
   nextRound: { round: number; label: string } | null;
   result: CupRoundResult;
 }
+
+export interface WorldTourStageInfo {
+  city: string;
+  rewardCoins: number;
+  guaranteedRarity: Rarity | null;
+  status: "done" | "current" | "locked";
+}
+
+export interface WorldTourStatus {
+  stage: number;
+  totalStages: number;
+  completed: boolean;
+  stages: WorldTourStageInfo[];
+}
+
+export interface WorldTourPlayResult {
+  rewardCoins: number;
+  rewardXp: number;
+  coins: number;
+  xp: number;
+  level: number;
+  levelUpReward: number;
+  grantedCard: Card | null;
+}
+
+export interface WorldTourPlayResponse {
+  userScore: number;
+  oppScore: number;
+  opponentName: string;
+  opponentOvr: number;
+  won: boolean;
+  city: string;
+  tourCompleted: boolean;
+  nextCity: string | null;
+  result: WorldTourPlayResult;
+}

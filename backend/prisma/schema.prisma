@@ -155,6 +155,9 @@ model User {
   // Кубок на выбывание — одна бесплатная попытка в сутки (см. lib/cup.ts)
   lastFreeCupAt DateTime?
 
+  // World Tour — сюжетный режим: сколько этапов (городов) уже пройдено (см. lib/worldTour.ts)
+  worldTourStage Int @default(0)
+
   // Косметическая тема интерфейса из «Патчей сообщества» — только акцентный цвет, без игровой логики
   cosmeticPatchId String?
 
@@ -345,6 +348,7 @@ enum TransactionType {
   ACADEMY
   STADIUM
   CUP
+  WORLD_TOUR
 }
 
 model Transaction {
