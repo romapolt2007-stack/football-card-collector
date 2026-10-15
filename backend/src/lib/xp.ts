@@ -19,7 +19,9 @@ export function levelUpReward(level: number): number {
 export async function addXp(userId: string, amount: number) {
   const user = await prisma.user.update({
     where: { id: userId },
-    data: { xp: { increment: amount } },
+    // Battle Pass XP растёт синхронно с обычным XP — один источник прогресса
+    // для всех игровых действий, без необходимости трогать каждый route отдельно.
+    data: { xp: { increment: amount }, battlePassXp: { increment: amount } },
   });
   const newLevel = levelForXp(user.xp);
 

@@ -12,6 +12,7 @@ import casesRouter from "./routes/cases.js";
 import cupRouter from "./routes/cup.js";
 import worldTourRouter from "./routes/worldTour.js";
 import clansRouter from "./routes/clans.js";
+import battlePassRouter from "./routes/battlePass.js";
 import cosmeticPatchesRouter from "./routes/cosmeticPatches.js";
 import duelRouter from "./routes/duel.js";
 import luckySpinRouter from "./routes/luckySpin.js";
@@ -85,6 +86,7 @@ app.use("/api/world-tour", worldTourRouter);
 // Без actionLimiter: GET и POST / делят один путь, а создание/вступление/выход — редкие
 // разовые действия, не экономический цикл для абуза; общего apiLimiter достаточно.
 app.use("/api/clans", clansRouter);
+app.use("/api/battle-pass", battlePassRouter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {

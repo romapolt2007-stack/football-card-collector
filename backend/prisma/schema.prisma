@@ -158,6 +158,12 @@ model User {
   // World Tour — сюжетный режим: сколько этапов (городов) уже пройдено (см. lib/worldTour.ts)
   worldTourStage Int @default(0)
 
+  // Battle Pass (один бессрочный сезон в v1, без реальной ротации) — см. lib/battlePass.ts
+  battlePassXp      Int     @default(0)
+  battlePassPremium Boolean @default(false)
+
+  battlePassClaims BattlePassClaim[]
+
   // Косметическая тема интерфейса из «Патчей сообщества» — только акцентный цвет, без игровой логики
   cosmeticPatchId String?
 
@@ -351,6 +357,7 @@ enum TransactionType {
   CUP
   WORLD_TOUR
   CLAN
+  BATTLE_PASS
 }
 
 model Transaction {
@@ -516,4 +523,24 @@ model ClanMember {
 
   @@index([clanId])
   @@map("clan_members")
+}
+
+// ──────────────────────────────────────────
+// Battle Pass
+// ──────────────────────────────────────────
+
+/** Отметка о выданной награде конкретного уровня/ветки — не даёт забрать дважды. */
+model BattlePassClaim {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  level Int
+  track String // "FREE" | "PREMIUM"
+
+  claimedAt DateTime @default(now())
+
+  @@unique([userId, level, track])
+  @@index([userId])
+  @@map("battle_pass_claims")
 }
