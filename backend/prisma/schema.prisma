@@ -92,6 +92,11 @@ model Player {
 
   rarity Rarity
 
+  // Жёсткий лимит копий для ультра-редких игроков (null = без лимита). Лимит
+  // считается по количеству ЖИВЫХ карт (Card) этого игрока — не отдельный
+  // счётчик: если все копии распроданы/сожжены, слот освобождается сам.
+  maxSupply Int?
+
   club   Club   @relation(fields: [clubId], references: [id])
   clubId String
 
@@ -252,6 +257,7 @@ model MarketBid {
 enum TransactionType {
   SPIN_PLAYER
   SPIN_STADIUM
+  STADIUM_CASE_OPEN
   QUICK_SELL
   MARKET_BUY
   MARKET_SELL

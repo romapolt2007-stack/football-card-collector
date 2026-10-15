@@ -27,6 +27,7 @@ interface PlayerData {
   nation: string;
   nationFlag: string;
   overall: number;
+  maxSupply?: number;
 }
 
 function loadJson<T>(filename: string): T {
@@ -112,6 +113,7 @@ async function main() {
         weakFoot: 3,
         skillMoves: rarity === "LEGEND" || rarity === "ICON" ? 4 : 3,
         rarity,
+        maxSupply: p.maxSupply ?? null,
         clubId,
       },
     });

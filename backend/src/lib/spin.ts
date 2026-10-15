@@ -1,4 +1,3 @@
-import { Position } from "@prisma/client";
 import { prisma } from "./prisma.js";
 
 /** Кулдаун бесплатного спина — общий для игроков и стадионов. */
@@ -15,36 +14,54 @@ export function msUntilFreeSpin(lastFreeSpinAt: Date | null): number {
   return Math.max(0, left);
 }
 
-const ALL_POSITIONS = Object.values(Position);
-
-export function rollPosition(): Position {
-  return ALL_POSITIONS[Math.floor(Math.random() * ALL_POSITIONS.length)];
-}
-
 /** Внутри позиции игроки с овералом выше порога выпадают реже — сила тоже должна быть трофеем. */
 const HIGH_OVERALL_THRESHOLD = 85;
 const HIGH_OVERALL_WEIGHT_MULTIPLIER = 0.3;
 
-/**
- * Крутит игрока под уже выпавшую позицию (+опционально лигу). Редкость не
- * рестится отдельно — она уже закреплена на Player.rarity при сидировании
- * (чистая функция от overall), спин просто выбирает КОГО из пула.
- */
-export async function spinPlayer(position: Position, leagueId?: string) {
-  const candidates = await prisma.player.findMany({
-    where: { position, ...(leagueId ? { club: { leagueId } } : {}) },
-    include: { club: { include: { league: true } } },
-  });
-  if (candidates.length === 0) return null;
+export interface SpinPlayerFilters {
+  leagueId?: string;
+  clubId?: string;
+  nation?: string;
+}
 
-  const weights = candidates.map((p) => (p.overall > HIGH_OVERALL_THRESHOLD ? HIGH_OVERALL_WEIGHT_MULTIPLIER : 1));
+/**
+ * Крутит игрока: сначала позиция из тех, что реально есть в отфильтрованном
+ * (лига/клуб/страна) пуле — так сужение фильтров никогда не даёт "пустой"
+ * результат из-за того, что в клубе, например, нет вратаря в базе — затем
+ * взвешенный выбор внутри позиции. Редкость не рестится отдельно — она уже
+ * закреплена на Player.rarity при сидировании (чистая функция от overall).
+ *
+ * Ультра-редкие игроки (Player.maxSupply) исключаются из пула, когда живых
+ * карт этого игрока уже maxSupply или больше — лимит по факту владения, не
+ * отдельный счётчик, поэтому освобождается сам, если копии распроданы/сожжены.
+ */
+export async function spinPlayer(filters: SpinPlayerFilters = {}) {
+  const where = {
+    ...(filters.leagueId ? { club: { leagueId: filters.leagueId } } : {}),
+    ...(filters.clubId ? { clubId: filters.clubId } : {}),
+    ...(filters.nation ? { nation: filters.nation } : {}),
+  };
+
+  const candidates = await prisma.player.findMany({
+    where,
+    include: { club: { include: { league: true } }, _count: { select: { cards: true } } },
+  });
+
+  const available = candidates.filter((p) => p.maxSupply == null || p._count.cards < p.maxSupply);
+  if (available.length === 0) return null;
+
+  const positions = [...new Set(available.map((p) => p.position))];
+  const position = positions[Math.floor(Math.random() * positions.length)];
+  const inPosition = available.filter((p) => p.position === position);
+
+  const weights = inPosition.map((p) => (p.overall > HIGH_OVERALL_THRESHOLD ? HIGH_OVERALL_WEIGHT_MULTIPLIER : 1));
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * totalWeight;
-  for (let i = 0; i < candidates.length; i++) {
+  for (let i = 0; i < inPosition.length; i++) {
     roll -= weights[i];
-    if (roll <= 0) return candidates[i];
+    if (roll <= 0) return inPosition[i];
   }
-  return candidates[candidates.length - 1];
+  return inPosition[inPosition.length - 1];
 }
 
 export async function spinStadium() {

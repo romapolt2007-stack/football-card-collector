@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
-import type { Card, PlayerSpinResult, SpinStatus, StadiumCard, StadiumSpinResult } from "../types/game";
+import type { Card, PlayerSpinResult, SpinFilters, SpinStatus, StadiumCard, StadiumSpinResult } from "../types/game";
 
 export function useSpinStatus() {
   const token = useAuthStore((s) => s.token);
@@ -16,7 +16,7 @@ export function useSpinStatus() {
 export function useSpinPlayer() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => api.post<PlayerSpinResult>("/api/spin/spin", {}),
+    mutationFn: (filters: SpinFilters = {}) => api.post<PlayerSpinResult>("/api/spin/spin", filters),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["spin-status"] }),
   });
 }
@@ -38,6 +38,33 @@ export function useSellSpinPlayer() {
     mutationFn: () => api.post<{ coins: number }>("/api/spin/sell"),
     onSuccess: (result) => {
       if (user) setUser({ ...user, coins: result.coins });
+    },
+  });
+}
+
+export interface StadiumCaseDef {
+  id: string;
+  title: string;
+  priceCoins: number;
+}
+
+export function useStadiumCases() {
+  return useQuery({
+    queryKey: ["stadium-cases"],
+    queryFn: () => api.get<{ cases: StadiumCaseDef[] }>("/api/stadiums/cases").then((r) => r.cases),
+    staleTime: 10 * 60_000,
+  });
+}
+
+export function useOpenStadiumCase() {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((s) => s.setUser);
+  const user = useAuthStore((s) => s.user);
+  return useMutation({
+    mutationFn: (caseId: string) => api.post<StadiumSpinResult & { coins: number }>("/api/stadiums/open-case", { caseId }),
+    onSuccess: (result) => {
+      if (user) setUser({ ...user, coins: result.coins });
+      queryClient.invalidateQueries({ queryKey: ["stadium-spin-status"] });
     },
   });
 }

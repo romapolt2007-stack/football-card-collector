@@ -5,8 +5,13 @@ import { prisma } from "../lib/prisma.js";
 import { stadiumQuickSellPrice } from "../lib/cardValue.js";
 import { freeSpinReady, msUntilFreeSpin, spinStadium } from "../lib/spin.js";
 import { setPendingSpin, takePendingSpin } from "../lib/spinStore.js";
+import { findStadiumCase, openStadiumCase, STADIUM_CASES } from "../lib/stadiumCases.js";
 
 const router = Router();
+
+router.get("/cases", (_req, res) => {
+  res.json({ cases: STADIUM_CASES.map((c) => ({ id: c.id, title: c.title, priceCoins: c.priceCoins })) });
+});
 
 router.get("/", requireAuth, async (req, res) => {
   const stadiumCards = await prisma.stadiumCard.findMany({
@@ -44,6 +49,49 @@ router.post("/spin", requireAuth, async (req, res) => {
   setPendingSpin(user.id, { kind: "stadium", stadiumId: stadium.id, rarity: stadium.rarity, price });
 
   res.json({ stadium, rarity: stadium.rarity, estimatedValue: price * 4, sellPrice: price });
+});
+
+const openCaseSchema = z.object({ caseId: z.string() });
+
+router.post("/open-case", requireAuth, async (req, res) => {
+  const parsed = openCaseSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Некорректное тело запроса" });
+    return;
+  }
+
+  const caseDef = findStadiumCase(parsed.data.caseId);
+  if (!caseDef) {
+    res.status(404).json({ error: "Кейс не найден" });
+    return;
+  }
+
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  if (user.coins < caseDef.priceCoins) {
+    res.status(400).json({ error: "Недостаточно монет" });
+    return;
+  }
+
+  // Списываем сразу, до генерации результата — защита от повторного нажатия.
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: user.id }, data: { coins: { decrement: caseDef.priceCoins } } }),
+    prisma.transaction.create({
+      data: { userId: user.id, type: "STADIUM_CASE_OPEN", amount: -caseDef.priceCoins, meta: { caseId: caseDef.id } },
+    }),
+  ]);
+
+  const stadium = await openStadiumCase(caseDef);
+  if (!stadium) {
+    // Откатываем списание, если стадионов под эти веса не нашлось (пустая база — не должно случаться в норме).
+    await prisma.user.update({ where: { id: user.id }, data: { coins: { increment: caseDef.priceCoins } } });
+    res.status(500).json({ error: "Не удалось открыть кейс — монеты возвращены" });
+    return;
+  }
+
+  const price = stadiumQuickSellPrice(stadium.rarity, stadium.capacity);
+  setPendingSpin(user.id, { kind: "stadium", stadiumId: stadium.id, rarity: stadium.rarity, price });
+
+  res.json({ stadium, rarity: stadium.rarity, estimatedValue: price * 4, sellPrice: price, coins: user.coins - caseDef.priceCoins });
 });
 
 router.post("/save", requireAuth, async (req, res) => {

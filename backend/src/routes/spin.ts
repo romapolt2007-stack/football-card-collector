@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 import { quickSellPrice } from "../lib/cardValue.js";
-import { freeSpinReady, msUntilFreeSpin, rollPosition, spinPlayer } from "../lib/spin.js";
+import { freeSpinReady, msUntilFreeSpin, spinPlayer } from "../lib/spin.js";
 import { setPendingSpin, takePendingSpin } from "../lib/spinStore.js";
 
 const router = Router();
@@ -16,7 +16,11 @@ router.get("/status", requireAuth, async (req, res) => {
   });
 });
 
-const spinSchema = z.object({ leagueId: z.string().optional() });
+const spinSchema = z.object({
+  leagueId: z.string().optional(),
+  clubId: z.string().optional(),
+  nation: z.string().optional(),
+});
 
 router.post("/spin", requireAuth, async (req, res) => {
   const parsed = spinSchema.safeParse(req.body);
@@ -34,10 +38,9 @@ router.post("/spin", requireAuth, async (req, res) => {
   // Кулдаун фиксируем сразу, до генерации результата — защита от повторного нажатия.
   await prisma.user.update({ where: { id: user.id }, data: { lastFreeSpinAt: new Date() } });
 
-  const position = rollPosition();
-  const player = await spinPlayer(position, parsed.data.leagueId);
+  const player = await spinPlayer(parsed.data);
   if (!player) {
-    res.status(500).json({ error: "Нет игроков под эту позицию — попробуйте ещё раз" });
+    res.status(400).json({ error: "Нет игроков под эти фильтры — попробуйте другие" });
     return;
   }
 
@@ -51,6 +54,15 @@ router.post("/save", requireAuth, async (req, res) => {
   const pending = takePendingSpin(req.userId!);
   if (!pending || pending.kind !== "player") {
     res.status(400).json({ error: "Нечего сохранять — результат уже обработан" });
+    return;
+  }
+
+  const player = await prisma.player.findUniqueOrThrow({
+    where: { id: pending.playerId },
+    include: { _count: { select: { cards: true } } },
+  });
+  if (player.maxSupply != null && player._count.cards >= player.maxSupply) {
+    res.status(409).json({ error: `Все ${player.maxSupply} копий «${player.fullName}» уже разобраны` });
     return;
   }
 

@@ -147,3 +147,18 @@ export interface DailyClaimResult {
   streak: number;
   reward: number;
 }
+
+export interface LeagueWithClubs extends League {
+  clubs: { id: string; name: string; shortName: string; colorPrimary: string; colorSecondary: string }[];
+}
+
+export interface NationOption {
+  nation: string;
+  flag: string;
+}
+
+export interface SpinFilters {
+  leagueId?: string;
+  clubId?: string;
+  nation?: string;
+}

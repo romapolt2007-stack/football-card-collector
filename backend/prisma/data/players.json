@@ -1,5 +1,5 @@
 [
-  {"slug": "haaland", "name": "Холанд", "fullName": "Эрлинг Холанд", "club": "mancity", "position": "ST", "nation": "Норвегия", "nationFlag": "🇳🇴", "overall": 93},
+  {"slug": "haaland", "name": "Холанд", "fullName": "Эрлинг Холанд", "club": "mancity", "position": "ST", "nation": "Норвегия", "nationFlag": "🇳🇴", "overall": 93, "maxSupply": 10},
   {"slug": "debruyne", "name": "Де Брёйне", "fullName": "Кевин Де Брёйне", "club": "mancity", "position": "CAM", "nation": "Бельгия", "nationFlag": "🇧🇪", "overall": 91},
   {"slug": "rodri", "name": "Родри", "fullName": "Родри", "club": "mancity", "position": "CDM", "nation": "Испания", "nationFlag": "🇪🇸", "overall": 91},
   {"slug": "gvardiol", "name": "Гвардиол", "fullName": "Йошко Гвардиол", "club": "mancity", "position": "CB", "nation": "Хорватия", "nationFlag": "🇭🇷", "overall": 86},
@@ -19,7 +19,7 @@
   {"slug": "yoro", "name": "Йоро", "fullName": "Лени Йоро", "club": "manutd", "position": "CB", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 76},
   {"slug": "hojlund", "name": "Хёйлунн", "fullName": "Расмус Хёйлунн", "club": "manutd", "position": "ST", "nation": "Дания", "nationFlag": "🇩🇰", "overall": 75},
 
-  {"slug": "mbappe", "name": "Мбаппе", "fullName": "Килиан Мбаппе", "club": "realmadrid", "position": "ST", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 93},
+  {"slug": "mbappe", "name": "Мбаппе", "fullName": "Килиан Мбаппе", "club": "realmadrid", "position": "ST", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 93, "maxSupply": 10},
   {"slug": "vinicius", "name": "Винисиус", "fullName": "Винисиус Жуниор", "club": "realmadrid", "position": "LW", "nation": "Бразилия", "nationFlag": "🇧🇷", "overall": 91},
   {"slug": "bellingham", "name": "Беллингем", "fullName": "Джуд Беллингем", "club": "realmadrid", "position": "CM", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 90},
   {"slug": "courtois", "name": "Куртуа", "fullName": "Тибо Куртуа", "club": "realmadrid", "position": "GK", "nation": "Бельгия", "nationFlag": "🇧🇪", "overall": 91},
