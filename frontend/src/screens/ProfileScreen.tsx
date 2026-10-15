@@ -6,6 +6,7 @@ import { ReferralScreen } from "./ReferralScreen";
 import { WorldTourScreen } from "./WorldTourScreen";
 import { ClansScreen } from "./ClansScreen";
 import { BattlePassScreen } from "./BattlePassScreen";
+import { GlobalTournamentScreen } from "./GlobalTournamentScreen";
 import { FreeBonusRoulette } from "../components/profile/FreeBonusRoulette";
 import { ProfileHero } from "../components/profile/ProfileHero";
 import { XpBar } from "../components/profile/XpBar";
@@ -45,6 +46,7 @@ export function ProfileScreen() {
   const [showWorldTour, setShowWorldTour] = useState(false);
   const [showClans, setShowClans] = useState(false);
   const [showBattlePass, setShowBattlePass] = useState(false);
+  const [showGlobalTournament, setShowGlobalTournament] = useState(false);
   const stadiumStatus = useStadiumStatus();
   const emergencyBonus = useEmergencyBonusStatus();
   const duelStatus = useDuelStatus();
@@ -154,6 +156,14 @@ export function ProfileScreen() {
             className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
           >
             <span className="text-sm font-semibold">🎫 Battle Pass</span>
+            <span className="text-xs text-white/40">Открыть →</span>
+          </button>
+
+          <button
+            onClick={() => setShowGlobalTournament(true)}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+          >
+            <span className="text-sm font-semibold">🌍 Глобальный турнир</span>
             <span className="text-xs text-white/40">Открыть →</span>
           </button>
 
@@ -285,6 +295,7 @@ export function ProfileScreen() {
       {showWorldTour && <WorldTourScreen onClose={() => setShowWorldTour(false)} />}
       {showClans && <ClansScreen onClose={() => setShowClans(false)} />}
       {showBattlePass && <BattlePassScreen onClose={() => setShowBattlePass(false)} />}
+      {showGlobalTournament && <GlobalTournamentScreen onClose={() => setShowGlobalTournament(false)} />}
     </div>
   );
 }

@@ -13,6 +13,7 @@ import cupRouter from "./routes/cup.js";
 import worldTourRouter from "./routes/worldTour.js";
 import clansRouter from "./routes/clans.js";
 import battlePassRouter from "./routes/battlePass.js";
+import globalTournamentRouter from "./routes/globalTournament.js";
 import cosmeticPatchesRouter from "./routes/cosmeticPatches.js";
 import duelRouter from "./routes/duel.js";
 import luckySpinRouter from "./routes/luckySpin.js";
@@ -87,6 +88,8 @@ app.use("/api/world-tour", worldTourRouter);
 // разовые действия, не экономический цикл для абуза; общего apiLimiter достаточно.
 app.use("/api/clans", clansRouter);
 app.use("/api/battle-pass", battlePassRouter);
+app.use("/api/global-tournament/start", actionLimiter);
+app.use("/api/global-tournament", globalTournamentRouter);
 
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {
