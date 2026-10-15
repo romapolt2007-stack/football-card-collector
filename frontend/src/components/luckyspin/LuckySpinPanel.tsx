@@ -40,7 +40,7 @@ export function LuckySpinPanel() {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<LuckySpinResult | null>(null);
 
-  const currentStake = stake ?? meta?.minStake ?? 100;
+  const currentStake = stake ?? meta?.minStake ?? 10_000;
 
   const odds = useMemo(() => {
     if (!meta) return null;

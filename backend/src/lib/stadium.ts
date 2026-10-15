@@ -3,7 +3,7 @@
  * лениво по времени (без крон-джобы, тот же паттерн, что energy.ts), с
  * потолком накопления, чтобы не было смысла не заходить месяцами.
  */
-export const STADIUM_MAX_LEVEL = 10;
+export const STADIUM_MAX_LEVEL = 20;
 const INCOME_PER_LEVEL_PER_HOUR = 40;
 const MAX_PENDING_HOURS = 8;
 
@@ -19,5 +19,5 @@ export function pendingIncome(level: number, collectedAt: Date): number {
 
 export function upgradeCost(currentLevel: number): number | null {
   if (currentLevel >= STADIUM_MAX_LEVEL) return null;
-  return 2_000 * currentLevel;
+  return 4_000 * currentLevel;
 }

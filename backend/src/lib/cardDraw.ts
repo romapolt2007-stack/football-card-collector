@@ -2,14 +2,18 @@ import { Rarity } from "@prisma/client";
 import { prisma } from "./prisma.js";
 import { nextRarity, rarityIndex } from "./packs.js";
 
-/** Базовое распределение редкости — то же, что в сиде игроков. */
+/** Распределение редкости — Icon и Legend стали заметно реже, чтобы оставаться настоящими трофеями. */
 const BASE_WEIGHTS: Record<Rarity, number> = {
-  [Rarity.BRONZE]: 60,
-  [Rarity.SILVER]: 25,
-  [Rarity.GOLD]: 13.3,
-  [Rarity.LEGEND]: 1.2,
-  [Rarity.ICON]: 0.5,
+  [Rarity.BRONZE]: 54,
+  [Rarity.SILVER]: 32,
+  [Rarity.GOLD]: 11.7,
+  [Rarity.LEGEND]: 2,
+  [Rarity.ICON]: 0.3,
 };
+
+/** Внутри редкости карты с овералом выше этого порога выпадают реже — сила тоже должна быть "трофеем". */
+const HIGH_OVERALL_THRESHOLD = 85;
+const HIGH_OVERALL_WEIGHT_MULTIPLIER = 0.3;
 
 const ALL_RARITIES = [Rarity.BRONZE, Rarity.SILVER, Rarity.GOLD, Rarity.LEGEND, Rarity.ICON];
 
@@ -25,18 +29,26 @@ function rollRarityAtLeast(minRarity: Rarity): Rarity {
   return allowed[allowed.length - 1];
 }
 
-/** Случайный игрок заданной редкости (равновероятно среди всех подходящих). */
+/**
+ * Случайный игрок заданной редкости — карты с овералом выше HIGH_OVERALL_THRESHOLD
+ * выпадают реже даже внутри своей редкости (сила — тоже трофей, не только тир).
+ * Берём пачку кандидатов и выбираем взвешенно в памяти, а не равновероятным skip.
+ */
 export async function randomPlayerByRarity(rarity: Rarity) {
-  const count = await prisma.player.count({ where: { rarity } });
-  if (count === 0) return null;
-  const skip = Math.floor(Math.random() * count);
-  const [player] = await prisma.player.findMany({
+  const candidates = await prisma.player.findMany({
     where: { rarity },
     include: { club: { include: { league: true } } },
-    take: 1,
-    skip,
   });
-  return player ?? null;
+  if (candidates.length === 0) return null;
+
+  const weights = candidates.map((p) => (p.overall > HIGH_OVERALL_THRESHOLD ? HIGH_OVERALL_WEIGHT_MULTIPLIER : 1));
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  let roll = Math.random() * totalWeight;
+  for (let i = 0; i < candidates.length; i++) {
+    roll -= weights[i];
+    if (roll <= 0) return candidates[i];
+  }
+  return candidates[candidates.length - 1];
 }
 
 export interface DrawnCard {

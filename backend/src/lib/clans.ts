@@ -2,7 +2,7 @@ import { prisma } from "./prisma.js";
 import { calcSquadStrength } from "./squadStrength.js";
 import type { SquadSlotJson } from "./squadTypes.js";
 
-export const CLAN_CREATE_COST = 5000;
+export const CLAN_CREATE_COST = 7000;
 export const CLAN_NAME_MAX = 30;
 export const CLAN_TAG_MIN = 2;
 export const CLAN_TAG_MAX = 5;

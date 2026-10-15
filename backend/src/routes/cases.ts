@@ -50,7 +50,7 @@ router.post("/spin", requireAuth, async (req, res) => {
           playerId: player.id,
           ownerId: req.userId!,
           rarity: prize.rarity,
-          quickSellPrice: quickSellPrice(prize.rarity, player.overall),
+          quickSellPrice: quickSellPrice(prize.rarity, player),
         },
         include: { player: { include: { club: { include: { league: true } } } } },
       });

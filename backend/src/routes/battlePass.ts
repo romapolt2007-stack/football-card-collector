@@ -93,7 +93,7 @@ router.post("/claim", requireAuth, async (req, res) => {
           playerId: drawn.player.id,
           ownerId: req.userId!,
           rarity: drawn.rarity,
-          quickSellPrice: quickSellPrice(drawn.rarity, drawn.player.overall),
+          quickSellPrice: quickSellPrice(drawn.rarity, drawn.player),
         },
         include: { player: { include: { club: { include: { league: true } } } } },
       });

@@ -82,7 +82,7 @@ router.post("/submit", requireAuth, async (req, res) => {
           playerId: rewardCard.player.id,
           ownerId: req.userId!,
           rarity: rewardCard.rarity,
-          quickSellPrice: quickSellPrice(rewardCard.rarity, rewardCard.player.overall),
+          quickSellPrice: quickSellPrice(rewardCard.rarity, rewardCard.player),
         },
         include: { player: { include: { club: { include: { league: true } } } } },
       });

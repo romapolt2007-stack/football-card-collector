@@ -11,8 +11,8 @@ import type { Rarity } from "@prisma/client";
 export const ACADEMY_DURATION_MS = 20 * 60 * 60 * 1000; // 20 часов
 
 export const ACADEMY_ENROLL_COST: Partial<Record<Rarity, number>> = {
-  BRONZE: 300,
-  SILVER: 800,
+  BRONZE: 420,
+  SILVER: 1100,
 };
 
 const PROMOTION: Partial<Record<Rarity, Rarity>> = {

@@ -77,7 +77,7 @@ router.post("/open", requireAuth, async (req, res) => {
           playerId: d.player.id,
           ownerId: user.id,
           rarity: d.rarity,
-          quickSellPrice: quickSellPrice(d.rarity, d.player.overall),
+          quickSellPrice: quickSellPrice(d.rarity, d.player),
         },
         include: { player: { include: { club: { include: { league: true } } } } },
       });

@@ -8,7 +8,7 @@ import type { Rarity } from "@prisma/client";
  */
 export const BATTLE_PASS_MAX_LEVEL = 30;
 export const BATTLE_PASS_XP_PER_LEVEL = 500;
-export const BATTLE_PASS_PREMIUM_COST = 15000;
+export const BATTLE_PASS_PREMIUM_COST = 20000;
 
 export function battlePassLevel(xp: number): number {
   return Math.min(BATTLE_PASS_MAX_LEVEL, Math.floor(xp / BATTLE_PASS_XP_PER_LEVEL));

@@ -1,8 +1,8 @@
 import { Rarity } from "@prisma/client";
 
-export const MIN_STAKE = 100;
-export const MAX_STAKE = 1000;
-export const STAKE_STEP = 50;
+export const MIN_STAKE = 10_000;
+export const MAX_STAKE = 1_000_000;
+export const STAKE_STEP = 10_000;
 
 /** Веса при минимальной ставке (100) — безопасно, почти всегда бронза/серебро. */
 const MIN_WEIGHTS: Record<Rarity, number> = {

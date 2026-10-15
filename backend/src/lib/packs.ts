@@ -43,7 +43,7 @@ export const PACKS: PackDef[] = [
   {
     id: "bronze",
     title: "Bronze Pack",
-    priceCoins: 500,
+    priceCoins: 3500,
     cardCount: 3,
     minRarity: Rarity.BRONZE,
     bonusChance: 0,
@@ -51,7 +51,7 @@ export const PACKS: PackDef[] = [
   {
     id: "silver",
     title: "Silver Pack",
-    priceCoins: 2500,
+    priceCoins: 16000,
     cardCount: 3,
     minRarity: Rarity.SILVER,
     bonusChance: 0,
@@ -59,7 +59,7 @@ export const PACKS: PackDef[] = [
   {
     id: "gold",
     title: "Gold Pack",
-    priceCoins: 10000,
+    priceCoins: 65000,
     cardCount: 5,
     minRarity: Rarity.GOLD,
     bonusChance: 0,
@@ -67,7 +67,7 @@ export const PACKS: PackDef[] = [
   {
     id: "legend",
     title: "Legend Pack",
-    priceCoins: 50000,
+    priceCoins: 320000,
     cardCount: 3,
     minRarity: Rarity.GOLD,
     bonusChance: 0.05, // шанс апгрейда одной карты до LEGEND
@@ -75,7 +75,7 @@ export const PACKS: PackDef[] = [
   {
     id: "icon",
     title: "Icon Pack",
-    priceCoins: 250000,
+    priceCoins: 1600000,
     cardCount: 1,
     minRarity: Rarity.LEGEND,
     bonusChance: 0.05, // шанс апгрейда до ICON

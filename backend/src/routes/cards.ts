@@ -145,7 +145,10 @@ router.post("/train", requireAuth, async (req, res) => {
   await clearCardFromSquads(req.userId!, duplicate.id);
 
   const newBoost = target.trainingBoost + 1;
-  const newQuickSellPrice = quickSellPrice(target.rarity, effectiveOverall(target.player.overall, newBoost));
+  const newQuickSellPrice = quickSellPrice(target.rarity, {
+    ...target.player,
+    overall: effectiveOverall(target.player.overall, newBoost),
+  });
 
   const updated = await prisma.$transaction(async (tx) => {
     await tx.card.delete({ where: { id: duplicate.id } });
@@ -237,7 +240,10 @@ router.post("/:cardId/academy/graduate", requireAuth, async (req, res) => {
   }
 
   const newBoost = Math.min(TRAINING_BOOST_CAP, card.trainingBoost + 1);
-  const newQuickSellPrice = quickSellPrice(promoted, effectiveOverall(card.player.overall, newBoost));
+  const newQuickSellPrice = quickSellPrice(promoted, {
+    ...card.player,
+    overall: effectiveOverall(card.player.overall, newBoost),
+  });
 
   const updated = await prisma.card.update({
     where: { id: card.id },
