@@ -139,30 +139,60 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-/** Редкость и базовый OVR согласно распределению из ТЗ. */
-export function rollRarity(): { rarity: Rarity; ovrRange: [number, number] } {
-  const roll = Math.random() * 100;
-  if (roll < 60) return { rarity: Rarity.BRONZE, ovrRange: [60, 74] };
-  if (roll < 85) return { rarity: Rarity.SILVER, ovrRange: [75, 84] };
-  if (roll < 98.3) return { rarity: Rarity.GOLD, ovrRange: [85, 92] };
-  if (roll < 99.5) return { rarity: Rarity.LEGEND, ovrRange: [93, 96] };
-  return { rarity: Rarity.ICON, ovrRange: [97, 99] };
+/**
+ * OVR — сглаженное (не кусочно-плоское по редкости) распределение: среднее
+ * двух равномерных роллов даёт треугольную форму вместо резких "ступенек"
+ * плотности на границах редкости. Редкость — чистая функция от итогового
+ * overall (никакого отдельного рандома), поэтому она растёт ровно вместе
+ * с рейтингом, а не скачком на границе 84->85 как раньше.
+ * Эмпирически (N=50000): Бронза ~50%, Серебро ~30%, Золото ~16%,
+ * Легенда ~4%, Икона ~0.8% — плавно убывающая кривая.
+ */
+export function rollOverall(): number {
+  const r = (Math.random() + Math.random()) / 2;
+  return clamp(Math.round(44 + r * 55), 40, 99);
 }
 
-/** Статы с позиционным смещением вокруг overall. */
-export function rollStats(overall: number, position: Position) {
-  const base = (spread: number) => clamp(overall + randInt(-spread, spread), 20, 99);
+export function rarityForOverall(overall: number): Rarity {
+  if (overall < 72) return Rarity.BRONZE;
+  if (overall < 82) return Rarity.SILVER;
+  if (overall < 91) return Rarity.GOLD;
+  if (overall < 96) return Rarity.LEGEND;
+  return Rarity.ICON;
+}
 
-  const isDefender = ["GK", "CB", "LB", "RB", "CDM"].includes(position);
-  const isAttacker = ["LW", "RW", "ST", "CF"].includes(position);
+/**
+ * Статы — профиль множителей по позиции, в сумме дающий среднее 1.0, поэтому
+ * среднее 6 суб-статов стремится к overall (а не уходит в произвольную
+ * сторону, как при независимом рандоме каждого стата). Внутри — небольшой
+ * джиттер для живого разброса между игроками одной позиции и рейтинга.
+ */
+const STAT_PROFILES: Record<Position, Record<"pace" | "shooting" | "passing" | "dribbling" | "defending" | "physical", number>> = {
+  GK: { pace: 0.75, shooting: 0.5, passing: 1.0, dribbling: 0.75, defending: 1.55, physical: 1.45 },
+  CB: { pace: 0.85, shooting: 0.6, passing: 0.95, dribbling: 0.75, defending: 1.55, physical: 1.3 },
+  LB: { pace: 1.15, shooting: 0.7, passing: 1.05, dribbling: 1.05, defending: 1.25, physical: 0.8 },
+  RB: { pace: 1.15, shooting: 0.7, passing: 1.05, dribbling: 1.05, defending: 1.25, physical: 0.8 },
+  CDM: { pace: 0.9, shooting: 0.75, passing: 1.15, dribbling: 0.9, defending: 1.35, physical: 0.95 },
+  CM: { pace: 1.0, shooting: 0.95, passing: 1.2, dribbling: 1.15, defending: 0.95, physical: 0.75 },
+  CAM: { pace: 1.05, shooting: 1.15, passing: 1.25, dribbling: 1.25, defending: 0.55, physical: 0.75 },
+  LW: { pace: 1.3, shooting: 1.1, passing: 1.05, dribbling: 1.3, defending: 0.5, physical: 0.75 },
+  RW: { pace: 1.3, shooting: 1.1, passing: 1.05, dribbling: 1.3, defending: 0.5, physical: 0.75 },
+  ST: { pace: 1.15, shooting: 1.4, passing: 0.85, dribbling: 1.1, defending: 0.45, physical: 1.05 },
+  CF: { pace: 1.15, shooting: 1.4, passing: 0.85, dribbling: 1.1, defending: 0.45, physical: 1.05 },
+};
+
+export function rollStats(overall: number, position: Position) {
+  const profile = STAT_PROFILES[position];
+  const jitter = () => randInt(-4, 4);
+  const stat = (mult: number) => clamp(Math.round(overall * mult) + jitter(), 20, 99);
 
   return {
-    pace: base(isAttacker ? 6 : 10),
-    shooting: isDefender ? base(18) - 10 : base(8),
-    passing: base(10),
-    dribbling: isDefender ? base(14) - 6 : base(8),
-    defending: isAttacker ? base(18) - 12 : base(8),
-    physical: base(9),
+    pace: stat(profile.pace),
+    shooting: stat(profile.shooting),
+    passing: stat(profile.passing),
+    dribbling: stat(profile.dribbling),
+    defending: stat(profile.defending),
+    physical: stat(profile.physical),
   };
 }
 
@@ -170,8 +200,8 @@ export function generatePlayerData(position: Position, clubId: string) {
   const nation = pick(NATIONS);
   const firstName = pick(nation.firstNames);
   const lastName = pick(nation.lastNames);
-  const { rarity, ovrRange } = rollRarity();
-  const overall = randInt(ovrRange[0], ovrRange[1]);
+  const overall = rollOverall();
+  const rarity = rarityForOverall(overall);
   const stats = rollStats(overall, position);
 
   return {
