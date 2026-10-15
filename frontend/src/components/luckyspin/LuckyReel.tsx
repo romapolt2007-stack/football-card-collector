@@ -22,8 +22,8 @@ const PARTICLE_POSITIONS = [
 ];
 
 const ITEM_WIDTH = 76; // 68px-карта + gap-2 (8px)
-const STRIP_LENGTH = 36;
-const WINNER_INDEX = 30;
+const STRIP_LENGTH = 50;
+const WINNER_INDEX = 43;
 const ALL_RARITIES: Rarity[] = ["BRONZE", "SILVER", "GOLD", "LEGEND", "ICON"];
 const TOP_TIER: Rarity[] = ["LEGEND", "ICON"];
 
@@ -31,7 +31,7 @@ const TOP_TIER: Rarity[] = ["LEGEND", "ICON"];
  * Тайминги анимации (от нажатия «Крутить» до кнопок под картой):
  *
  *   t=0ms      — sfx.launch() + импакт-хаптик, лента трогается с места
- *   t=0–4200ms — единая анимация x: лента едет и тормозит (easing [0.11,0.58,0.18,1]);
+ *   t=0–6000ms — единая анимация x: лента едет и тормозит (easing [0.11,0.58,0.18,1]);
  *                для топ-карты (LEGEND/ICON) добавлен 3-й keyframe — лента
  *                проезжает цель на 0.55 ширины карты и откатывается назад
  *                (times [0, 0.88, 1], 2-й отрезок — пружинный bounce-easing)
@@ -42,7 +42,7 @@ const TOP_TIER: Rarity[] = ["LEGEND", "ICON"];
  *                считается из реальной позиции x (не по таймеру): далеко от
  *                победной карты — лёгкий tick()+selectionChanged, в последних
  *                3 карточках — тяжелеющий reelLandTick()+impact(medium/heavy)
- *   t=4200ms   — onAnimationComplete → handleLanded():
+ *   t=6000ms   — onAnimationComplete → handleLanded():
  *     • LEGEND/ICON: экран темнеет (180ms) → вспышка/искры + fanfare()
  *       + конфетти (ещё +470ms) → карта всплывает с scale-pop и свечением
  *       (итого ~950ms до появления статов)
@@ -50,7 +50,7 @@ const TOP_TIER: Rarity[] = ["LEGEND", "ICON"];
  *     • BRONZE/SILVER: глухой sfx.thud(), карта сразу всплывает
  *   +300ms после появления карты — переворот рубашкой и показ статов
  */
-const TOTAL_DURATION_MS = 4200;
+const TOTAL_DURATION_MS = 6000;
 const OVERSHOOT_PX = ITEM_WIDTH * 0.55;
 
 function fireConfetti(rarity: Rarity) {
