@@ -174,10 +174,11 @@ export interface Squad {
 
 export interface MatchEvent {
   minute: number;
-  type: "GOAL" | "POST" | "SAVE" | "YELLOW" | "RED" | "INJURY";
+  type: "GOAL" | "POST" | "SAVE" | "YELLOW" | "RED" | "INJURY" | "VAR";
   team: "user" | "opponent";
   cardId?: string;
   playerName?: string;
+  varOutcome?: "disallowed" | "confirmed";
 }
 
 export interface MatchStats {

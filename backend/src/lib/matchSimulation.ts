@@ -1,10 +1,12 @@
 export interface MatchEvent {
   minute: number;
-  type: "GOAL" | "POST" | "SAVE" | "YELLOW" | "RED" | "INJURY";
+  type: "GOAL" | "POST" | "SAVE" | "YELLOW" | "RED" | "INJURY" | "VAR";
   team: "user" | "opponent";
   /** Только для дисциплинарных событий своей команды — нужно для применения последствий. */
   cardId?: string;
   playerName?: string;
+  /** Только для VAR — итог пересмотра момента. */
+  varOutcome?: "disallowed" | "confirmed";
 }
 
 export interface MatchStats {
@@ -27,6 +29,19 @@ function clamp(value: number, min: number, max: number): number {
 
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Небольшой шанс, что только что забитый гол попадёт на пересмотр ВАР — и чуть
+// меньший шанс, что его отменят (офсайд/фол в начале атаки). Чисто флейвор-риск,
+// не меняющий базовую вероятностную модель сильно (~3% голов в среднем отменяется).
+const VAR_REVIEW_CHANCE = 0.08;
+const VAR_DISALLOW_CHANCE = 0.4;
+
+function maybeVarReview(events: MatchEvent[], minute: number, team: "user" | "opponent"): boolean {
+  if (Math.random() >= VAR_REVIEW_CHANCE) return false;
+  const disallowed = Math.random() < VAR_DISALLOW_CHANCE;
+  events.push({ minute, type: "VAR", team, varOutcome: disallowed ? "disallowed" : "confirmed" });
+  return disallowed;
 }
 
 const BOT_PREFIXES = ["Теневой", "Стальной", "Ночной", "Грозовой", "Железный", "Дикий", "Быстрый"];
@@ -52,12 +67,18 @@ export function simulateMatch(userStrength: number, opponentOvr: number, goalMul
 
   for (let minute = 1; minute <= 90; minute++) {
     if (Math.random() < userXg / 90) {
-      userScore++;
-      events.push({ minute, type: "GOAL", team: "user" });
+      const disallowed = maybeVarReview(events, minute, "user");
+      if (!disallowed) {
+        userScore++;
+        events.push({ minute, type: "GOAL", team: "user" });
+      }
     }
     if (Math.random() < oppXg / 90) {
-      oppScore++;
-      events.push({ minute, type: "GOAL", team: "opponent" });
+      const disallowed = maybeVarReview(events, minute, "opponent");
+      if (!disallowed) {
+        oppScore++;
+        events.push({ minute, type: "GOAL", team: "opponent" });
+      }
     }
   }
 

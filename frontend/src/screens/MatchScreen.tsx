@@ -23,6 +23,7 @@ const EVENT_META: Record<string, { emoji: string; label: string; badgeBg: string
   YELLOW: { emoji: "🟨", label: "Жёлтая карточка", badgeBg: "linear-gradient(160deg, #fff3a0 0%, #eab308 70%, #8a6400 100%)" },
   RED: { emoji: "🟥", label: "Красная карточка", badgeBg: "linear-gradient(160deg, #ff8f8f 0%, #dc2626 70%, #7a0d0d 100%)" },
   INJURY: { emoji: "🚑", label: "Травма", badgeBg: "linear-gradient(160deg, #7db8ff 0%, #2f6fcc 70%, #123a73 100%)" },
+  VAR: { emoji: "📺", label: "ВАР подтвердил гол", badgeBg: "linear-gradient(160deg, #a7f3d0 0%, #10b981 70%, #065f46 100%)" },
 };
 
 type Phase = "idle" | "walkout" | "playing" | "shootout" | "result";
@@ -132,6 +133,9 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
       } else if (event.type === "INJURY") {
         sfx.injury();
         haptics.notify("warning");
+      } else if (event.type === "VAR") {
+        sfx.whistle();
+        haptics.notify(event.varOutcome === "disallowed" ? "warning" : "success");
       }
     }
     setRevealedCount(upTo);
@@ -242,7 +246,10 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
           <div className="flex flex-col gap-1.5">
             <AnimatePresence initial={false}>
               {events.slice(0, revealedCount).map((e, i) => {
-                const meta = EVENT_META[e.type];
+                const isVarDisallowed = e.type === "VAR" && e.varOutcome === "disallowed";
+                const meta = isVarDisallowed
+                  ? { emoji: "🚫", label: "ВАР отменил гол!", badgeBg: "linear-gradient(160deg, #ff8f8f 0%, #dc2626 70%, #7a0d0d 100%)" }
+                  : EVENT_META[e.type];
                 return (
                   <motion.div
                     key={i}
@@ -251,7 +258,7 @@ function QuickMatchScreen({ mode, onModeChange }: QuickMatchProps) {
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs"
                     style={{
                       background:
-                        e.type === "RED"
+                        e.type === "RED" || isVarDisallowed
                           ? "rgba(239,68,68,0.15)"
                           : e.type === "YELLOW"
                             ? "rgba(234,179,8,0.15)"
