@@ -3,14 +3,13 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { signAuthToken } from "../lib/jwt.js";
 import { verifyTelegramInitData } from "../lib/telegramAuth.js";
+import { grantReferralBonus } from "../lib/referral.js";
 
 const router = Router();
 
 const authSchema = z.object({
   initData: z.string().min(1),
 });
-
-const REFERRAL_BONUS_COINS = 10000;
 
 router.post("/telegram", async (req, res) => {
   const parsed = authSchema.safeParse(req.body);
@@ -60,18 +59,7 @@ router.post("/telegram", async (req, res) => {
 
     // Реферальный бонус начисляется один раз, в момент первой регистрации приглашённого
     if (!existing && referrerId) {
-      await tx.user.update({
-        where: { id: referrerId },
-        data: { coins: { increment: REFERRAL_BONUS_COINS } },
-      });
-      await tx.transaction.create({
-        data: {
-          userId: referrerId,
-          type: "REFERRAL_BONUS",
-          amount: REFERRAL_BONUS_COINS,
-          meta: { referredUserId: u.id },
-        },
-      });
+      await grantReferralBonus(tx, referrerId, u.id);
     }
 
     return u;

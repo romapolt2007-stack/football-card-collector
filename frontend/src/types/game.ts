@@ -68,6 +68,7 @@ export interface GameUser {
   isVip: boolean;
   hasClaimedStarter: boolean;
   referralCode: string;
+  referredBy: string | null;
   dailyStreak: number;
   lastDailyClaimAt: string | null;
   teamName: string | null;

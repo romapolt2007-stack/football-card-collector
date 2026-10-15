@@ -18,6 +18,7 @@ import {
 import { drawPackCards } from "../lib/cardDraw.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import { settleEnergy } from "../lib/energy.js";
+import { grantReferralBonus } from "../lib/referral.js";
 import { tierFor } from "../lib/penaltyStats.js";
 import type { Rarity } from "@prisma/client";
 
@@ -252,6 +253,56 @@ router.post("/emergency-bonus", requireAuth, async (req, res) => {
   ]);
 
   res.json({ coins: updatedUser.coins, reward: EMERGENCY_BONUS_REWARD, intervalMs: EMERGENCY_BONUS_INTERVAL_MS });
+});
+
+const applyReferralSchema = z.object({ code: z.string().min(1) });
+
+router.post("/apply-referral", requireAuth, async (req, res) => {
+  const parsed = applyReferralSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Некорректный код" });
+    return;
+  }
+
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  if (user.referredBy) {
+    res.status(400).json({ error: "Код приглашения уже применён" });
+    return;
+  }
+
+  const referrer = await prisma.user.findUnique({ where: { referralCode: parsed.data.code.trim() } });
+  if (!referrer) {
+    res.status(404).json({ error: "Код не найден" });
+    return;
+  }
+  if (referrer.id === user.id) {
+    res.status(400).json({ error: "Нельзя использовать собственный код" });
+    return;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: user.id }, data: { referredBy: referrer.id } });
+    await grantReferralBonus(tx, referrer.id, user.id);
+  });
+
+  res.json({ applied: true });
+});
+
+router.get("/referrals", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  const [invitedCount, earnings] = await Promise.all([
+    prisma.user.count({ where: { referredBy: req.userId } }),
+    prisma.transaction.aggregate({
+      where: { userId: req.userId, type: "REFERRAL_BONUS" },
+      _sum: { amount: true },
+    }),
+  ]);
+
+  res.json({
+    referralCode: user.referralCode,
+    invitedCount,
+    totalEarned: earnings._sum.amount ?? 0,
+  });
 });
 
 interface MatchEventLike {
