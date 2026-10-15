@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { HAIR_STYLES, hashString, lookForNation } from "./nationLooks";
+import { HAIR_STYLES, hashString, lookForNation, shadeColor } from "./nationLooks";
 
 interface Props {
   accent?: string;
@@ -29,13 +29,17 @@ export function PlayerPortrait({ accent = "#e8c98a", size = 72, nation, playerId
   const eyeRx = Math.floor(seed / 7) % 2 === 0 ? 2 : 2.6;
   const eyeRy = eyeRx === 2 ? 2 : 1.6;
   const browThickness = Math.floor(seed / 11) % 2 === 0 ? 1.2 : 2;
+  const mouthStyle = Math.floor(seed / 13) % 3;
+  const skinJitter = ((seed % 21) - 10) / 100; // ±10% яркости — лёгкий индивидуальный разброс поверх тона нации
+  const skinFrom = shadeColor(look.skinFrom, skinJitter);
+  const skinTo = shadeColor(look.skinTo, skinJitter);
 
   return (
     <svg width={size} height={size} viewBox="0 0 100 100">
       <defs>
         <radialGradient id={faceId} cx="40%" cy="32%" r="75%">
-          <stop offset="0%" stopColor={look.skinFrom} />
-          <stop offset="100%" stopColor={look.skinTo} />
+          <stop offset="0%" stopColor={skinFrom} />
+          <stop offset="100%" stopColor={skinTo} />
         </radialGradient>
       </defs>
       <path d="M10 100 Q10 66 50 62 Q90 66 90 100 Z" fill={accent} />
@@ -67,7 +71,14 @@ export function PlayerPortrait({ accent = "#e8c98a", size = 72, nation, playerId
       <path d={`M54 30 Q58 ${27 - browThickness} 62 30`} stroke={look.hairColor} strokeWidth={browThickness} fill="none" strokeLinecap="round" />
       <ellipse cx="42" cy="36" rx={eyeRx} ry={eyeRy} fill="rgba(0,0,0,0.5)" />
       <ellipse cx="58" cy="36" rx={eyeRx} ry={eyeRy} fill="rgba(0,0,0,0.5)" />
-      <path d="M45 47 Q50 50 55 47" stroke="rgba(0,0,0,0.35)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <path d="M50 38 L48 44 Q50 46 52 44" stroke="rgba(0,0,0,0.22)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+      {mouthStyle === 0 ? (
+        <path d="M45 47 Q50 50 55 47" stroke="rgba(0,0,0,0.35)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      ) : mouthStyle === 1 ? (
+        <path d="M44 46 Q50 52 56 46" stroke="rgba(0,0,0,0.4)" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      ) : (
+        <path d="M45 47.5 L55 47.5" stroke="rgba(0,0,0,0.35)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      )}
     </svg>
   );
 }

@@ -11,6 +11,16 @@ export function hashString(value: string): number {
   return Math.abs(h);
 }
 
+/** Слегка осветляет/затемняет hex-цвет (delta в [-1,1]) — лёгкий индивидуальный разброс тона кожи поверх базовой палитры нации. */
+export function shadeColor(hex: string, delta: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const clamp = (v: number) => Math.max(0, Math.min(255, v));
+  const r = clamp(((n >> 16) & 0xff) + Math.round(255 * delta));
+  const g = clamp(((n >> 8) & 0xff) + Math.round(255 * delta));
+  const b = clamp((n & 0xff) + Math.round(255 * delta));
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
 export interface NationLook {
   skinFrom: string;
   skinTo: string;

@@ -16,7 +16,7 @@ export const RARITY_THEME: Record<Rarity, RarityTheme> = {
     emoji: "🟤",
     background: "linear-gradient(160deg, #a96a35 0%, #6b3f1c 55%, #37200e 100%)",
     borderColor: "#cd7f32",
-    glow: "none",
+    glow: "0 0 10px rgba(205,127,50,0.3)",
     textColor: "#fbe8d2",
     statBg: "rgba(0,0,0,0.25)",
   },

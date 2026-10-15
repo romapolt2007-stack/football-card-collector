@@ -12,6 +12,10 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
   lg: "w-60",
 };
 
+/** Та же форма щита, что у RarityCard.tsx (PENNANT_CLIP) — рубашка и лицо карты должны совпадать по силуэту при перевороте. */
+const PENNANT_CLIP =
+  "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
+
 const BACK_TIER: Record<Rarity, { background: string; borderColor: string; glow: string }> = {
   BRONZE: {
     background: "linear-gradient(155deg, #8a5a30 0%, #4a2d14 55%, #231408 100%)",
@@ -47,11 +51,12 @@ export function CardBack({ size = "md", rarity }: Props) {
 
   return (
     <div
-      className={`relative flex aspect-[3/4.2] shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 ${SIZE_CLASSES[size]}`}
+      className={`relative flex aspect-[3/4.2] shrink-0 items-center justify-center overflow-hidden pb-4 border-[3px] ${SIZE_CLASSES[size]}`}
       style={{
         background: tier?.background ?? "linear-gradient(155deg, var(--color-pitch-blue), var(--color-pitch-violet))",
         borderColor,
         boxShadow: tier?.glow ?? "0 0 16px rgba(138,160,255,0.35)",
+        clipPath: PENNANT_CLIP,
       }}
     >
       <div className="foil-texture pointer-events-none absolute inset-0" />

@@ -18,7 +18,7 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
   full: "w-full text-[11px]",
 };
 
-/** Силуэт "щит/баннер" с заострением снизу — только для крупных карт инвентаря. */
+/** Силуэт "щит/баннер" с заострением снизу — фирменная форма карты FUT-стиля, для всех размеров. */
 const PENNANT_CLIP =
   "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
 
@@ -33,24 +33,22 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
   return (
     <div
       onClick={onClick}
-      className={`relative aspect-[3/4.2] shrink-0 overflow-hidden ${isFull ? "pb-4" : "rounded-2xl"} border-2 p-3 ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative aspect-[3/4.2] shrink-0 overflow-hidden pb-4 border-[3px] p-3 ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""} ${onClick ? "cursor-pointer" : ""}`}
       style={{
         background: theme.background,
         borderColor: theme.borderColor,
         boxShadow: theme.glow,
         color: theme.textColor,
         opacity: isUnavailable ? 0.6 : 1,
-        clipPath: isFull ? PENNANT_CLIP : undefined,
+        clipPath: PENNANT_CLIP,
       }}
     >
-      {isFull && <div className="pointer-events-none absolute inset-0 bg-black/18" />}
-      {isFull && <div className="foil-texture pointer-events-none absolute inset-0" />}
-      {isFull && (
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ background: "linear-gradient(140deg, rgba(255,255,255,0.22) 0%, transparent 38%)" }}
-        />
-      )}
+      <div className="pointer-events-none absolute inset-0 bg-black/18" />
+      <div className="foil-texture pointer-events-none absolute inset-0" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "linear-gradient(140deg, rgba(255,255,255,0.22) 0%, transparent 38%)" }}
+      />
       {isLegend && <div className="holo-sweep pointer-events-none absolute inset-0" />}
       {isIcon && <IconSparkles />}
       {isUnavailable && (

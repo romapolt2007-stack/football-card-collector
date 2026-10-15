@@ -23,7 +23,7 @@ const STAR_PATH =
  * логотипам — визуальный язык классических футсимов, не конкретный клуб.
  */
 export function ClubCrest({ club, size = 48 }: Props) {
-  const variant = hashString(club.id) % 8;
+  const variant = hashString(club.id) % 10;
   const starCount = hashString(`${club.id}-star`) % 4;
   const { colorPrimary: p, colorSecondary: s, shortName } = club;
   const clipId = `shield-${club.id}`;
@@ -59,6 +59,19 @@ export function ClubCrest({ club, size = 48 }: Props) {
         )}
         {variant === 6 && <polygon points="0,100 50,30 100,100" fill={s} />}
         {variant === 7 && <rect x="0" y="0" width="100" height="100" fill="none" stroke={s} strokeWidth="14" />}
+        {variant === 8 && (
+          <>
+            <rect y="0" width="100" height="14" fill={s} />
+            <rect y="43" width="100" height="14" fill={s} />
+            <rect y="86" width="100" height="14" fill={s} />
+          </>
+        )}
+        {variant === 9 && (
+          <>
+            <rect x="0" y="0" width="50" height="50" fill={s} />
+            <rect x="50" y="50" width="50" height="50" fill={s} />
+          </>
+        )}
         {/* Рельефный блик сверху и тень снизу — объёмный "3D" вид щита. */}
         <ellipse cx="42" cy="18" rx="38" ry="16" fill="rgba(255,255,255,0.28)" />
         <rect y="70" width="100" height="30" fill="rgba(0,0,0,0.28)" />
@@ -86,6 +99,10 @@ export function ClubCrest({ club, size = 48 }: Props) {
         );
       })}
 
+      <path
+        d={`M18 ${starCount > 0 ? 71 : 65} L82 ${starCount > 0 ? 71 : 65} L76 ${starCount > 0 ? 79 : 73} L24 ${starCount > 0 ? 79 : 73} Z`}
+        fill="rgba(0,0,0,0.25)"
+      />
       <text
         x="50"
         y={starCount > 0 ? "66" : "60"}

@@ -9,18 +9,23 @@ interface Props {
   theme: SpecialEditionTheme;
 }
 
+/** Та же форма щита, что у RarityCard.tsx — единый визуальный язык карт по всему приложению. */
+const PENNANT_CLIP =
+  "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
+
 /** Карточка-витрина: одно и то же издание игрока в другом премиальном материале. Чисто декоративная, не меняет редкость карты. */
 export function SpecialEditionCard({ card, theme }: Props) {
   const { player } = card;
 
   return (
     <div
-      className="relative aspect-[3/4.2] w-36 shrink-0 overflow-hidden rounded-2xl border-2 p-2.5 text-[10px]"
+      className="relative aspect-[3/4.2] w-36 shrink-0 overflow-hidden pb-3 border-[3px] p-2.5 text-[10px]"
       style={{
         background: theme.background,
         borderColor: theme.borderColor,
         boxShadow: theme.glow,
         color: theme.textColor,
+        clipPath: PENNANT_CLIP,
       }}
     >
       <div className={`${theme.patternClass} pointer-events-none absolute inset-0`} />
