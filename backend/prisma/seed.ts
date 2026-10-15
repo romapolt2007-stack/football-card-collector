@@ -28,6 +28,11 @@ interface PlayerData {
   nationFlag: string;
   overall: number;
   maxSupply?: number;
+  age?: number;
+  height?: number;
+  foot?: "RIGHT" | "LEFT";
+  weakFoot?: number;
+  skillMoves?: number;
 }
 
 function loadJson<T>(filename: string): T {
@@ -107,11 +112,11 @@ async function main() {
         position: p.position,
         overall: p.overall,
         ...stats,
-        age: 24,
-        height: p.position === "GK" ? 190 : 180,
-        foot: "RIGHT",
-        weakFoot: 3,
-        skillMoves: rarity === "LEGEND" || rarity === "ICON" ? 4 : 3,
+        age: p.age ?? 24,
+        height: p.height ?? (p.position === "GK" ? 190 : 180),
+        foot: p.foot ?? "RIGHT",
+        weakFoot: p.weakFoot ?? 3,
+        skillMoves: p.skillMoves ?? (rarity === "LEGEND" || rarity === "ICON" ? 4 : 3),
         rarity,
         maxSupply: p.maxSupply ?? null,
         clubId,

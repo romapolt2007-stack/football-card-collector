@@ -1,22 +1,1570 @@
 [
-  {"slug": "mancity", "name": "Манчестер Сити", "shortName": "MCI", "league": "Премьер-лига", "colorPrimary": "#6CABDD", "colorSecondary": "#1C2C5B", "stadium": {"name": "Этихад Стэдиум", "city": "Манчестер", "capacity": 53400, "openedYear": 2003}},
-  {"slug": "liverpool", "name": "Ливерпуль", "shortName": "LIV", "league": "Премьер-лига", "colorPrimary": "#C8102E", "colorSecondary": "#F6EB61", "stadium": {"name": "Энфилд", "city": "Ливерпуль", "capacity": 61276, "openedYear": 1884}},
-  {"slug": "arsenal", "name": "Арсенал", "shortName": "ARS", "league": "Премьер-лига", "colorPrimary": "#EF0107", "colorSecondary": "#023474", "stadium": {"name": "Эмирейтс Стэдиум", "city": "Лондон", "capacity": 60704, "openedYear": 2006}},
-  {"slug": "manutd", "name": "Манчестер Юнайтед", "shortName": "MUN", "league": "Премьер-лига", "colorPrimary": "#DA291C", "colorSecondary": "#FBE122", "stadium": {"name": "Олд Траффорд", "city": "Манчестер", "capacity": 74310, "openedYear": 1910}},
-  {"slug": "realmadrid", "name": "Реал Мадрид", "shortName": "RMA", "league": "Ла Лига", "colorPrimary": "#FEBE10", "colorSecondary": "#FFFFFF", "stadium": {"name": "Сантьяго Бернабеу", "city": "Мадрид", "capacity": 81044, "openedYear": 1947}},
-  {"slug": "barcelona", "name": "Барселона", "shortName": "BAR", "league": "Ла Лига", "colorPrimary": "#004D98", "colorSecondary": "#A50044", "stadium": {"name": "Спотифай Камп Ноу", "city": "Барселона", "capacity": 99354, "openedYear": 1957}},
-  {"slug": "atletico", "name": "Атлетико Мадрид", "shortName": "ATM", "league": "Ла Лига", "colorPrimary": "#CB3524", "colorSecondary": "#FFFFFF", "stadium": {"name": "Сивитас Метрополитано", "city": "Мадрид", "capacity": 70460, "openedYear": 2017}},
-  {"slug": "sevilla", "name": "Севилья", "shortName": "SEV", "league": "Ла Лига", "colorPrimary": "#D81E05", "colorSecondary": "#FFFFFF", "stadium": {"name": "Рамон Санчес Писхуан", "city": "Севилья", "capacity": 43883, "openedYear": 1958}},
-  {"slug": "milan", "name": "Милан", "shortName": "MIL", "league": "Серия А", "colorPrimary": "#FB090B", "colorSecondary": "#000000", "stadium": {"name": "Сан Сиро", "city": "Милан", "capacity": 75923, "openedYear": 1926}},
-  {"slug": "inter", "name": "Интер", "shortName": "INT", "league": "Серия А", "colorPrimary": "#0B5BA6", "colorSecondary": "#000000", "stadium": {"name": "Сан Сиро", "city": "Милан", "capacity": 75923, "openedYear": 1926}},
-  {"slug": "napoli", "name": "Наполи", "shortName": "NAP", "league": "Серия А", "colorPrimary": "#12A0D7", "colorSecondary": "#FFFFFF", "stadium": {"name": "Стадио Марадона", "city": "Неаполь", "capacity": 54726, "openedYear": 1959}},
-  {"slug": "juventus", "name": "Ювентус", "shortName": "JUV", "league": "Серия А", "colorPrimary": "#000000", "colorSecondary": "#FFFFFF", "stadium": {"name": "Альянц Стэдиум", "city": "Турин", "capacity": 41507, "openedYear": 2011}},
-  {"slug": "bayern", "name": "Бавария", "shortName": "BAY", "league": "Бундеслига", "colorPrimary": "#DC052D", "colorSecondary": "#0066B2", "stadium": {"name": "Альянц Арена", "city": "Мюнхен", "capacity": 75000, "openedYear": 2005}},
-  {"slug": "leverkusen", "name": "Байер Леверкузен", "shortName": "B04", "league": "Бундеслига", "colorPrimary": "#E32221", "colorSecondary": "#000000", "stadium": {"name": "БайАрена", "city": "Леверкузен", "capacity": 30210, "openedYear": 1958}},
-  {"slug": "dortmund", "name": "Боруссия Дортмунд", "shortName": "BVB", "league": "Бундеслига", "colorPrimary": "#FDE100", "colorSecondary": "#000000", "stadium": {"name": "Сигнал Идуна Парк", "city": "Дортмунд", "capacity": 81365, "openedYear": 1974}},
-  {"slug": "leipzig", "name": "РБ Лейпциг", "shortName": "RBL", "league": "Бундеслига", "colorPrimary": "#DD0741", "colorSecondary": "#FFFFFF", "stadium": {"name": "Ред Булл Арена", "city": "Лейпциг", "capacity": 47069, "openedYear": 2004}},
-  {"slug": "psg", "name": "ПСЖ", "shortName": "PSG", "league": "Лига 1", "colorPrimary": "#004170", "colorSecondary": "#DA291C", "stadium": {"name": "Парк де Пренс", "city": "Париж", "capacity": 47929, "openedYear": 1972}},
-  {"slug": "marseille", "name": "Марсель", "shortName": "OM", "league": "Лига 1", "colorPrimary": "#2FAEE0", "colorSecondary": "#FFFFFF", "stadium": {"name": "Велодром", "city": "Марсель", "capacity": 67394, "openedYear": 1937}},
-  {"slug": "monaco", "name": "Монако", "shortName": "ASM", "league": "Лига 1", "colorPrimary": "#E51A23", "colorSecondary": "#FFFFFF", "stadium": {"name": "Стад Луи II", "city": "Монако", "capacity": 16360, "openedYear": 1985}},
-  {"slug": "lyon", "name": "Лион", "shortName": "OL", "league": "Лига 1", "colorPrimary": "#1A3C8F", "colorSecondary": "#FFFFFF", "stadium": {"name": "Групама Стэдиум", "city": "Лион", "capacity": 59186, "openedYear": 2016}}
+  {
+    "slug": "mancity",
+    "name": "Манчестер Сити",
+    "shortName": "MCI",
+    "league": "Премьер-лига",
+    "colorPrimary": "#6CABDD",
+    "colorSecondary": "#1C2C5B",
+    "stadium": {
+      "name": "Этихад Стэдиум",
+      "city": "Манчестер",
+      "capacity": 53400,
+      "openedYear": 2003
+    }
+  },
+  {
+    "slug": "liverpool",
+    "name": "Ливерпуль",
+    "shortName": "LIV",
+    "league": "Премьер-лига",
+    "colorPrimary": "#C8102E",
+    "colorSecondary": "#F6EB61",
+    "stadium": {
+      "name": "Энфилд",
+      "city": "Ливерпуль",
+      "capacity": 61276,
+      "openedYear": 1884
+    }
+  },
+  {
+    "slug": "arsenal",
+    "name": "Арсенал",
+    "shortName": "ARS",
+    "league": "Премьер-лига",
+    "colorPrimary": "#EF0107",
+    "colorSecondary": "#023474",
+    "stadium": {
+      "name": "Эмирейтс Стэдиум",
+      "city": "Лондон",
+      "capacity": 60704,
+      "openedYear": 2006
+    }
+  },
+  {
+    "slug": "manutd",
+    "name": "Манчестер Юнайтед",
+    "shortName": "MUN",
+    "league": "Премьер-лига",
+    "colorPrimary": "#DA291C",
+    "colorSecondary": "#FBE122",
+    "stadium": {
+      "name": "Олд Траффорд",
+      "city": "Манчестер",
+      "capacity": 74310,
+      "openedYear": 1910
+    }
+  },
+  {
+    "slug": "realmadrid",
+    "name": "Реал Мадрид",
+    "shortName": "RMA",
+    "league": "Ла Лига",
+    "colorPrimary": "#FEBE10",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Сантьяго Бернабеу",
+      "city": "Мадрид",
+      "capacity": 81044,
+      "openedYear": 1947
+    }
+  },
+  {
+    "slug": "barcelona",
+    "name": "Барселона",
+    "shortName": "BAR",
+    "league": "Ла Лига",
+    "colorPrimary": "#004D98",
+    "colorSecondary": "#A50044",
+    "stadium": {
+      "name": "Спотифай Камп Ноу",
+      "city": "Барселона",
+      "capacity": 99354,
+      "openedYear": 1957
+    }
+  },
+  {
+    "slug": "atletico",
+    "name": "Атлетико Мадрид",
+    "shortName": "ATM",
+    "league": "Ла Лига",
+    "colorPrimary": "#CB3524",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Сивитас Метрополитано",
+      "city": "Мадрид",
+      "capacity": 70460,
+      "openedYear": 2017
+    }
+  },
+  {
+    "slug": "sevilla",
+    "name": "Севилья",
+    "shortName": "SEV",
+    "league": "Ла Лига",
+    "colorPrimary": "#D81E05",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Рамон Санчес Писхуан",
+      "city": "Севилья",
+      "capacity": 43883,
+      "openedYear": 1958
+    }
+  },
+  {
+    "slug": "milan",
+    "name": "Милан",
+    "shortName": "MIL",
+    "league": "Серия А",
+    "colorPrimary": "#FB090B",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Сан Сиро",
+      "city": "Милан",
+      "capacity": 75923,
+      "openedYear": 1926
+    }
+  },
+  {
+    "slug": "inter",
+    "name": "Интер",
+    "shortName": "INT",
+    "league": "Серия А",
+    "colorPrimary": "#0B5BA6",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Сан Сиро",
+      "city": "Милан",
+      "capacity": 75923,
+      "openedYear": 1926
+    }
+  },
+  {
+    "slug": "napoli",
+    "name": "Наполи",
+    "shortName": "NAP",
+    "league": "Серия А",
+    "colorPrimary": "#12A0D7",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стадио Марадона",
+      "city": "Неаполь",
+      "capacity": 54726,
+      "openedYear": 1959
+    }
+  },
+  {
+    "slug": "juventus",
+    "name": "Ювентус",
+    "shortName": "JUV",
+    "league": "Серия А",
+    "colorPrimary": "#000000",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Альянц Стэдиум",
+      "city": "Турин",
+      "capacity": 41507,
+      "openedYear": 2011
+    }
+  },
+  {
+    "slug": "bayern",
+    "name": "Бавария",
+    "shortName": "BAY",
+    "league": "Бундеслига",
+    "colorPrimary": "#DC052D",
+    "colorSecondary": "#0066B2",
+    "stadium": {
+      "name": "Альянц Арена",
+      "city": "Мюнхен",
+      "capacity": 75000,
+      "openedYear": 2005
+    }
+  },
+  {
+    "slug": "leverkusen",
+    "name": "Байер Леверкузен",
+    "shortName": "B04",
+    "league": "Бундеслига",
+    "colorPrimary": "#E32221",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "БайАрена",
+      "city": "Леверкузен",
+      "capacity": 30210,
+      "openedYear": 1958
+    }
+  },
+  {
+    "slug": "dortmund",
+    "name": "Боруссия Дортмунд",
+    "shortName": "BVB",
+    "league": "Бундеслига",
+    "colorPrimary": "#FDE100",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Сигнал Идуна Парк",
+      "city": "Дортмунд",
+      "capacity": 81365,
+      "openedYear": 1974
+    }
+  },
+  {
+    "slug": "leipzig",
+    "name": "РБ Лейпциг",
+    "shortName": "RBL",
+    "league": "Бундеслига",
+    "colorPrimary": "#DD0741",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Ред Булл Арена",
+      "city": "Лейпциг",
+      "capacity": 47069,
+      "openedYear": 2004
+    }
+  },
+  {
+    "slug": "psg",
+    "name": "ПСЖ",
+    "shortName": "PSG",
+    "league": "Лига 1",
+    "colorPrimary": "#004170",
+    "colorSecondary": "#DA291C",
+    "stadium": {
+      "name": "Парк де Пренс",
+      "city": "Париж",
+      "capacity": 47929,
+      "openedYear": 1972
+    }
+  },
+  {
+    "slug": "marseille",
+    "name": "Марсель",
+    "shortName": "OM",
+    "league": "Лига 1",
+    "colorPrimary": "#2FAEE0",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Велодром",
+      "city": "Марсель",
+      "capacity": 67394,
+      "openedYear": 1937
+    }
+  },
+  {
+    "slug": "monaco",
+    "name": "Монако",
+    "shortName": "ASM",
+    "league": "Лига 1",
+    "colorPrimary": "#E51A23",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стад Луи II",
+      "city": "Монако",
+      "capacity": 16360,
+      "openedYear": 1985
+    }
+  },
+  {
+    "slug": "lyon",
+    "name": "Лион",
+    "shortName": "OL",
+    "league": "Лига 1",
+    "colorPrimary": "#1A3C8F",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Групама Стэдиум",
+      "city": "Лион",
+      "capacity": 59186,
+      "openedYear": 2016
+    }
+  },
+  {
+    "slug": "zenit",
+    "name": "Зенит",
+    "shortName": "З",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#5CA6E0",
+    "colorSecondary": "#0033A0",
+    "stadium": {
+      "name": "Газпром Арена",
+      "city": "Санкт-Петербург",
+      "capacity": 68134,
+      "openedYear": 2017
+    }
+  },
+  {
+    "slug": "spartak",
+    "name": "Спартак Москва",
+    "shortName": "СМ",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#CC0000",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Лукойл Арена",
+      "city": "Москва",
+      "capacity": 45360,
+      "openedYear": 2014
+    }
+  },
+  {
+    "slug": "cska",
+    "name": "ЦСКА Москва",
+    "shortName": "ЦМ",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#D1001F",
+    "colorSecondary": "#0033A0",
+    "stadium": {
+      "name": "ВЭБ Арена",
+      "city": "Москва",
+      "capacity": 30000,
+      "openedYear": 2016
+    }
+  },
+  {
+    "slug": "dynamo_mow",
+    "name": "Динамо Москва",
+    "shortName": "ДМ",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#1E3C8C",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "ВТБ Арена",
+      "city": "Москва",
+      "capacity": 26319,
+      "openedYear": 2019
+    }
+  },
+  {
+    "slug": "lokomotiv",
+    "name": "Локомотив Москва",
+    "shortName": "ЛМ",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#C8102E",
+    "colorSecondary": "#007A3D",
+    "stadium": {
+      "name": "РЖД Арена",
+      "city": "Москва",
+      "capacity": 28800,
+      "openedYear": 2002
+    }
+  },
+  {
+    "slug": "krasnodar",
+    "name": "Краснодар",
+    "shortName": "К",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#1C8A3C",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Стадион Краснодар",
+      "city": "Краснодар",
+      "capacity": 34234,
+      "openedYear": 2016
+    }
+  },
+  {
+    "slug": "rostov",
+    "name": "Ростов",
+    "shortName": "Р",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#FFD100",
+    "colorSecondary": "#002D72",
+    "stadium": {
+      "name": "Ростов Арена",
+      "city": "Ростов-на-Дону",
+      "capacity": 45000,
+      "openedYear": 2018
+    }
+  },
+  {
+    "slug": "rubin",
+    "name": "Рубин",
+    "shortName": "Р",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#1A8A3C",
+    "colorSecondary": "#FFD700",
+    "stadium": {
+      "name": "Ак Барс Арена",
+      "city": "Казань",
+      "capacity": 45379,
+      "openedYear": 2013
+    }
+  },
+  {
+    "slug": "krylia_sovetov",
+    "name": "Крылья Советов",
+    "shortName": "КС",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#0039A6",
+    "colorSecondary": "#8DC63F",
+    "stadium": {
+      "name": "Солидарность Самара Арена",
+      "city": "Самара",
+      "capacity": 41970,
+      "openedYear": 2018
+    }
+  },
+  {
+    "slug": "akhmat",
+    "name": "Ахмат",
+    "shortName": "А",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#0E8E3C",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Ахмат-Арена",
+      "city": "Грозный",
+      "capacity": 30000,
+      "openedYear": 2011
+    }
+  },
+  {
+    "slug": "orenburg",
+    "name": "Оренбург",
+    "shortName": "О",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#1C3F94",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Газовик",
+      "city": "Оренбург",
+      "capacity": 9850,
+      "openedYear": 1960
+    }
+  },
+  {
+    "slug": "pari_nn",
+    "name": "Пари НН",
+    "shortName": "ПН",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#1C3F94",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Нижний Новгород",
+      "city": "Нижний Новгород",
+      "capacity": 44899,
+      "openedYear": 2018
+    }
+  },
+  {
+    "slug": "fakel",
+    "name": "Факел",
+    "shortName": "Ф",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#1C3F94",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Центральный профсоюзов",
+      "city": "Воронеж",
+      "capacity": 13500,
+      "openedYear": 1951
+    }
+  },
+  {
+    "slug": "dynamo_makhachkala",
+    "name": "Динамо Махачкала",
+    "shortName": "ДМ",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#1E3C8C",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Анжи Арена",
+      "city": "Каспийск",
+      "capacity": 27750,
+      "openedYear": 2018
+    }
+  },
+  {
+    "slug": "akron_tolyatti",
+    "name": "Акрон",
+    "shortName": "А",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#0039A6",
+    "colorSecondary": "#FFD700",
+    "stadium": {
+      "name": "Солидарность Самара Арена",
+      "city": "Самара",
+      "capacity": 41970,
+      "openedYear": 2018
+    }
+  },
+  {
+    "slug": "baltika",
+    "name": "Балтика",
+    "shortName": "Б",
+    "league": "Российская Премьер-лига",
+    "colorPrimary": "#0039A6",
+    "colorSecondary": "#FFD700",
+    "stadium": {
+      "name": "Ростех Арена",
+      "city": "Калининград",
+      "capacity": 35212,
+      "openedYear": 2018
+    }
+  },
+  {
+    "slug": "chelsea",
+    "name": "Челси",
+    "shortName": "Ч",
+    "league": "Премьер-лига",
+    "colorPrimary": "#034694",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стэмфорд Бридж",
+      "city": "Лондон",
+      "capacity": 40343,
+      "openedYear": 1877
+    }
+  },
+  {
+    "slug": "tottenham",
+    "name": "Тоттенхэм Хотспур",
+    "shortName": "ТХ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#132257",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Тоттенхэм Хотспур Стэдиум",
+      "city": "Лондон",
+      "capacity": 62850,
+      "openedYear": 2019
+    }
+  },
+  {
+    "slug": "aston_villa",
+    "name": "Астон Вилла",
+    "shortName": "АВ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#670E36",
+    "colorSecondary": "#95BFE5",
+    "stadium": {
+      "name": "Вилла Парк",
+      "city": "Бирмингем",
+      "capacity": 42682,
+      "openedYear": 1897
+    }
+  },
+  {
+    "slug": "newcastle",
+    "name": "Ньюкасл Юнайтед",
+    "shortName": "НЮ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#241F20",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Сент-Джеймс Парк",
+      "city": "Ньюкасл",
+      "capacity": 52305,
+      "openedYear": 1892
+    }
+  },
+  {
+    "slug": "brighton",
+    "name": "Брайтон энд Хоув Альбион",
+    "shortName": "БЭХ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#0057B8",
+    "colorSecondary": "#FFCD00",
+    "stadium": {
+      "name": "Фалмер Стэдиум",
+      "city": "Брайтон",
+      "capacity": 31800,
+      "openedYear": 2011
+    }
+  },
+  {
+    "slug": "west_ham",
+    "name": "Вест Хэм Юнайтед",
+    "shortName": "ВХЮ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#7A263A",
+    "colorSecondary": "#1BB1E7",
+    "stadium": {
+      "name": "Лондон Стэдиум",
+      "city": "Лондон",
+      "capacity": 62500,
+      "openedYear": 2016
+    }
+  },
+  {
+    "slug": "crystal_palace",
+    "name": "Кристал Пэлас",
+    "shortName": "КП",
+    "league": "Премьер-лига",
+    "colorPrimary": "#1B458F",
+    "colorSecondary": "#C4122E",
+    "stadium": {
+      "name": "Селхерст Парк",
+      "city": "Лондон",
+      "capacity": 25486,
+      "openedYear": 1924
+    }
+  },
+  {
+    "slug": "fulham",
+    "name": "Фулхэм",
+    "shortName": "Ф",
+    "league": "Премьер-лига",
+    "colorPrimary": "#000000",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Крейвен Коттедж",
+      "city": "Лондон",
+      "capacity": 29600,
+      "openedYear": 1896
+    }
+  },
+  {
+    "slug": "brentford",
+    "name": "Брентфорд",
+    "shortName": "Б",
+    "league": "Премьер-лига",
+    "colorPrimary": "#E30613",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Гтех Коммьюнити Стэдиум",
+      "city": "Лондон",
+      "capacity": 17250,
+      "openedYear": 2020
+    }
+  },
+  {
+    "slug": "everton",
+    "name": "Эвертон",
+    "shortName": "Э",
+    "league": "Премьер-лига",
+    "colorPrimary": "#003399",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Гудисон Парк",
+      "city": "Ливерпуль",
+      "capacity": 39572,
+      "openedYear": 1892
+    }
+  },
+  {
+    "slug": "nottingham_forest",
+    "name": "Ноттингем Форест",
+    "shortName": "НФ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#DD0000",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Сити Граунд",
+      "city": "Ноттингем",
+      "capacity": 30445,
+      "openedYear": 1898
+    }
+  },
+  {
+    "slug": "wolverhampton",
+    "name": "Вулверхэмптон Уондерерс",
+    "shortName": "ВУ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#FDB913",
+    "colorSecondary": "#231F20",
+    "stadium": {
+      "name": "Молинью",
+      "city": "Вулверхэмптон",
+      "capacity": 31700,
+      "openedYear": 1889
+    }
+  },
+  {
+    "slug": "bournemouth",
+    "name": "Борнмут",
+    "shortName": "Б",
+    "league": "Премьер-лига",
+    "colorPrimary": "#DA291C",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Витэлити Стэдиум",
+      "city": "Борнмут",
+      "capacity": 11364,
+      "openedYear": 1910
+    }
+  },
+  {
+    "slug": "leicester_city",
+    "name": "Лестер Сити",
+    "shortName": "ЛС",
+    "league": "Премьер-лига",
+    "colorPrimary": "#003090",
+    "colorSecondary": "#FDBE11",
+    "stadium": {
+      "name": "Кинг Пауэр Стэдиум",
+      "city": "Лестер",
+      "capacity": 32273,
+      "openedYear": 2002
+    }
+  },
+  {
+    "slug": "ipswich_town",
+    "name": "Ипсвич Таун",
+    "shortName": "ИТ",
+    "league": "Премьер-лига",
+    "colorPrimary": "#0044A9",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Портман Роуд",
+      "city": "Ипсвич",
+      "capacity": 30311,
+      "openedYear": 1884
+    }
+  },
+  {
+    "slug": "southampton",
+    "name": "Саутгемптон",
+    "shortName": "С",
+    "league": "Премьер-лига",
+    "colorPrimary": "#D71920",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Сент-Мэрис",
+      "city": "Саутгемптон",
+      "capacity": 32384,
+      "openedYear": 2001
+    }
+  },
+  {
+    "slug": "roma",
+    "name": "Рома",
+    "shortName": "Р",
+    "league": "Серия А",
+    "colorPrimary": "#8E1F2F",
+    "colorSecondary": "#F0BC42",
+    "stadium": {
+      "name": "Стадио Олимпико",
+      "city": "Рим",
+      "capacity": 70634,
+      "openedYear": 1953
+    }
+  },
+  {
+    "slug": "atalanta",
+    "name": "Аталанта",
+    "shortName": "А",
+    "league": "Серия А",
+    "colorPrimary": "#1E71B8",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Гевисс Стэдиум",
+      "city": "Бергамо",
+      "capacity": 21300,
+      "openedYear": 1928
+    }
+  },
+  {
+    "slug": "lazio",
+    "name": "Лацио",
+    "shortName": "Л",
+    "league": "Серия А",
+    "colorPrimary": "#87CEEB",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стадио Олимпико",
+      "city": "Рим",
+      "capacity": 70634,
+      "openedYear": 1953
+    }
+  },
+  {
+    "slug": "fiorentina",
+    "name": "Фиорентина",
+    "shortName": "Ф",
+    "league": "Серия А",
+    "colorPrimary": "#5B2A86",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Артемио Франки",
+      "city": "Флоренция",
+      "capacity": 43147,
+      "openedYear": 1931
+    }
+  },
+  {
+    "slug": "bologna",
+    "name": "Болонья",
+    "shortName": "Б",
+    "league": "Серия А",
+    "colorPrimary": "#AD1D22",
+    "colorSecondary": "#1C305C",
+    "stadium": {
+      "name": "Ренато Даль-Ара",
+      "city": "Болонья",
+      "capacity": 36462,
+      "openedYear": 1927
+    }
+  },
+  {
+    "slug": "torino",
+    "name": "Торино",
+    "shortName": "Т",
+    "league": "Серия А",
+    "colorPrimary": "#7B1E3A",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стадио Олимпико Гранде Торино",
+      "city": "Турин",
+      "capacity": 27994,
+      "openedYear": 1933
+    }
+  },
+  {
+    "slug": "udinese",
+    "name": "Удинезе",
+    "shortName": "У",
+    "league": "Серия А",
+    "colorPrimary": "#000000",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Фриули",
+      "city": "Удине",
+      "capacity": 25144,
+      "openedYear": 1976
+    }
+  },
+  {
+    "slug": "genoa",
+    "name": "Дженоа",
+    "shortName": "Д",
+    "league": "Серия А",
+    "colorPrimary": "#C8102E",
+    "colorSecondary": "#002157",
+    "stadium": {
+      "name": "Луиджи Феррарис",
+      "city": "Генуя",
+      "capacity": 36599,
+      "openedYear": 1911
+    }
+  },
+  {
+    "slug": "monza",
+    "name": "Монца",
+    "shortName": "М",
+    "league": "Серия А",
+    "colorPrimary": "#D7141A",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "У-Пауэр Стэдиум",
+      "city": "Монца",
+      "capacity": 18568,
+      "openedYear": 1988
+    }
+  },
+  {
+    "slug": "lecce",
+    "name": "Лечче",
+    "shortName": "Л",
+    "league": "Серия А",
+    "colorPrimary": "#FFD400",
+    "colorSecondary": "#D7141A",
+    "stadium": {
+      "name": "Виа дель Маре",
+      "city": "Лечче",
+      "capacity": 31533,
+      "openedYear": 1966
+    }
+  },
+  {
+    "slug": "cagliari",
+    "name": "Кальяри",
+    "shortName": "К",
+    "league": "Серия А",
+    "colorPrimary": "#C8102E",
+    "colorSecondary": "#002868",
+    "stadium": {
+      "name": "Унипол Домус",
+      "city": "Кальяри",
+      "capacity": 16233,
+      "openedYear": 2024
+    }
+  },
+  {
+    "slug": "empoli",
+    "name": "Эмполи",
+    "shortName": "Э",
+    "league": "Серия А",
+    "colorPrimary": "#005BAA",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Карло Кастеллани",
+      "city": "Эмполи",
+      "capacity": 16284,
+      "openedYear": 1953
+    }
+  },
+  {
+    "slug": "verona",
+    "name": "Эллас Верона",
+    "shortName": "ЭВ",
+    "league": "Серия А",
+    "colorPrimary": "#FFD400",
+    "colorSecondary": "#003399",
+    "stadium": {
+      "name": "Маркантонио Бентегоди",
+      "city": "Верона",
+      "capacity": 31045,
+      "openedYear": 1963
+    }
+  },
+  {
+    "slug": "venezia",
+    "name": "Венеция",
+    "shortName": "В",
+    "league": "Серия А",
+    "colorPrimary": "#006633",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Пьерлуиджи Пенцо",
+      "city": "Венеция",
+      "capacity": 11150,
+      "openedYear": 1913
+    }
+  },
+  {
+    "slug": "parma",
+    "name": "Парма",
+    "shortName": "П",
+    "league": "Серия А",
+    "colorPrimary": "#FFD400",
+    "colorSecondary": "#002868",
+    "stadium": {
+      "name": "Эннио Тардини",
+      "city": "Парма",
+      "capacity": 22352,
+      "openedYear": 1923
+    }
+  },
+  {
+    "slug": "como",
+    "name": "Комо",
+    "shortName": "К",
+    "league": "Серия А",
+    "colorPrimary": "#0047AB",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Джузеппе Синигалья",
+      "city": "Комо",
+      "capacity": 13602,
+      "openedYear": 1927
+    }
+  },
+  {
+    "slug": "vfb_stuttgart",
+    "name": "Штутгарт",
+    "shortName": "Ш",
+    "league": "Бундеслига",
+    "colorPrimary": "#E32219",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "МХП-Арена",
+      "city": "Штутгарт",
+      "capacity": 60058,
+      "openedYear": 1933
+    }
+  },
+  {
+    "slug": "eintracht_frankfurt",
+    "name": "Айнтрахт Франкфурт",
+    "shortName": "АФ",
+    "league": "Бундеслига",
+    "colorPrimary": "#000000",
+    "colorSecondary": "#E2001A",
+    "stadium": {
+      "name": "Дойче Банк Парк",
+      "city": "Франкфурт",
+      "capacity": 58000,
+      "openedYear": 1925
+    }
+  },
+  {
+    "slug": "sc_freiburg",
+    "name": "Фрайбург",
+    "shortName": "Ф",
+    "league": "Бундеслига",
+    "colorPrimary": "#E2001A",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Европа-Парк-Штадион",
+      "city": "Фрайбург",
+      "capacity": 34700,
+      "openedYear": 2021
+    }
+  },
+  {
+    "slug": "borussia_monchengladbach",
+    "name": "Боруссия Мёнхенгладбах",
+    "shortName": "БМ",
+    "league": "Бундеслига",
+    "colorPrimary": "#000000",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Боруссия-Парк",
+      "city": "Мёнхенгладбах",
+      "capacity": 54010,
+      "openedYear": 2004
+    }
+  },
+  {
+    "slug": "vfl_wolfsburg",
+    "name": "Вольфсбург",
+    "shortName": "В",
+    "league": "Бундеслига",
+    "colorPrimary": "#65B32E",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Фольксваген-Арена",
+      "city": "Вольфсбург",
+      "capacity": 30000,
+      "openedYear": 2002
+    }
+  },
+  {
+    "slug": "hoffenheim",
+    "name": "Хоффенхайм",
+    "shortName": "Х",
+    "league": "Бундеслига",
+    "colorPrimary": "#1961B5",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "ПреЗеро Арена",
+      "city": "Зинсхайм",
+      "capacity": 30150,
+      "openedYear": 2009
+    }
+  },
+  {
+    "slug": "werder_bremen",
+    "name": "Вердер",
+    "shortName": "В",
+    "league": "Бундеслига",
+    "colorPrimary": "#00923F",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Везерштадион",
+      "city": "Бремен",
+      "capacity": 42100,
+      "openedYear": 1909
+    }
+  },
+  {
+    "slug": "union_berlin",
+    "name": "Унион Берлин",
+    "shortName": "УБ",
+    "league": "Бундеслига",
+    "colorPrimary": "#EB1923",
+    "colorSecondary": "#FFE628",
+    "stadium": {
+      "name": "Ан дер Альтен Фёрстерай",
+      "city": "Берлин",
+      "capacity": 22012,
+      "openedYear": 1920
+    }
+  },
+  {
+    "slug": "fc_augsburg",
+    "name": "Аугсбург",
+    "shortName": "А",
+    "league": "Бундеслига",
+    "colorPrimary": "#BA3733",
+    "colorSecondary": "#015229",
+    "stadium": {
+      "name": "ВВК Арена",
+      "city": "Аугсбург",
+      "capacity": 30660,
+      "openedYear": 2009
+    }
+  },
+  {
+    "slug": "mainz_05",
+    "name": "Майнц 05",
+    "shortName": "М0",
+    "league": "Бундеслига",
+    "colorPrimary": "#C8102E",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Мева Арена",
+      "city": "Майнц",
+      "capacity": 33305,
+      "openedYear": 2011
+    }
+  },
+  {
+    "slug": "heidenheim",
+    "name": "Хайденхайм",
+    "shortName": "Х",
+    "league": "Бундеслига",
+    "colorPrimary": "#E2001A",
+    "colorSecondary": "#003087",
+    "stadium": {
+      "name": "Фойт-Арена",
+      "city": "Хайденхайм",
+      "capacity": 15000,
+      "openedYear": 1951
+    }
+  },
+  {
+    "slug": "vfl_bochum",
+    "name": "Бохум",
+    "shortName": "Б",
+    "league": "Бундеслига",
+    "colorPrimary": "#005CA9",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Воновия Рурштадион",
+      "city": "Бохум",
+      "capacity": 27599,
+      "openedYear": 1979
+    }
+  },
+  {
+    "slug": "st_pauli",
+    "name": "Санкт-Паули",
+    "shortName": "С",
+    "league": "Бундеслига",
+    "colorPrimary": "#6B3E26",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Миллертор-Штадион",
+      "city": "Гамбург",
+      "capacity": 29546,
+      "openedYear": 1961
+    }
+  },
+  {
+    "slug": "holstein_kiel",
+    "name": "Хольштайн Киль",
+    "shortName": "ХК",
+    "league": "Бундеслига",
+    "colorPrimary": "#003C7D",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Хольштайн-Штадион",
+      "city": "Киль",
+      "capacity": 15034,
+      "openedYear": 1911
+    }
+  },
+  {
+    "slug": "lille",
+    "name": "ЛОСК Лилль",
+    "shortName": "ЛЛ",
+    "league": "Лига 1",
+    "colorPrimary": "#C8102E",
+    "colorSecondary": "#002868",
+    "stadium": {
+      "name": "Пьер Моруа",
+      "city": "Лилль",
+      "capacity": 50186,
+      "openedYear": 2012
+    }
+  },
+  {
+    "slug": "rennes",
+    "name": "Ренн",
+    "shortName": "Р",
+    "league": "Лига 1",
+    "colorPrimary": "#E2001A",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Роазон Парк",
+      "city": "Ренн",
+      "capacity": 29778,
+      "openedYear": 1912
+    }
+  },
+  {
+    "slug": "nice",
+    "name": "Ницца",
+    "shortName": "Н",
+    "league": "Лига 1",
+    "colorPrimary": "#000000",
+    "colorSecondary": "#E2001A",
+    "stadium": {
+      "name": "Альянц Ривьера",
+      "city": "Ницца",
+      "capacity": 35624,
+      "openedYear": 2013
+    }
+  },
+  {
+    "slug": "lens",
+    "name": "Ланс",
+    "shortName": "Л",
+    "league": "Лига 1",
+    "colorPrimary": "#FFD400",
+    "colorSecondary": "#DA291C",
+    "stadium": {
+      "name": "Боллар-Делелис",
+      "city": "Ланс",
+      "capacity": 38223,
+      "openedYear": 1933
+    }
+  },
+  {
+    "slug": "strasbourg",
+    "name": "Страсбур",
+    "shortName": "С",
+    "league": "Лига 1",
+    "colorPrimary": "#0050AA",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стад де ла Мено",
+      "city": "Страсбур",
+      "capacity": 29230,
+      "openedYear": 1914
+    }
+  },
+  {
+    "slug": "brest",
+    "name": "Брест",
+    "shortName": "Б",
+    "league": "Лига 1",
+    "colorPrimary": "#DA291C",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стад Франсис Ле Бле",
+      "city": "Брест",
+      "capacity": 15076,
+      "openedYear": 1922
+    }
+  },
+  {
+    "slug": "lorient",
+    "name": "Лорьян",
+    "shortName": "Л",
+    "league": "Лига 1",
+    "colorPrimary": "#F57C00",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Стад дю Мустуар",
+      "city": "Лорьян",
+      "capacity": 18110,
+      "openedYear": 1921
+    }
+  },
+  {
+    "slug": "angers",
+    "name": "Анже",
+    "shortName": "А",
+    "league": "Лига 1",
+    "colorPrimary": "#000000",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стад Раймон Копа",
+      "city": "Анже",
+      "capacity": 18752,
+      "openedYear": 1913
+    }
+  },
+  {
+    "slug": "paris_fc",
+    "name": "Париж ФК",
+    "shortName": "ПФ",
+    "league": "Лига 1",
+    "colorPrimary": "#0033A0",
+    "colorSecondary": "#DA291C",
+    "stadium": {
+      "name": "Стад Жан-Буэн",
+      "city": "Париж",
+      "capacity": 20000,
+      "openedYear": 2013
+    }
+  },
+  {
+    "slug": "le_mans",
+    "name": "Ле-Ман",
+    "shortName": "Л",
+    "league": "Лига 1",
+    "colorPrimary": "#003DA5",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "ММАрена",
+      "city": "Ле-Ман",
+      "capacity": 25064,
+      "openedYear": 2011
+    }
+  },
+  {
+    "slug": "toulouse",
+    "name": "Тулуза",
+    "shortName": "Т",
+    "league": "Лига 1",
+    "colorPrimary": "#5B2A86",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стадион Мунисипаль",
+      "city": "Тулуза",
+      "capacity": 33150,
+      "openedYear": 1937
+    }
+  },
+  {
+    "slug": "auxerre",
+    "name": "Осер",
+    "shortName": "О",
+    "league": "Лига 1",
+    "colorPrimary": "#FFFFFF",
+    "colorSecondary": "#002D72",
+    "stadium": {
+      "name": "Стад де л'Аббе-Дешам",
+      "city": "Осер",
+      "capacity": 18467,
+      "openedYear": 1930
+    }
+  },
+  {
+    "slug": "troyes",
+    "name": "Труа",
+    "shortName": "Т",
+    "league": "Лига 1",
+    "colorPrimary": "#002868",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стад де л'Об",
+      "city": "Труа",
+      "capacity": 20400,
+      "openedYear": 1956
+    }
+  },
+  {
+    "slug": "le_havre",
+    "name": "Гавр",
+    "shortName": "Г",
+    "league": "Лига 1",
+    "colorPrimary": "#003DA5",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Стад Осеан",
+      "city": "Гавр",
+      "capacity": 25178,
+      "openedYear": 2012
+    }
+  },
+  {
+    "slug": "real_sociedad",
+    "name": "Реал Сосьедад",
+    "shortName": "РС",
+    "league": "Ла Лига",
+    "colorPrimary": "#004C97",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Реале Арена",
+      "city": "Сан-Себастьян",
+      "capacity": 39500,
+      "openedYear": 1993
+    }
+  },
+  {
+    "slug": "villarreal",
+    "name": "Вильярреал",
+    "shortName": "В",
+    "league": "Ла Лига",
+    "colorPrimary": "#FFE667",
+    "colorSecondary": "#005CA9",
+    "stadium": {
+      "name": "Эстадио де ла Керамика",
+      "city": "Вильярреал",
+      "capacity": 23008,
+      "openedYear": 1923
+    }
+  },
+  {
+    "slug": "athletic_bilbao",
+    "name": "Атлетик Бильбао",
+    "shortName": "АБ",
+    "league": "Ла Лига",
+    "colorPrimary": "#EE2523",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Сан-Мамес",
+      "city": "Бильбао",
+      "capacity": 53289,
+      "openedYear": 2013
+    }
+  },
+  {
+    "slug": "real_betis",
+    "name": "Реал Бетис",
+    "shortName": "РБ",
+    "league": "Ла Лига",
+    "colorPrimary": "#00954C",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Бенито Вильямарин",
+      "city": "Севилья",
+      "capacity": 60720,
+      "openedYear": 1929
+    }
+  },
+  {
+    "slug": "valencia",
+    "name": "Валенсия",
+    "shortName": "В",
+    "league": "Ла Лига",
+    "colorPrimary": "#FF7900",
+    "colorSecondary": "#000000",
+    "stadium": {
+      "name": "Месталья",
+      "city": "Валенсия",
+      "capacity": 49430,
+      "openedYear": 1923
+    }
+  },
+  {
+    "slug": "celta_vigo",
+    "name": "Сельта",
+    "shortName": "С",
+    "league": "Ла Лига",
+    "colorPrimary": "#8AC3EE",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Балаидос",
+      "city": "Виго",
+      "capacity": 24870,
+      "openedYear": 1928
+    }
+  },
+  {
+    "slug": "osasuna",
+    "name": "Осасуна",
+    "shortName": "О",
+    "league": "Ла Лига",
+    "colorPrimary": "#D91A21",
+    "colorSecondary": "#07226C",
+    "stadium": {
+      "name": "Эль Садар",
+      "city": "Памплона",
+      "capacity": 23576,
+      "openedYear": 1967
+    }
+  },
+  {
+    "slug": "rayo_vallecano",
+    "name": "Райо Вальекано",
+    "shortName": "РВ",
+    "league": "Ла Лига",
+    "colorPrimary": "#CC092F",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Кампо де Вальекас",
+      "city": "Мадрид",
+      "capacity": 14708,
+      "openedYear": 1976
+    }
+  },
+  {
+    "slug": "getafe",
+    "name": "Хетафе",
+    "shortName": "Х",
+    "league": "Ла Лига",
+    "colorPrimary": "#005BA8",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Колизеум Альфонсо Перес",
+      "city": "Хетафе",
+      "capacity": 17393,
+      "openedYear": 1998
+    }
+  },
+  {
+    "slug": "alaves",
+    "name": "Алавес",
+    "shortName": "А",
+    "league": "Ла Лига",
+    "colorPrimary": "#0F3C78",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Мендисорроса",
+      "city": "Витория-Гастейс",
+      "capacity": 19840,
+      "openedYear": 1924
+    }
+  },
+  {
+    "slug": "espanyol",
+    "name": "Эспаньол",
+    "shortName": "Э",
+    "league": "Ла Лига",
+    "colorPrimary": "#0A5FA8",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "RCDE Стэдиум",
+      "city": "Корнелья",
+      "capacity": 40500,
+      "openedYear": 2009
+    }
+  },
+  {
+    "slug": "elche",
+    "name": "Эльче",
+    "shortName": "Э",
+    "league": "Ла Лига",
+    "colorPrimary": "#1B6E3C",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Мануэль Мартинес Валеро",
+      "city": "Эльче",
+      "capacity": 33732,
+      "openedYear": 1976
+    }
+  },
+  {
+    "slug": "malaga",
+    "name": "Малага",
+    "shortName": "М",
+    "league": "Ла Лига",
+    "colorPrimary": "#0E5FAD",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Ла Росаледа",
+      "city": "Малага",
+      "capacity": 30044,
+      "openedYear": 1941
+    }
+  },
+  {
+    "slug": "racing_santander",
+    "name": "Расинг Сантандер",
+    "shortName": "РС",
+    "league": "Ла Лига",
+    "colorPrimary": "#00A550",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Эль Сардинеро",
+      "city": "Сантандер",
+      "capacity": 22271,
+      "openedYear": 1988
+    }
+  },
+  {
+    "slug": "deportivo_la_coruna",
+    "name": "Депортиво Ла-Корунья",
+    "shortName": "ДЛ",
+    "league": "Ла Лига",
+    "colorPrimary": "#0057A8",
+    "colorSecondary": "#FFFFFF",
+    "stadium": {
+      "name": "Риасор",
+      "city": "Ла-Корунья",
+      "capacity": 32912,
+      "openedYear": 1944
+    }
+  },
+  {
+    "slug": "levante",
+    "name": "Леванте",
+    "shortName": "Л",
+    "league": "Ла Лига",
+    "colorPrimary": "#1A2E5A",
+    "colorSecondary": "#C8102E",
+    "stadium": {
+      "name": "Сьюдад де Валенсия",
+      "city": "Валенсия",
+      "capacity": 26354,
+      "openedYear": 1969
+    }
+  }
 ]
