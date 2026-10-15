@@ -21,11 +21,11 @@ export function calcChemistry(starters: CardWithPlayer[]): number {
   return Math.round(perPlayer.reduce((a, b) => a + b, 0) / perPlayer.length);
 }
 
-/** Сила состава: средний OVR стартового состава + бонус от химии (до +10%). */
+/** Сила состава: средний OVR стартового состава + бонус от химии (до +15%). */
 export function calcSquadStrength(starters: CardWithPlayer[]): { strength: number; avgOvr: number; chemistry: number } {
   if (starters.length === 0) return { strength: 0, avgOvr: 0, chemistry: 0 };
   const avgOvr = starters.reduce((sum, c) => sum + effectiveOverall(c.player.overall, c.trainingBoost), 0) / starters.length;
   const chemistry = calcChemistry(starters);
-  const strength = avgOvr * (1 + chemistry / 1000);
+  const strength = avgOvr * (1 + chemistry / 667);
   return { strength: Math.round(strength * 10) / 10, avgOvr: Math.round(avgOvr), chemistry };
 }
