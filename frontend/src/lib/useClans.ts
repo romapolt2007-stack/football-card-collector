@@ -2,11 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
 
+export const CLAN_CREATE_COST = 7000;
+
 export interface ClanListItem {
   id: string;
   name: string;
   tag: string;
   description: string | null;
+  avatarUrl: string | null;
   memberCount: number;
   totalPower: number;
   createdAt: string;
@@ -26,6 +29,7 @@ export interface MyClan {
   name: string;
   tag: string;
   description: string | null;
+  avatarUrl: string | null;
   leaderId: string;
   createdAt: string;
   totalPower: number;
@@ -54,10 +58,23 @@ export function useCreateClan() {
   const user = useAuthStore((s) => s.user);
 
   return useMutation({
-    mutationFn: (input: { name: string; tag: string; description?: string }) =>
+    mutationFn: (input: { name: string; tag: string; description?: string; avatarUrl?: string }) =>
       api.post<{ clanId: string }>("/api/clans", input),
     onSuccess: () => {
-      if (user) setUser({ ...user, coins: user.coins - 5000 });
+      if (user) setUser({ ...user, coins: user.coins - CLAN_CREATE_COST });
+      queryClient.invalidateQueries({ queryKey: ["my-clan"] });
+      queryClient.invalidateQueries({ queryKey: ["clans"] });
+    },
+  });
+}
+
+export function useSetClanAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (avatarUrl: string | null) =>
+      api.post<{ avatarUrl: string | null }>("/api/clans/avatar", { avatarUrl }),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-clan"] });
       queryClient.invalidateQueries({ queryKey: ["clans"] });
     },

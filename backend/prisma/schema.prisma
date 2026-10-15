@@ -506,6 +506,7 @@ model Clan {
   name        String  @unique
   tag         String  @unique
   description String?
+  avatarUrl   String?
   leaderId    String
 
   createdAt DateTime @default(now())

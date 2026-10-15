@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { useClanList, useCreateClan, useJoinClan, useKickMember, useLeaveClan, useMyClan } from "../lib/useClans";
+import {
+  CLAN_CREATE_COST,
+  useClanList,
+  useCreateClan,
+  useJoinClan,
+  useKickMember,
+  useLeaveClan,
+  useMyClan,
+  useSetClanAvatar,
+} from "../lib/useClans";
 import { useAuthStore } from "../store/useAuthStore";
 import { haptics } from "../lib/telegram";
 
@@ -7,7 +16,18 @@ interface Props {
   onClose: () => void;
 }
 
-const CREATE_COST = 5000;
+const CREATE_COST = CLAN_CREATE_COST;
+
+function ClanAvatar({ url, size = 44 }: { url: string | null | undefined; size?: number }) {
+  return (
+    <div
+      className="shrink-0 overflow-hidden rounded-full border border-gold/30 bg-black/40 bg-cover bg-center text-center"
+      style={{ width: size, height: size, lineHeight: `${size}px`, fontSize: size * 0.5, backgroundImage: url ? `url(${url})` : undefined }}
+    >
+      {!url && "⚔️"}
+    </div>
+  );
+}
 
 /** Кланы: создание/вступление, рейтинг по суммарной силе составов участников. */
 export function ClansScreen({ onClose }: Props) {
@@ -17,17 +37,21 @@ export function ClansScreen({ onClose }: Props) {
   const joinClan = useJoinClan();
   const leaveClan = useLeaveClan();
   const kickMember = useKickMember();
+  const setClanAvatar = useSetClanAvatar();
   const user = useAuthStore((s) => s.user);
 
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [editingAvatar, setEditingAvatar] = useState(false);
+  const [avatarDraft, setAvatarDraft] = useState("");
 
   function submitCreate() {
     if (!name.trim() || !tag.trim()) return;
     haptics.impact("medium");
     createClan.mutate(
-      { name: name.trim(), tag: tag.trim().toUpperCase() },
+      { name: name.trim(), tag: tag.trim().toUpperCase(), avatarUrl: avatarUrl.trim() || undefined },
       { onSuccess: () => setShowCreate(false) },
     );
   }
@@ -46,12 +70,57 @@ export function ClansScreen({ onClose }: Props) {
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-10">
           <div className="metal-banner overflow-hidden rounded-2xl border border-white/15 px-4 py-5 text-center">
+            <div className="mb-2 flex justify-center">
+              <ClanAvatar url={clan.avatarUrl} size={64} />
+            </div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">[{clan.tag}]</p>
             <p className="mt-1 text-2xl font-extrabold text-gold">{clan.name}</p>
             {clan.description && <p className="mt-1 text-xs text-white/50">{clan.description}</p>}
             <p className="mt-2 text-sm text-white/60">
               💪 {clan.totalPower.toLocaleString("ru-RU")} суммарной силы · {clan.members.length} участников
             </p>
+            {isLeader && !editingAvatar && (
+              <button
+                onClick={() => {
+                  setAvatarDraft(clan.avatarUrl ?? "");
+                  setEditingAvatar(true);
+                }}
+                className="mt-3 text-xs font-semibold text-gold/80"
+              >
+                Изменить аватарку
+              </button>
+            )}
+            {isLeader && editingAvatar && (
+              <div className="mt-3 flex flex-col gap-2">
+                <input
+                  value={avatarDraft}
+                  onChange={(e) => setAvatarDraft(e.target.value)}
+                  placeholder="Ссылка на картинку (https://...)"
+                  className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs outline-none"
+                />
+                {setClanAvatar.isError && (
+                  <p className="text-xs text-red-400">{(setClanAvatar.error as Error)?.message ?? "Не удалось сохранить"}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingAvatar(false)}
+                    className="flex-1 rounded-full border border-white/20 py-2 text-xs font-semibold"
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    onClick={() => {
+                      haptics.impact("light");
+                      setClanAvatar.mutate(avatarDraft.trim() || null, { onSuccess: () => setEditingAvatar(false) });
+                    }}
+                    disabled={setClanAvatar.isPending}
+                    className="flex-1 rounded-full bg-gold py-2 text-xs font-extrabold text-pitch-dark disabled:opacity-30"
+                  >
+                    Сохранить
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -121,8 +190,17 @@ export function ClansScreen({ onClose }: Props) {
               onChange={(e) => setTag(e.target.value.toUpperCase())}
               placeholder="Тег (2-5 символов)"
               maxLength={5}
-              className="mb-3 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm uppercase outline-none"
+              className="mb-2 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm uppercase outline-none"
             />
+            <div className="mb-3 flex items-center gap-2">
+              <ClanAvatar url={avatarUrl.trim() || null} />
+              <input
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="Ссылка на аватарку (необязательно)"
+                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none"
+              />
+            </div>
             {createClan.isError && (
               <p className="mb-2 text-xs text-red-400">{(createClan.error as Error)?.message ?? "Не удалось создать клан"}</p>
             )}
@@ -159,11 +237,14 @@ export function ClansScreen({ onClose }: Props) {
               key={c.id}
               className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5"
             >
-              <span className="flex min-w-0 flex-col">
-                <span className="truncate text-sm font-semibold">
-                  #{i + 1} [{c.tag}] {c.name}
+              <span className="flex min-w-0 items-center gap-2">
+                <ClanAvatar url={c.avatarUrl} size={32} />
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate text-sm font-semibold">
+                    #{i + 1} [{c.tag}] {c.name}
+                  </span>
+                  <span className="text-xs text-white/40">{c.memberCount} участников · {c.totalPower.toLocaleString("ru-RU")} 💪</span>
                 </span>
-                <span className="text-xs text-white/40">{c.memberCount} участников · {c.totalPower.toLocaleString("ru-RU")} 💪</span>
               </span>
               <button
                 onClick={() => {

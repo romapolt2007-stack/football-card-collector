@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
-import { CLAN_CREATE_COST, CLAN_NAME_MAX, calcUserSquadStrengths, isValidTag } from "../lib/clans.js";
+import { CLAN_CREATE_COST, CLAN_NAME_MAX, calcUserSquadStrengths, isValidAvatarUrl, isValidTag } from "../lib/clans.js";
 
 const router = Router();
 
@@ -20,6 +20,7 @@ router.get("/", async (_req, res) => {
       name: c.name,
       tag: c.tag,
       description: c.description,
+      avatarUrl: c.avatarUrl,
       memberCount: c.members.length,
       totalPower: Math.round(c.members.reduce((sum, m) => sum + (strengths.get(m.userId) ?? 0), 0)),
       createdAt: c.createdAt,
@@ -54,6 +55,7 @@ router.get("/mine", requireAuth, async (req, res) => {
       name: clan.name,
       tag: clan.tag,
       description: clan.description,
+      avatarUrl: clan.avatarUrl,
       leaderId: clan.leaderId,
       createdAt: clan.createdAt,
       totalPower: Math.round(clan.members.reduce((sum, m) => sum + (strengths.get(m.userId) ?? 0), 0)),
@@ -73,12 +75,17 @@ const createSchema = z.object({
   name: z.string().min(2).max(CLAN_NAME_MAX),
   tag: z.string(),
   description: z.string().max(200).optional(),
+  avatarUrl: z.string().optional(),
 });
 
 router.post("/", requireAuth, async (req, res) => {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success || !isValidTag(parsed.data.tag)) {
     res.status(400).json({ error: "Некорректные название или тег клана" });
+    return;
+  }
+  if (parsed.data.avatarUrl && !isValidAvatarUrl(parsed.data.avatarUrl)) {
+    res.status(400).json({ error: "Ссылка на аватарку должна быть https-адресом картинки" });
     return;
   }
 
@@ -108,6 +115,7 @@ router.post("/", requireAuth, async (req, res) => {
         name: parsed.data.name,
         tag: parsed.data.tag,
         description: parsed.data.description,
+        avatarUrl: parsed.data.avatarUrl,
         leaderId: req.userId!,
       },
     });
@@ -120,6 +128,25 @@ router.post("/", requireAuth, async (req, res) => {
   });
 
   res.json({ clanId: clan.id });
+});
+
+const avatarSchema = z.object({ avatarUrl: z.string().nullable() });
+
+router.post("/avatar", requireAuth, async (req, res) => {
+  const parsed = avatarSchema.safeParse(req.body);
+  if (!parsed.success || (parsed.data.avatarUrl && !isValidAvatarUrl(parsed.data.avatarUrl))) {
+    res.status(400).json({ error: "Ссылка на аватарку должна быть https-адресом картинки" });
+    return;
+  }
+
+  const membership = await prisma.clanMember.findUnique({ where: { userId: req.userId } });
+  if (!membership || membership.role !== "LEADER") {
+    res.status(403).json({ error: "Только лидер клана может менять аватарку" });
+    return;
+  }
+
+  await prisma.clan.update({ where: { id: membership.clanId }, data: { avatarUrl: parsed.data.avatarUrl } });
+  res.json({ avatarUrl: parsed.data.avatarUrl });
 });
 
 router.post("/:id/join", requireAuth, async (req, res) => {

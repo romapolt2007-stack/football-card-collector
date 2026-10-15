@@ -13,6 +13,19 @@ export function isValidTag(tag: string): boolean {
   return tag.length >= CLAN_TAG_MIN && tag.length <= CLAN_TAG_MAX && TAG_PATTERN.test(tag);
 }
 
+export const CLAN_AVATAR_URL_MAX = 500;
+
+/** Позволяем любую https-ссылку на картинку (включая t.me/Telegram file-ссылки) — без загрузки файлов на свой сервер. */
+export function isValidAvatarUrl(url: string): boolean {
+  if (url.length === 0 || url.length > CLAN_AVATAR_URL_MAX) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 /** Суммарная сила активных составов участников — один проход, без N+1 на каждого отдельно. */
 export async function calcUserSquadStrengths(userIds: string[]): Promise<Map<string, number>> {
   if (userIds.length === 0) return new Map();
