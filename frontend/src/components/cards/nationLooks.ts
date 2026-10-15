@@ -1,4 +1,15 @@
-export type HairStyle = "short" | "wavy" | "afro";
+export type HairStyle = "short" | "wavy" | "afro" | "bald" | "fauxhawk";
+
+export const HAIR_STYLES: HairStyle[] = ["short", "wavy", "afro", "bald", "fauxhawk"];
+
+/** Простой детерминированный хэш строки (та же схема, что в ClubCrest.tsx) — держать в синхроне. */
+export function hashString(value: string): number {
+  let h = 0;
+  for (let i = 0; i < value.length; i++) {
+    h = (h * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
 
 export interface NationLook {
   skinFrom: string;

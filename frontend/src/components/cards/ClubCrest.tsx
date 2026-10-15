@@ -23,8 +23,8 @@ const STAR_PATH =
  * логотипам — визуальный язык классических футсимов, не конкретный клуб.
  */
 export function ClubCrest({ club, size = 48 }: Props) {
-  const variant = hashString(club.id) % 5;
-  const showStar = hashString(`${club.id}-star`) % 3 === 0;
+  const variant = hashString(club.id) % 8;
+  const starCount = hashString(`${club.id}-star`) % 4;
   const { colorPrimary: p, colorSecondary: s, shortName } = club;
   const clipId = `shield-${club.id}`;
   const ringId = `ring-${club.id}`;
@@ -51,6 +51,14 @@ export function ClubCrest({ club, size = 48 }: Props) {
         {variant === 2 && <circle cx="50" cy="50" r="28" fill={s} />}
         {variant === 3 && <rect x="0" y="33" width="100" height="34" fill={s} />}
         {variant === 4 && <polygon points="50,0 100,50 50,100 0,50" fill={s} />}
+        {variant === 5 && (
+          <>
+            <rect x="12" width="22" height="100" fill={s} />
+            <rect x="66" width="22" height="100" fill={s} />
+          </>
+        )}
+        {variant === 6 && <polygon points="0,100 50,30 100,100" fill={s} />}
+        {variant === 7 && <rect x="0" y="0" width="100" height="100" fill="none" stroke={s} strokeWidth="14" />}
         {/* Рельефный блик сверху и тень снизу — объёмный "3D" вид щита. */}
         <ellipse cx="42" cy="18" rx="38" ry="16" fill="rgba(255,255,255,0.28)" />
         <rect y="70" width="100" height="30" fill="rgba(0,0,0,0.28)" />
@@ -58,13 +66,31 @@ export function ClubCrest({ club, size = 48 }: Props) {
       <path d={SHIELD_PATH} fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" />
       <path d={SHIELD_PATH} fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1" transform="translate(0.6,0.6)" />
 
-      {showStar && <path d={STAR_PATH} fill="#ffd166" stroke="rgba(0,0,0,0.35)" strokeWidth="1" />}
+      {Array.from({ length: starCount }, (_, i) => {
+        const scale = 0.45;
+        const spacing = 16;
+        const startX = 50 - ((starCount - 1) * spacing) / 2;
+        const desiredX = startX + i * spacing;
+        const desiredY = 14;
+        const tx = desiredX - scale * 50;
+        const ty = desiredY - scale * 20;
+        return (
+          <path
+            key={i}
+            d={STAR_PATH}
+            fill="#ffd166"
+            stroke="rgba(0,0,0,0.35)"
+            strokeWidth="1"
+            transform={`translate(${tx}, ${ty}) scale(${scale})`}
+          />
+        );
+      })}
 
       <text
         x="50"
-        y={showStar ? "66" : "60"}
+        y={starCount > 0 ? "66" : "60"}
         textAnchor="middle"
-        fontSize={showStar ? "24" : "28"}
+        fontSize={starCount > 0 ? "24" : "28"}
         fontWeight="800"
         fill="#fff"
         style={{ paintOrder: "stroke", stroke: "rgba(0,0,0,0.4)", strokeWidth: 3 }}

@@ -82,7 +82,7 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
 
       <div className="relative mt-1 flex flex-col items-center">
         <div className="relative">
-          <PlayerPortrait accent={theme.borderColor} size={isFull ? 84 : 64} nation={player.nation} />
+          <PlayerPortrait accent={theme.borderColor} size={isFull ? 84 : 64} nation={player.nation} playerId={player.id} />
           <div
             className="absolute -bottom-1 -right-1 rounded-full border-2 bg-black/50 p-0.5"
             style={{ borderColor: theme.borderColor }}
