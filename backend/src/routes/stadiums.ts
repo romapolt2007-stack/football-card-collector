@@ -6,6 +6,7 @@ import { stadiumQuickSellPrice } from "../lib/cardValue.js";
 import { freeSpinReady, msUntilFreeSpin, spinStadium } from "../lib/spin.js";
 import { setPendingSpin, takePendingSpin } from "../lib/spinStore.js";
 import { findStadiumCase, openStadiumCase, STADIUM_CASES } from "../lib/stadiumCases.js";
+import { getUserStadiumBuff } from "../lib/stadiumBuffs.js";
 
 const router = Router();
 
@@ -20,6 +21,11 @@ router.get("/", requireAuth, async (req, res) => {
     orderBy: { obtainedAt: "desc" },
   });
   res.json({ stadiumCards });
+});
+
+router.get("/buff", requireAuth, async (req, res) => {
+  const buff = await getUserStadiumBuff(req.userId!);
+  res.json(buff);
 });
 
 router.get("/status", requireAuth, async (req, res) => {
@@ -39,7 +45,8 @@ router.post("/spin", requireAuth, async (req, res) => {
 
   await prisma.user.update({ where: { id: user.id }, data: { lastFreeStadiumSpinAt: new Date() } });
 
-  const stadium = await spinStadium();
+  const buff = await getUserStadiumBuff(user.id);
+  const stadium = await spinStadium(buff.topTierWeightBonus);
   if (!stadium) {
     res.status(500).json({ error: "Нет стадионов в базе — попробуйте ещё раз" });
     return;
@@ -80,7 +87,8 @@ router.post("/open-case", requireAuth, async (req, res) => {
     }),
   ]);
 
-  const stadium = await openStadiumCase(caseDef);
+  const buff = await getUserStadiumBuff(user.id);
+  const stadium = await openStadiumCase(caseDef, buff.topTierWeightBonus);
   if (!stadium) {
     // Откатываем списание, если стадионов под эти веса не нашлось (пустая база — не должно случаться в норме).
     await prisma.user.update({ where: { id: user.id }, data: { coins: { increment: caseDef.priceCoins } } });

@@ -121,6 +121,8 @@ export interface MarketHistoryEntry {
 export interface SpinStatus {
   ready: boolean;
   msLeft: number;
+  hotStreak?: number;
+  hotStreakMax?: number;
 }
 
 export interface PlayerSpinResult {
@@ -128,6 +130,28 @@ export interface PlayerSpinResult {
   rarity: Rarity;
   estimatedValue: number;
   sellPrice: number;
+  hotStreak?: number;
+  hotStreakMax?: number;
+  wasHotUpgrade?: boolean;
+}
+
+export interface StadiumBuff {
+  topTierWeightBonus: number;
+  extraListingSlots: number;
+  bestRarity: Rarity | null;
+}
+
+export interface RelicStatus {
+  relicCount: number;
+  pending: number;
+  perCardPerDay: number;
+}
+
+export interface LeagueTrend {
+  leagueId: string;
+  leagueName: string;
+  multiplier: number;
+  changePct: number;
 }
 
 export interface StadiumSpinResult {

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { BidModal } from "../components/market/BidModal";
 import { CreateListingModal, type ListableItem } from "../components/market/CreateListingModal";
 import { ListingCard } from "../components/market/ListingCard";
+import { MarketTrendsTicker } from "../components/market/MarketTrendsTicker";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { CoinBalance } from "../components/common/CoinBalance";
 import { PillTabs } from "../components/common/PillTabs";
@@ -118,6 +119,8 @@ export function MarketScreen() {
 
       {tab === "browse" && (
         <>
+          <MarketTrendsTicker />
+
           <PillTabs
             layoutId="market-kind"
             active={kind}

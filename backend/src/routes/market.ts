@@ -4,11 +4,20 @@ import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 import { getIo } from "../lib/socket.js";
 import { MARKET_FEE_RATE } from "../lib/marketConstants.js";
+import { getUserStadiumBuff } from "../lib/stadiumBuffs.js";
+import { todaysLeagueTrends } from "../lib/marketTrends.js";
 import type { Position, Rarity } from "@prisma/client";
 
 const router = Router();
 
 const DURATION_HOURS = [1, 6, 24, 168] as const;
+/** Базовый лимит активных лотов на игрока — расширяется баффом лучшего владеемого стадиона. */
+const BASE_LISTING_LIMIT = 10;
+
+router.get("/trends-today", async (_req, res) => {
+  const trends = await todaysLeagueTrends();
+  res.json({ trends });
+});
 
 const listingInclude = {
   card: { include: { player: { include: { club: { include: { league: true } } } } } },
@@ -169,6 +178,16 @@ router.post("/list", requireAuth, async (req, res) => {
   }
   if (parsed.data.buyNowPrice && parsed.data.buyNowPrice <= parsed.data.price) {
     res.status(400).json({ error: "Цена выкупа должна быть выше стартовой цены" });
+    return;
+  }
+
+  const activeCount = await prisma.listing.count({ where: { sellerId: req.userId, status: "ACTIVE" } });
+  const buff = await getUserStadiumBuff(req.userId!);
+  const limit = BASE_LISTING_LIMIT + buff.extraListingSlots;
+  if (activeCount >= limit) {
+    res.status(400).json({
+      error: `Лимит активных лотов исчерпан (${activeCount}/${limit}) — прокачайте стадион, чтобы расширить рынок`,
+    });
     return;
   }
 

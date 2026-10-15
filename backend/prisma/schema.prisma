@@ -172,6 +172,15 @@ model User {
   lastFreeSpinAt        DateTime?
   lastFreeStadiumSpinAt DateTime?
 
+  // Азарт (Hot Streak): растёт, пока игрок не пропускает "окно" между спинами
+  // и/или крутит с жёстким фильтром (клуб) — временно поднимает шанс апгрейда
+  // результата до LEGEND/ICON. Сбрасывается, если спин пропущен надолго.
+  hotStreakCount Int @default(0)
+
+  // Пассивные "дивиденды" за владение лимитированными (maxSupply) картами —
+  // копится лениво по времени, см. lib/relics.ts.
+  relicDividendsCollectedAt DateTime?
+
   cards        Card[]
   stadiumCards StadiumCard[]
   listings     Listing[]

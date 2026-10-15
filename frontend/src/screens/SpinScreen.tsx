@@ -5,6 +5,7 @@ import { useSaveSpinPlayer, useSellSpinPlayer, useSpinPlayer, useSpinStatus } fr
 import { RarityCard } from "../components/cards/RarityCard";
 import { SpinReel } from "../components/spin/SpinReel";
 import { SpinFilterBar } from "../components/spin/SpinFilterBar";
+import { HotStreakMeter } from "../components/spin/HotStreakMeter";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { haptics } from "../lib/telegram";
 import type { Card, PlayerSpinResult, SpinFilters } from "../types/game";
@@ -113,6 +114,9 @@ export function SpinScreen() {
               <RarityCard card={previewCard(result)} size="lg" />
             </div>
             <p className="text-sm text-white/60">Примерная стоимость: {result.estimatedValue.toLocaleString("ru-RU")} 🪙</p>
+            {result.wasHotUpgrade && (
+              <p className="animate-pulse text-sm font-extrabold text-orange-400">🔥 Азарт сработал — апгрейд редкости!</p>
+            )}
             <div className="flex gap-3">
               <button
                 onClick={handleSell}
@@ -139,6 +143,7 @@ export function SpinScreen() {
               <p className="text-sm text-white/50">Загрузка...</p>
             ) : ready ? (
               <div className="flex w-full max-w-sm flex-col items-center gap-3">
+                <HotStreakMeter streak={status.data?.hotStreak ?? 0} max={status.data?.hotStreakMax ?? 12} />
                 <SpinFilterBar filters={filters} onChange={setFilters} />
                 <button
                   onClick={handleSpin}

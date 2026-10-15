@@ -3,8 +3,18 @@ import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 import { quickSellPrice } from "../lib/cardValue.js";
-import { freeSpinReady, msUntilFreeSpin, spinPlayer } from "../lib/spin.js";
+import {
+  attemptTopTierUpgrade,
+  freeSpinReady,
+  hotStreakUpgradeChance,
+  HOT_STREAK_MAX,
+  msUntilFreeSpin,
+  nextHotStreak,
+  spinPlayer,
+} from "../lib/spin.js";
 import { setPendingSpin, takePendingSpin } from "../lib/spinStore.js";
+import { getUserStadiumBuff } from "../lib/stadiumBuffs.js";
+import { leagueTrendMultiplier } from "../lib/marketTrends.js";
 
 const router = Router();
 
@@ -13,6 +23,8 @@ router.get("/status", requireAuth, async (req, res) => {
   res.json({
     ready: freeSpinReady(user.lastFreeSpinAt),
     msLeft: msUntilFreeSpin(user.lastFreeSpinAt),
+    hotStreak: user.hotStreakCount,
+    hotStreakMax: HOT_STREAK_MAX,
   });
 });
 
@@ -35,19 +47,41 @@ router.post("/spin", requireAuth, async (req, res) => {
     return;
   }
 
-  // Кулдаун фиксируем сразу, до генерации результата — защита от повторного нажатия.
-  await prisma.user.update({ where: { id: user.id }, data: { lastFreeSpinAt: new Date() } });
+  const streak = nextHotStreak(user.hotStreakCount, user.lastFreeSpinAt, Boolean(parsed.data.clubId));
 
-  const player = await spinPlayer(parsed.data);
+  // Кулдаун и серию фиксируем сразу, до генерации результата — защита от повторного нажатия.
+  await prisma.user.update({ where: { id: user.id }, data: { lastFreeSpinAt: new Date(), hotStreakCount: streak } });
+
+  let player = await spinPlayer(parsed.data);
   if (!player) {
     res.status(400).json({ error: "Нет игроков под эти фильтры — попробуйте другие" });
     return;
   }
 
-  const price = quickSellPrice(player.rarity, player);
+  const stadiumBuff = await getUserStadiumBuff(user.id);
+  let wasHotUpgrade = false;
+  if (!["LEGEND", "ICON"].includes(player.rarity)) {
+    const chance = hotStreakUpgradeChance(streak, stadiumBuff.topTierWeightBonus);
+    const upgraded = await attemptTopTierUpgrade(parsed.data, chance);
+    if (upgraded) {
+      player = upgraded;
+      wasHotUpgrade = true;
+    }
+  }
+
+  const trendMultiplier = leagueTrendMultiplier(player.club.leagueId);
+  const price = quickSellPrice(player.rarity, player, trendMultiplier);
   setPendingSpin(user.id, { kind: "player", playerId: player.id, rarity: player.rarity, price });
 
-  res.json({ player, rarity: player.rarity, estimatedValue: price * 4, sellPrice: price });
+  res.json({
+    player,
+    rarity: player.rarity,
+    estimatedValue: price * 4,
+    sellPrice: price,
+    hotStreak: streak,
+    hotStreakMax: HOT_STREAK_MAX,
+    wasHotUpgrade,
+  });
 });
 
 router.post("/save", requireAuth, async (req, res) => {

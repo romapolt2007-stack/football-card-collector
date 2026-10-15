@@ -9,8 +9,17 @@ import {
   useStadiumSpinStatus,
 } from "../lib/useSpin";
 import { StadiumReveal } from "../components/spin/StadiumReveal";
+import { useStadiumBuff } from "../lib/useMeta";
 import { haptics } from "../lib/telegram";
 import type { StadiumCard, StadiumSpinResult } from "../types/game";
+
+const RARITY_LABEL: Record<string, string> = {
+  BRONZE: "Бронза",
+  SILVER: "Серебро",
+  GOLD: "Золото",
+  LEGEND: "Легенда",
+  ICON: "Икона",
+};
 
 function formatCountdown(ms: number): string {
   const totalMin = Math.ceil(ms / 60_000);
@@ -42,6 +51,7 @@ const CASE_STYLE: Record<string, { emoji: string; gradient: string; border: stri
 export function StadiumsScreen() {
   const user = useAuthStore((s) => s.user);
   const status = useStadiumSpinStatus();
+  const buff = useStadiumBuff();
   const cases = useStadiumCases();
   const spin = useSpinStadium();
   const openCase = useOpenStadiumCase();
@@ -80,6 +90,17 @@ export function StadiumsScreen() {
           {(user?.coins ?? 0).toLocaleString("ru-RU")} 🪙
         </span>
       </div>
+
+      {buff.data?.bestRarity && (
+        <div className="mx-4 mb-3 flex items-center justify-between rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-xs">
+          <span className="font-semibold text-gold">
+            🏟️ Бафф стадиона: {RARITY_LABEL[buff.data.bestRarity] ?? buff.data.bestRarity}
+          </span>
+          <span className="font-bold text-white/70">
+            +{Math.round(buff.data.topTierWeightBonus * 100)}% топ-карты · +{buff.data.extraListingSlots} слотов рынка
+          </span>
+        </div>
+      )}
 
       {result ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">

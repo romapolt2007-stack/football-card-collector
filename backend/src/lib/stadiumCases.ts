@@ -40,8 +40,13 @@ export function findStadiumCase(id: string): StadiumCaseDef | undefined {
   return STADIUM_CASES.find((c) => c.id === id);
 }
 
-/** Роллит редкость по весам кейса (среди тиров, которые реально есть в базе), потом стадион внутри тира. */
-export async function openStadiumCase(caseDef: StadiumCaseDef) {
+/**
+ * Роллит редкость по весам кейса (среди тиров, которые реально есть в
+ * базе), потом стадион внутри тира. `topTierBonus` — бафф от лучшего
+ * ВЛАДЕЕМОГО стадиона (см. lib/stadiumBuffs.ts): прибавляется к весам
+ * GOLD/LEGEND/ICON пропорционально их месту в иерархии — "деньги к деньгам".
+ */
+export async function openStadiumCase(caseDef: StadiumCaseDef, topTierBonus = 0) {
   const allStadiums = await prisma.stadium.findMany({ include: { club: { include: { league: true } } } });
   if (allStadiums.length === 0) return null;
 
@@ -51,14 +56,17 @@ export async function openStadiumCase(caseDef: StadiumCaseDef) {
     byRarity.get(s.rarity)!.push(s);
   }
 
+  const BONUS_SCALE: Partial<Record<Rarity, number>> = { GOLD: 1, LEGEND: 2, ICON: 3 };
+  const effectiveWeight = (r: Rarity) => caseDef.weights[r] + topTierBonus * 100 * (BONUS_SCALE[r] ?? 0);
+
   const availableTiers = [...byRarity.keys()].filter((r) => caseDef.weights[r] > 0);
   if (availableTiers.length === 0) return null;
 
-  const totalWeight = availableTiers.reduce((sum, r) => sum + caseDef.weights[r], 0);
+  const totalWeight = availableTiers.reduce((sum, r) => sum + effectiveWeight(r), 0);
   let roll = Math.random() * totalWeight;
   let chosenRarity = availableTiers[availableTiers.length - 1];
   for (const r of availableTiers) {
-    roll -= caseDef.weights[r];
+    roll -= effectiveWeight(r);
     if (roll <= 0) {
       chosenRarity = r;
       break;
