@@ -35,7 +35,7 @@ export function MiniCard({ card, onTap, onDragEnd }: Props) {
       layout
       layoutId={`squad-card-${card.id}`}
       transition={{ layout: { type: "spring", stiffness: 320, damping: 28 } }}
-      className="absolute h-14 w-11 -translate-x-1/2 -translate-y-1/2"
+      className="h-14 w-11"
     >
       <motion.div
         drag
