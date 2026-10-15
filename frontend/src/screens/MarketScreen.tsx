@@ -4,6 +4,7 @@ import { BidModal } from "../components/market/BidModal";
 import { CreateListingModal } from "../components/market/CreateListingModal";
 import { HotDealsRow } from "../components/market/HotDealsRow";
 import { ListingCard } from "../components/market/ListingCard";
+import { PlayerTrendsRow } from "../components/market/PlayerTrendsRow";
 import { TrendTicker } from "../components/market/TrendTicker";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { CoinBalance } from "../components/common/CoinBalance";
@@ -17,6 +18,7 @@ import {
   useMarketLiveUpdates,
   useMarketTrends,
   useMyListings,
+  usePlayerTrends,
   type MarketFilters,
 } from "../lib/useMarket";
 import { useInventory } from "../lib/queries";
@@ -56,6 +58,7 @@ export function MarketScreen() {
   const { data, isLoading } = useListings(filters);
   const hotDeals = useHotDeals();
   const trends = useMarketTrends();
+  const playerTrends = usePlayerTrends();
   const myListings = useMyListings();
   const history = useMarketHistory();
   const buyListing = useBuyListing();
@@ -110,6 +113,9 @@ export function MarketScreen() {
       {tab === "browse" && (
         <>
           {trends.data && trends.data.length > 0 && <TrendTicker trends={trends.data} />}
+          {playerTrends.data && (
+            <PlayerTrendsRow risers={playerTrends.data.risers} fallers={playerTrends.data.fallers} />
+          )}
           {hotDeals.data && <HotDealsRow listings={hotDeals.data} onSelect={setBidding} />}
 
           <input

@@ -357,6 +357,15 @@ export interface MarketTrend {
   changePct: number;
 }
 
+export interface PlayerTrend {
+  playerId: string;
+  name: string;
+  nationFlag: string;
+  overall: number;
+  recentAvg: number;
+  changePct: number;
+}
+
 export interface MarketHistoryEntry {
   id: string;
   type: "MARKET_BUY" | "MARKET_SELL";

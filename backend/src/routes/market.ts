@@ -149,6 +149,76 @@ router.get("/trends", async (_req, res) => {
   res.json({ trends });
 });
 
+/**
+ * Fantasy-биржа: топ растущих/падающих в цене ИГРОКОВ (не редкостей) — та же
+ * 48ч-методология, что /trends, только группировка по playerId. На реальных
+ * продажах, без фейковой волатильности — если данных мало, список короткий
+ * или пустой, это честно отражает живой рынок, а не выдумывает активность.
+ */
+router.get("/player-trends", async (_req, res) => {
+  const now = Date.now();
+  const since48h = new Date(now - 48 * 60 * 60 * 1000);
+  const cutoff = new Date(now - 24 * 60 * 60 * 1000);
+  const MIN_SALES_PER_BUCKET = 2;
+
+  const recentSales = await prisma.transaction.findMany({
+    where: { type: "MARKET_SELL", createdAt: { gte: since48h } },
+    select: { amount: true, createdAt: true, meta: true },
+  });
+  if (recentSales.length === 0) {
+    res.json({ risers: [], fallers: [] });
+    return;
+  }
+
+  const listingIds = [...new Set(recentSales.map((t) => (t.meta as { listingId?: string })?.listingId).filter((id): id is string => Boolean(id)))];
+  const listings = await prisma.listing.findMany({
+    where: { id: { in: listingIds } },
+    include: { card: { include: { player: { include: { club: true } } } } },
+  });
+  const playerByListing = new Map(listings.map((l) => [l.id, l.card.player]));
+
+  const buckets = new Map<string, { recent: number[]; prior: number[]; player: (typeof listings)[number]["card"]["player"] }>();
+  for (const sale of recentSales) {
+    const listingId = (sale.meta as { listingId?: string })?.listingId;
+    const player = listingId ? playerByListing.get(listingId) : undefined;
+    if (!player) continue;
+    if (!buckets.has(player.id)) buckets.set(player.id, { recent: [], prior: [], player });
+    const bucket = buckets.get(player.id)!;
+    if (sale.createdAt >= cutoff) bucket.recent.push(sale.amount);
+    else bucket.prior.push(sale.amount);
+  }
+
+  const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+
+  const all = [...buckets.values()]
+    .filter((b) => b.recent.length >= MIN_SALES_PER_BUCKET && b.prior.length >= MIN_SALES_PER_BUCKET)
+    .map((b) => {
+      const recentAvg = avg(b.recent);
+      const priorAvg = avg(b.prior);
+      const changePct = Math.round(((recentAvg - priorAvg) / priorAvg) * 100);
+      return {
+        playerId: b.player.id,
+        name: b.player.name,
+        nationFlag: b.player.nationFlag,
+        overall: b.player.overall,
+        recentAvg: Math.round(recentAvg),
+        changePct,
+      };
+    })
+    .filter((t) => t.changePct !== 0);
+
+  const risers = all
+    .filter((t) => t.changePct > 0)
+    .sort((a, b) => b.changePct - a.changePct)
+    .slice(0, 5);
+  const fallers = all
+    .filter((t) => t.changePct < 0)
+    .sort((a, b) => a.changePct - b.changePct)
+    .slice(0, 5);
+
+  res.json({ risers, fallers });
+});
+
 router.get("/mine", requireAuth, async (req, res) => {
   const listings = await prisma.listing.findMany({
     where: { sellerId: req.userId },

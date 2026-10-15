@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { api } from "./api";
 import { getSocket } from "./socket";
 import { useAuthStore } from "../store/useAuthStore";
-import type { Listing, MarketHistoryEntry, MarketTrend, Rarity } from "../types/game";
+import type { Listing, MarketHistoryEntry, MarketTrend, PlayerTrend, Rarity } from "../types/game";
 
 export interface MarketFilters {
   rarity?: Rarity;
@@ -44,6 +44,14 @@ export function useMarketTrends() {
   return useQuery({
     queryKey: ["market-trends"],
     queryFn: () => api.get<{ trends: MarketTrend[] }>("/api/market/trends").then((r) => r.trends),
+    refetchInterval: 60_000,
+  });
+}
+
+export function usePlayerTrends() {
+  return useQuery({
+    queryKey: ["market-player-trends"],
+    queryFn: () => api.get<{ risers: PlayerTrend[]; fallers: PlayerTrend[] }>("/api/market/player-trends"),
     refetchInterval: 60_000,
   });
 }
