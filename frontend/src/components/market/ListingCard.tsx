@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ClubCrest } from "../cards/ClubCrest";
+import { StadiumIllustration } from "../cards/StadiumIllustration";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import { POSITION_RU } from "../../lib/ruLabels";
 import type { Listing } from "../../types/game";
@@ -25,8 +26,8 @@ function formatCountdown(ms: number): string {
 }
 
 export function ListingCard({ listing, isMine, onBuy, onBid, onCancel, isBusy }: Props) {
-  const theme = RARITY_THEME[listing.card.rarity];
-  const { player } = listing.card;
+  const rarity = listing.card?.rarity ?? listing.stadiumCard!.stadium.rarity;
+  const theme = RARITY_THEME[rarity];
   const [msLeft, setMsLeft] = useState(() => new Date(listing.expiresAt).getTime() - Date.now());
 
   useEffect(() => {
@@ -43,15 +44,29 @@ export function ListingCard({ listing, isMine, onBuy, onBid, onCancel, isBusy }:
       className="relative flex flex-col overflow-hidden rounded-2xl border-2 p-3"
       style={{ background: theme.background, borderColor: theme.borderColor, boxShadow: theme.glow, color: theme.textColor }}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col items-center leading-none">
-          <span className="text-xl font-extrabold">{player.overall}</span>
-          <span className="mt-0.5 text-[0.65em] font-bold opacity-80">{POSITION_RU[player.position]}</span>
-        </div>
-        <ClubCrest club={player.club} size={32} />
-      </div>
-
-      <p className="mt-1 truncate text-center text-xs font-bold uppercase tracking-wide">{player.name}</p>
+      {listing.card ? (
+        <>
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col items-center leading-none">
+              <span className="text-xl font-extrabold">{listing.card.player.overall}</span>
+              <span className="mt-0.5 text-[0.65em] font-bold opacity-80">{POSITION_RU[listing.card.player.position]}</span>
+            </div>
+            <ClubCrest club={listing.card.player.club} size={32} />
+          </div>
+          <p className="mt-1 truncate text-center text-xs font-bold uppercase tracking-wide">{listing.card.player.name}</p>
+        </>
+      ) : (
+        <>
+          <div className="flex items-start justify-between">
+            <span className="text-xl font-extrabold">{(listing.stadiumCard!.stadium.capacity / 1000).toFixed(0)}к</span>
+            <ClubCrest club={listing.stadiumCard!.stadium.club} size={32} />
+          </div>
+          <div className="flex justify-center">
+            <StadiumIllustration stadiumId={listing.stadiumCard!.stadium.id} accent={theme.borderColor} size={40} />
+          </div>
+          <p className="mt-1 truncate text-center text-xs font-bold uppercase tracking-wide">{listing.stadiumCard!.stadium.name}</p>
+        </>
+      )}
 
       <div className="mt-2 flex items-center justify-between rounded-full bg-black/25 px-2 py-1 text-[10px] font-semibold">
         <span>⏱ {formatCountdown(msLeft)}</span>

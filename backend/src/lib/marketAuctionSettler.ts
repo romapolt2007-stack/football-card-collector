@@ -49,7 +49,11 @@ async function settleOne(listingId: string) {
       if (!fresh || fresh.status !== "ACTIVE") return false;
 
       await tx.listing.update({ where: { id: listing.id }, data: { status: "SOLD" } });
-      await tx.card.update({ where: { id: listing.cardId }, data: { ownerId: bid.bidderId, isListed: false } });
+      if (listing.cardId) {
+        await tx.card.update({ where: { id: listing.cardId }, data: { ownerId: bid.bidderId, isListed: false } });
+      } else if (listing.stadiumCardId) {
+        await tx.stadiumCard.update({ where: { id: listing.stadiumCardId }, data: { ownerId: bid.bidderId, isListed: false } });
+      }
       await tx.user.update({ where: { id: bid.bidderId }, data: { coins: { decrement: bid.amount } } });
       await tx.user.update({ where: { id: listing.sellerId }, data: { coins: { increment: sellerPayout } } });
       await tx.transaction.createMany({
@@ -71,7 +75,8 @@ async function settleOne(listingId: string) {
   // Ни одна ставка не прошла (или ставок не было вовсе) — лот снимается без продажи.
   await prisma.$transaction([
     prisma.listing.update({ where: { id: listing.id }, data: { status: "EXPIRED" } }),
-    prisma.card.update({ where: { id: listing.cardId }, data: { isListed: false } }),
+    ...(listing.cardId ? [prisma.card.update({ where: { id: listing.cardId }, data: { isListed: false } })] : []),
+    ...(listing.stadiumCardId ? [prisma.stadiumCard.update({ where: { id: listing.stadiumCardId }, data: { isListed: false } })] : []),
   ]);
   getIo()?.emit("market:removed", { listingId: listing.id });
 }

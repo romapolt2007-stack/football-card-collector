@@ -1,10 +1,8 @@
 import type { Card } from "../../types/game";
 import { RARITY_THEME } from "./rarityTheme";
-import { editionById } from "./specialEditionThemes";
 import { ClubCrest } from "./ClubCrest";
 import { PlayerPortrait } from "./PlayerPortrait";
 import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
-import { effectiveOverall } from "../../lib/cardStats";
 
 interface Props {
   card: Card;
@@ -19,18 +17,15 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
   full: "w-full text-[11px]",
 };
 
-/** Силуэт "щит/баннер" с заострением снизу — фирменная форма карты FUT-стиля, для всех размеров. */
+/** Силуэт "щит/баннер" с заострением снизу — фирменная форма карты, для всех размеров. */
 const PENNANT_CLIP =
   "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
 
 export function RarityCard({ card, size = "md", onClick }: Props) {
-  const rarityTheme = RARITY_THEME[card.rarity];
-  const edition = editionById(card.specialEdition);
-  const theme = edition ? { ...rarityTheme, ...edition, statBg: "rgba(0,0,0,0.3)" } : rarityTheme;
+  const theme = RARITY_THEME[card.rarity];
   const { player } = card;
   const isIcon = card.rarity === "ICON";
   const isLegend = card.rarity === "LEGEND";
-  const isUnavailable = card.unavailableMatches > 0;
   const isFull = size === "full";
 
   return (
@@ -42,7 +37,6 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
         borderColor: theme.borderColor,
         boxShadow: theme.glow,
         color: theme.textColor,
-        opacity: isUnavailable ? 0.6 : 1,
         clipPath: PENNANT_CLIP,
       }}
     >
@@ -52,31 +46,14 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
         className="pointer-events-none absolute inset-0"
         style={{ background: "linear-gradient(140deg, rgba(255,255,255,0.22) 0%, transparent 38%)" }}
       />
-      {edition && <div className={`${edition.patternClass} pointer-events-none absolute inset-0`} />}
       {isLegend && <div className="holo-sweep pointer-events-none absolute inset-0" />}
       {isIcon && <IconSparkles />}
-      {edition && (
-        <span
-          className="absolute left-1.5 top-1.5 z-10 rounded px-1.5 py-0.5 text-[0.6em] font-extrabold uppercase tracking-wide"
-          style={{ background: "rgba(0,0,0,0.45)", color: edition.borderColor }}
-        >
-          {edition.tag}
-        </span>
-      )}
-      {isUnavailable && (
-        <span className="absolute right-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white">
-          {card.unavailableMatches}
-        </span>
-      )}
 
       <div className="relative flex items-start justify-between">
         <div className="flex flex-col items-center leading-none">
           <span className="text-2xl font-extrabold" style={isFull ? { textShadow: `0 0 10px ${theme.borderColor}88` } : undefined}>
-            {effectiveOverall(card)}
+            {player.overall}
           </span>
-          {card.trainingBoost > 0 && (
-            <span className="mt-0.5 text-[0.6em] font-extrabold text-emerald-400">+{card.trainingBoost} ТРН</span>
-          )}
           <span className="mt-0.5 text-[0.7em] font-bold opacity-80">{POSITION_RU[player.position]}</span>
         </div>
         <div className="flex flex-col items-end gap-1 text-right">

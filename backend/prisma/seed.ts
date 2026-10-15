@@ -1,77 +1,122 @@
-import { PrismaClient } from "@prisma/client";
-import {
-  CLUB_COLORS,
-  POSITIONS_BY_SLOT,
-  generateClubName,
-  generatePlayerData,
-  randInt,
-  pick,
-} from "./seedShared.js";
+import { PrismaClient, Position } from "@prisma/client";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { rarityForCapacity, rarityForOverall, rollStats } from "./seedShared.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const prisma = new PrismaClient();
 
-const LEAGUE_DEFS = [
-  { name: "Crown League", clubCount: 20 },
-  { name: "Kaiser Liga", clubCount: 18 },
-  { name: "Liga Dorada", clubCount: 20 },
-  { name: "Lega Stella", clubCount: 20 },
-  { name: "Ligue Royale", clubCount: 18 },
-  { name: "Liga Atlântica", clubCount: 16 },
-  { name: "Tulpen Liga", clubCount: 16 },
-  { name: "Liga Verde-Ouro", clubCount: 16 },
-];
+interface ClubData {
+  slug: string;
+  name: string;
+  shortName: string;
+  league: string;
+  colorPrimary: string;
+  colorSecondary: string;
+  stadium: { name: string; city: string; capacity: number; openedYear: number };
+}
 
+interface PlayerData {
+  slug: string;
+  name: string;
+  fullName: string;
+  club: string;
+  position: Position;
+  nation: string;
+  nationFlag: string;
+  overall: number;
+}
+
+function loadJson<T>(filename: string): T {
+  const path = join(__dirname, "data", filename);
+  return JSON.parse(readFileSync(path, "utf-8")) as T;
+}
+
+/**
+ * Сид РЕАЛЬНЫХ данных (prisma/data/clubs.json, prisma/data/players.json) —
+ * никакой процедурной генерации вымышленных имён, только загрузка готового
+ * curated-набора. ДЕСТРУКТИВНО: полностью очищает игровые данные перед
+ * загрузкой — предназначено для полного сброса (см. README/план разворота
+ * на реальных футболистов), НИКОГДА не запускать против прода без явного
+ * согласования.
+ */
 async function main() {
   console.log("Очищаю старые данные...");
+  await prisma.marketBid.deleteMany();
+  await prisma.listing.deleteMany();
   await prisma.card.deleteMany();
+  await prisma.stadiumCard.deleteMany();
   await prisma.player.deleteMany();
+  await prisma.stadium.deleteMany();
   await prisma.club.deleteMany();
   await prisma.league.deleteMany();
-  await prisma.quest.deleteMany();
 
-  const usedClubNames = new Set<string>();
+  const clubsData = loadJson<ClubData[]>("clubs.json");
+  const playersData = loadJson<PlayerData[]>("players.json");
 
-  for (const [leagueOrder, leagueDef] of LEAGUE_DEFS.entries()) {
-    const league = await prisma.league.create({
-      data: { name: leagueDef.name, order: leagueOrder },
-    });
-
-    for (let i = 0; i < leagueDef.clubCount; i++) {
-      const clubName = generateClubName(usedClubNames);
-      const [colorPrimary, colorSecondary] = pick(CLUB_COLORS);
-      const club = await prisma.club.create({
-        data: {
-          name: clubName,
-          shortName: clubName.slice(0, 3).toUpperCase(),
-          colorPrimary,
-          colorSecondary,
-          leagueId: league.id,
-        },
-      });
-
-      const squadSize = randInt(6, 8);
-      for (let p = 0; p < squadSize; p++) {
-        const position = POSITIONS_BY_SLOT[p % POSITIONS_BY_SLOT.length];
-        await prisma.player.create({ data: generatePlayerData(position, club.id) });
-      }
-    }
-    console.log(`Лига "${leagueDef.name}" — ${leagueDef.clubCount} клубов готово`);
+  const leagueNames = [...new Set(clubsData.map((c) => c.league))];
+  const leagueByName = new Map<string, string>();
+  for (const [order, name] of leagueNames.entries()) {
+    const league = await prisma.league.create({ data: { name, order } });
+    leagueByName.set(name, league.id);
   }
 
-  const totalPlayers = await prisma.player.count();
-  console.log(`Всего игроков: ${totalPlayers}`);
+  const clubIdBySlug = new Map<string, string>();
+  for (const c of clubsData) {
+    const club = await prisma.club.create({
+      data: {
+        name: c.name,
+        shortName: c.shortName,
+        colorPrimary: c.colorPrimary,
+        colorSecondary: c.colorSecondary,
+        leagueId: leagueByName.get(c.league)!,
+      },
+    });
+    clubIdBySlug.set(c.slug, club.id);
 
-  console.log("Сею ежедневные квесты...");
-  await prisma.quest.createMany({
-    data: [
-      { code: "OPEN_PACK", title: "Открой 1 пак", description: "Открой любой пак", target: 1, reward: 500 },
-      { code: "PLAY_MATCH", title: "Сыграй 3 матча", description: "Сыграй 3 матча в любом режиме", target: 3, reward: 800 },
-      { code: "WIN_MATCH", title: "Победи в матче", description: "Выиграй 1 матч", target: 1, reward: 1000 },
-      { code: "SELL_CARD", title: "Продай карточку", description: "Выставь карточку на рынок", target: 1, reward: 300 },
-      { code: "LOGIN_STREAK", title: "Зайди в игру", description: "Ежедневный вход", target: 1, reward: 200 },
-      { code: "WIN_DUEL", title: "Выиграй 2 дуэли", description: "Победи 2 раза в режиме «Дуэль»", target: 2, reward: 600 },
-    ],
-  });
+    await prisma.stadium.create({
+      data: {
+        name: c.stadium.name,
+        city: c.stadium.city,
+        capacity: c.stadium.capacity,
+        openedYear: c.stadium.openedYear,
+        rarity: rarityForCapacity(c.stadium.capacity),
+        clubId: club.id,
+      },
+    });
+  }
+  console.log(`Клубы и стадионы: ${clubsData.length}`);
+
+  for (const p of playersData) {
+    const clubId = clubIdBySlug.get(p.club);
+    if (!clubId) {
+      throw new Error(`Игрок ${p.slug}: клуб "${p.club}" не найден в clubs.json`);
+    }
+    const rarity = rarityForOverall(p.overall);
+    const stats = rollStats(p.overall, p.position);
+
+    await prisma.player.create({
+      data: {
+        name: p.name,
+        fullName: p.fullName,
+        nation: p.nation,
+        nationFlag: p.nationFlag,
+        position: p.position,
+        overall: p.overall,
+        ...stats,
+        age: 24,
+        height: p.position === "GK" ? 190 : 180,
+        foot: "RIGHT",
+        weakFoot: 3,
+        skillMoves: rarity === "LEGEND" || rarity === "ICON" ? 4 : 3,
+        rarity,
+        clubId,
+      },
+    });
+  }
+  console.log(`Игроки: ${playersData.length}`);
 
   console.log("Готово.");
 }

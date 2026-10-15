@@ -3,9 +3,10 @@ import { useEffect } from "react";
 import { api } from "./api";
 import { getSocket } from "./socket";
 import { useAuthStore } from "../store/useAuthStore";
-import type { Listing, MarketHistoryEntry, MarketTrend, PlayerTrend, Rarity } from "../types/game";
+import type { Listing, MarketHistoryEntry, Rarity } from "../types/game";
 
 export interface MarketFilters {
+  kind?: "player" | "stadium";
   rarity?: Rarity;
   position?: string;
   nation?: string;
@@ -37,22 +38,6 @@ export function useHotDeals() {
     queryKey: ["market-hot"],
     queryFn: () => api.get<{ listings: Listing[] }>("/api/market/hot").then((r) => r.listings),
     refetchInterval: 30_000,
-  });
-}
-
-export function useMarketTrends() {
-  return useQuery({
-    queryKey: ["market-trends"],
-    queryFn: () => api.get<{ trends: MarketTrend[] }>("/api/market/trends").then((r) => r.trends),
-    refetchInterval: 60_000,
-  });
-}
-
-export function usePlayerTrends() {
-  return useQuery({
-    queryKey: ["market-player-trends"],
-    queryFn: () => api.get<{ risers: PlayerTrend[]; fallers: PlayerTrend[] }>("/api/market/player-trends"),
-    refetchInterval: 60_000,
   });
 }
 
@@ -103,12 +88,13 @@ export function useMarketLiveUpdates() {
 export function useCreateListing() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { cardId: string; price: number; buyNowPrice?: number; durationHours: number }) =>
+    mutationFn: (payload: { cardId?: string; stadiumCardId?: string; price: number; buyNowPrice?: number; durationHours: number }) =>
       api.post<{ listing: Listing }>("/api/market/list", payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["market"] });
       queryClient.invalidateQueries({ queryKey: ["market-mine"] });
       queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["stadium-cards"] });
     },
   });
 }
@@ -121,6 +107,7 @@ export function useCancelListing() {
       queryClient.invalidateQueries({ queryKey: ["market"] });
       queryClient.invalidateQueries({ queryKey: ["market-mine"] });
       queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["stadium-cards"] });
     },
   });
 }
@@ -137,6 +124,7 @@ export function useBuyListing() {
       queryClient.invalidateQueries({ queryKey: ["market"] });
       queryClient.invalidateQueries({ queryKey: ["market-hot"] });
       queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["stadium-cards"] });
     },
   });
 }

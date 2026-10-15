@@ -1,14 +1,10 @@
 import { Bot, InlineKeyboard } from "grammy";
-import { prisma } from "./lib/prisma.js";
-import { findStarProduct } from "./lib/starProducts.js";
 
 const PLACEHOLDER_WEBAPP_URL = "https://your-app.vercel.app";
 
 /**
  * Бот живёт в том же процессе, что и backend (long polling) — это позволяет
- * обойтись одним Railway-сервисом вместо двух платных. Для локальной разработки
- * отдельного бота (bot/) можно по-прежнему запускать самостоятельно — там та же
- * логика, с собственным Prisma-клиентом.
+ * обойтись одним Railway-сервисом вместо двух платных.
  */
 export function startBot() {
   const token = process.env.BOT_TOKEN;
@@ -24,7 +20,7 @@ export function startBot() {
 
   bot.command("start", async (ctx) => {
     const greeting =
-      "Добро пожаловать в Football Card Collector!\n\nСобирай карточки игроков из топ-5 лиг, открывай паки и кейсы, строй состав и побеждай в матчах.";
+      "Добро пожаловать!\n\nКрути состав, собирай карточки реальных футболистов топ-5 лиг и стадионов, строй коллекцию и торгуй на рынке.";
 
     if (!isWebAppConfigured) {
       await ctx.reply(`${greeting}\n\n(Игра ещё готовится — кнопка появится после деплоя.)`);
@@ -33,68 +29,6 @@ export function startBot() {
 
     const keyboard = new InlineKeyboard().webApp("🎮 Открыть игру", webAppUrl);
     await ctx.reply(greeting, { reply_markup: keyboard });
-  });
-
-  bot.on("pre_checkout_query", async (ctx) => {
-    try {
-      const payload = JSON.parse(ctx.preCheckoutQuery.invoice_payload) as {
-        userId: string;
-        sku: string;
-      };
-      const product = findStarProduct(payload.sku);
-
-      if (!product || product.priceStars !== ctx.preCheckoutQuery.total_amount) {
-        await ctx.answerPreCheckoutQuery(false, { error_message: "Товар недоступен, попробуйте снова" });
-        return;
-      }
-
-      await ctx.answerPreCheckoutQuery(true);
-    } catch {
-      await ctx.answerPreCheckoutQuery(false, { error_message: "Не удалось обработать платёж" });
-    }
-  });
-
-  bot.on("message:successful_payment", async (ctx) => {
-    const payment = ctx.message.successful_payment;
-    const payload = JSON.parse(payment.invoice_payload) as { userId: string; sku: string };
-    const product = findStarProduct(payload.sku);
-    if (!product) return;
-
-    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
-    if (!user) return;
-
-    const vipUntil =
-      product.grants.vipDays && user.vipUntil && user.vipUntil > new Date()
-        ? new Date(user.vipUntil.getTime() + product.grants.vipDays * 86_400_000)
-        : product.grants.vipDays
-          ? new Date(Date.now() + product.grants.vipDays * 86_400_000)
-          : undefined;
-
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: user.id },
-        data: {
-          coins: product.grants.coins ? { increment: product.grants.coins } : undefined,
-          stars: { increment: payment.total_amount },
-          isVip: vipUntil ? true : undefined,
-          vipUntil,
-        },
-      }),
-      prisma.transaction.create({
-        data: {
-          userId: user.id,
-          type: "STARS_PURCHASE",
-          amount: payment.total_amount,
-          meta: { sku: product.sku, telegramChargeId: payment.telegram_payment_charge_id },
-        },
-      }),
-    ]);
-
-    await ctx.reply(
-      product.grants.coins
-        ? `Готово! Зачислено ${product.grants.coins.toLocaleString("ru-RU")} монет 🪙`
-        : `Готово! VIP активирован на ${product.grants.vipDays} дней ⭐`,
-    );
   });
 
   // Не await'им — polling идёт бесконечно. Если он всё же упадёт (например,

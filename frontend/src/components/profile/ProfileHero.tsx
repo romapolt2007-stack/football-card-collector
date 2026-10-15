@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { AvatarPicker } from "./AvatarPicker";
-import { accountRating, rankForLevel } from "../../lib/profileRanks";
 import { haptics } from "../../lib/telegram";
 import type { GameUser } from "../../types/game";
 
@@ -10,9 +9,7 @@ interface Props {
 
 export function ProfileHero({ user }: Props) {
   const [pickingAvatar, setPickingAvatar] = useState(false);
-  const rank = rankForLevel(user.level);
-  const rating = accountRating(user.level, user.xp);
-  const name = user.teamName ?? user.firstName ?? user.username ?? "Legioner";
+  const name = user.firstName ?? user.username ?? "Игрок";
 
   return (
     <div
@@ -43,8 +40,7 @@ export function ProfileHero({ user }: Props) {
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-extrabold">{name}</p>
-          <p className="flex items-center gap-1 text-xs font-semibold text-gold">🏅 {rank}</p>
-          <p className="mt-0.5 text-[11px] text-white/40">Рейтинг аккаунта: {rating.toLocaleString("ru-RU")}</p>
+          <p className="mt-0.5 text-[11px] text-white/40">В игре с {new Date(user.createdAt).toLocaleDateString("ru-RU")}</p>
         </div>
       </div>
 

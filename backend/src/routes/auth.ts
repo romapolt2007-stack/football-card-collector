@@ -3,7 +3,6 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { signAuthToken } from "../lib/jwt.js";
 import { verifyTelegramInitData } from "../lib/telegramAuth.js";
-import { grantReferralBonus } from "../lib/referral.js";
 
 const router = Router();
 
@@ -31,38 +30,20 @@ router.post("/telegram", async (req, res) => {
   }
 
   const tgId = String(data.user.id);
-  const existing = await prisma.user.findUnique({ where: { tgId } });
 
-  let referrerId: string | undefined;
-  if (!existing && data.startParam?.startsWith("ref_")) {
-    const code = data.startParam.slice(4);
-    const referrer = await prisma.user.findUnique({ where: { referralCode: code } });
-    if (referrer) referrerId = referrer.id;
-  }
-
-  const user = await prisma.$transaction(async (tx) => {
-    const u = await tx.user.upsert({
-      where: { tgId },
-      update: {
-        username: data.user.username,
-        firstName: data.user.first_name,
-        photoUrl: data.user.photo_url,
-      },
-      create: {
-        tgId,
-        username: data.user.username,
-        firstName: data.user.first_name,
-        photoUrl: data.user.photo_url,
-        referredBy: referrerId,
-      },
-    });
-
-    // Реферальный бонус начисляется один раз, в момент первой регистрации приглашённого
-    if (!existing && referrerId) {
-      await grantReferralBonus(tx, referrerId, u.id);
-    }
-
-    return u;
+  const user = await prisma.user.upsert({
+    where: { tgId },
+    update: {
+      username: data.user.username,
+      firstName: data.user.first_name,
+      photoUrl: data.user.photo_url,
+    },
+    create: {
+      tgId,
+      username: data.user.username,
+      firstName: data.user.first_name,
+      photoUrl: data.user.photo_url,
+    },
   });
 
   const token = signAuthToken({ userId: user.id });

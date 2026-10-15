@@ -1,6 +1,0 @@
--- AlterEnum
-ALTER TYPE "TransactionType" ADD VALUE 'STADIUM';
-
--- AlterTable
-ALTER TABLE "users" ADD COLUMN     "stadiumCollectedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "stadiumLevel" INTEGER NOT NULL DEFAULT 1;

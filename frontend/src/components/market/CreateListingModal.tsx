@@ -1,12 +1,20 @@
 import { useMemo, useState } from "react";
-import type { Card, Listing } from "../../types/game";
+import type { Listing, Rarity } from "../../types/game";
 import { RARITY_THEME } from "../cards/rarityTheme";
 import { useCreateListing } from "../../lib/useMarket";
-import { POSITION_RU } from "../../lib/ruLabels";
 import { haptics } from "../../lib/telegram";
 
+export interface ListableItem {
+  cardId?: string;
+  stadiumCardId?: string;
+  label: string;
+  sublabel: string;
+  rarity: Rarity;
+  quickSellPrice: number;
+}
+
 interface Props {
-  cards: Card[];
+  items: ListableItem[];
   listings: Listing[];
   onClose: () => void;
 }
@@ -18,8 +26,8 @@ const DURATIONS: { hours: number; label: string }[] = [
   { hours: 168, label: "7 дней" },
 ];
 
-export function CreateListingModal({ cards, listings, onClose }: Props) {
-  const [selected, setSelected] = useState<Card | null>(null);
+export function CreateListingModal({ items, listings, onClose }: Props) {
+  const [selected, setSelected] = useState<ListableItem | null>(null);
   const [price, setPrice] = useState("");
   const [buyNowPrice, setBuyNowPrice] = useState("");
   const [durationHours, setDurationHours] = useState(24);
@@ -27,7 +35,7 @@ export function CreateListingModal({ cards, listings, onClose }: Props) {
 
   const avgPrice = useMemo(() => {
     if (!selected) return null;
-    const sameRarity = listings.filter((l) => l.card.rarity === selected.rarity);
+    const sameRarity = listings.filter((l) => (l.card?.rarity ?? l.stadiumCard?.stadium.rarity) === selected.rarity);
     if (sameRarity.length === 0) return null;
     const total = sameRarity.reduce((sum, l) => sum + (l.buyNowPrice ?? l.price), 0);
     return Math.round(total / sameRarity.length);
@@ -42,7 +50,7 @@ export function CreateListingModal({ cards, listings, onClose }: Props) {
 
     haptics.impact("medium");
     createListing.mutate(
-      { cardId: selected.id, price: startValue, buyNowPrice: buyNowValue, durationHours },
+      { cardId: selected.cardId, stadiumCardId: selected.stadiumCardId, price: startValue, buyNowPrice: buyNowValue, durationHours },
       { onSuccess: onClose },
     );
   }
@@ -58,31 +66,27 @@ export function CreateListingModal({ cards, listings, onClose }: Props) {
 
       {!selected ? (
         <div className="flex-1 overflow-y-auto px-4 pb-8">
-          {cards.length === 0 && (
-            <p className="mt-6 text-center text-sm text-white/40">
-              Нет карт для продажи — все либо в составе, либо уже на рынке
-            </p>
+          {items.length === 0 && (
+            <p className="mt-6 text-center text-sm text-white/40">Нет предметов для продажи — всё уже на рынке</p>
           )}
           <div className="flex flex-col gap-2">
-            {cards.map((card) => (
+            {items.map((item) => (
               <button
-                key={card.id}
-                onClick={() => setSelected(card)}
+                key={item.cardId ?? item.stadiumCardId}
+                onClick={() => setSelected(item)}
                 className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left"
               >
                 <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-xs font-extrabold"
-                  style={{ background: RARITY_THEME[card.rarity].background, color: RARITY_THEME[card.rarity].textColor }}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[10px] font-extrabold"
+                  style={{ background: RARITY_THEME[item.rarity].background, color: RARITY_THEME[item.rarity].textColor }}
                 >
-                  {card.player.overall}
+                  {RARITY_THEME[item.rarity].emoji}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{card.player.name}</p>
-                  <p className="truncate text-xs text-white/50">
-                    {POSITION_RU[card.player.position]} · {card.player.club.shortName}
-                  </p>
+                  <p className="truncate text-sm font-semibold">{item.label}</p>
+                  <p className="truncate text-xs text-white/50">{item.sublabel}</p>
                 </div>
-                <span className="text-xs text-white/40">~{card.quickSellPrice.toLocaleString("ru-RU")} 🪙</span>
+                <span className="text-xs text-white/40">~{item.quickSellPrice.toLocaleString("ru-RU")} 🪙</span>
               </button>
             ))}
           </div>
@@ -94,13 +98,11 @@ export function CreateListingModal({ cards, listings, onClose }: Props) {
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-sm font-extrabold"
               style={{ background: RARITY_THEME[selected.rarity].background, color: RARITY_THEME[selected.rarity].textColor }}
             >
-              {selected.player.overall}
+              {RARITY_THEME[selected.rarity].emoji}
             </span>
             <div>
-              <p className="font-semibold">{selected.player.name}</p>
-              <p className="text-xs text-white/50">
-                {POSITION_RU[selected.player.position]} · {selected.player.club.shortName}
-              </p>
+              <p className="font-semibold">{selected.label}</p>
+              <p className="text-xs text-white/50">{selected.sublabel}</p>
             </div>
           </div>
 
@@ -112,7 +114,7 @@ export function CreateListingModal({ cards, listings, onClose }: Props) {
           )}
 
           <label className="text-xs text-white/60">
-            Стартовая цена (ставки) — комиссия системы 5%
+            Стартовая цена (ставки) — комиссия системы 8%
             <input
               type="number"
               inputMode="numeric"
@@ -157,7 +159,7 @@ export function CreateListingModal({ cards, listings, onClose }: Props) {
 
           {price && Number(price) > 0 && (
             <p className="text-xs text-white/40">
-              При выкупе вы получите: {Math.round(Number(buyNowPrice || price) * 0.95).toLocaleString("ru-RU")} 🪙
+              При выкупе вы получите: {Math.round(Number(buyNowPrice || price) * 0.92).toLocaleString("ru-RU")} 🪙
             </p>
           )}
 

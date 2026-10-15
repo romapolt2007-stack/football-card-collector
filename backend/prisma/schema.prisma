@@ -8,8 +8,10 @@ datasource db {
 }
 
 // ──────────────────────────────────────────
-// Игроки и состав лиги (вымышленная вселенная —
-// см. README-FICTION.md: никаких реальных имён/клубов/лого)
+// Игроки и клубы — РЕАЛЬНЫЕ футболисты/клубы/лиги (имя, позиция, нация,
+// клуб текстом, числовые характеристики). Никаких фото/логотипов — только
+// абстрактная процедурная графика на фронтенде (PlayerPortrait/ClubCrest).
+// Рейтинг и суб-статы — собственная формула, не копия EA.
 // ──────────────────────────────────────────
 
 model League {
@@ -23,9 +25,9 @@ model League {
 }
 
 model Club {
-  id       String @id @default(cuid())
-  name     String
-  shortName String
+  id             String @id @default(cuid())
+  name           String
+  shortName      String
   colorPrimary   String
   colorSecondary String
 
@@ -33,6 +35,7 @@ model Club {
   leagueId String
 
   players Player[]
+  stadium Stadium?
 
   @@unique([leagueId, name])
   @@map("clubs")
@@ -66,27 +69,26 @@ enum Foot {
 }
 
 model Player {
-  id       String @id @default(cuid())
-  name     String
-  fullName String
-  photoUrl String?
-  nation   String
+  id         String @id @default(cuid())
+  name       String
+  fullName   String
+  nation     String
   nationFlag String
 
-  position Position
-  overall  Int
-  pace       Int
-  shooting   Int
-  passing    Int
-  dribbling  Int
-  defending  Int
-  physical   Int
+  position  Position
+  overall   Int
+  pace      Int
+  shooting  Int
+  passing   Int
+  dribbling Int
+  defending Int
+  physical  Int
 
   age        Int
   height     Int
   foot       Foot
-  weakFoot   Int @default(3)
-  skillMoves Int @default(3)
+  weakFoot   Int  @default(3)
+  skillMoves Int  @default(3)
 
   rarity Rarity
 
@@ -103,6 +105,48 @@ model Player {
 }
 
 // ──────────────────────────────────────────
+// Стадионы — реальные арены клубов топ-5 лиг. Редкость — функция от
+// вместимости (пороги в backend/src/lib/stadiums.ts). Только факты
+// (название/город/вместимость/год) — без фото, без детальной архитектуры.
+// ──────────────────────────────────────────
+
+model Stadium {
+  id         String @id @default(cuid())
+  name       String
+  city       String
+  capacity   Int
+  openedYear Int
+  rarity     Rarity
+
+  club   Club   @relation(fields: [clubId], references: [id])
+  clubId String @unique
+
+  stadiumCards StadiumCard[]
+
+  @@index([rarity])
+  @@map("stadiums")
+}
+
+model StadiumCard {
+  id        String  @id @default(cuid())
+  stadium   Stadium @relation(fields: [stadiumId], references: [id])
+  stadiumId String
+  owner     User    @relation(fields: [ownerId], references: [id])
+  ownerId   String
+
+  isListed       Boolean @default(false)
+  quickSellPrice Int
+
+  obtainedAt DateTime @default(now())
+
+  listing Listing?
+
+  @@index([ownerId])
+  @@index([stadiumId])
+  @@map("stadium_cards")
+}
+
+// ──────────────────────────────────────────
 // Пользователь и его карточки
 // ──────────────────────────────────────────
 
@@ -112,92 +156,22 @@ model User {
   username   String?
   firstName  String?
   photoUrl   String?
-
-  coins Int @default(5000)
-  stars Int @default(0)
-  xp    Int @default(0)
-  level Int @default(1)
-
-  teamName   String?
-  teamLogo   String?
-  teamColors String?
   avatarIcon String?
 
-  isVip    Boolean   @default(false)
-  vipUntil DateTime?
+  coins Int @default(5000)
 
-  referralCode String  @unique @default(cuid())
-  referredBy   String?
+  dailyStreak      Int       @default(0)
+  lastDailyClaimAt DateTime?
 
-  hasClaimedStarter Boolean   @default(false)
-  dailyStreak       Int       @default(0)
-  lastDailyClaimAt  DateTime?
-  // Куплена ли "страховка" пропущенного дня — сохраняет стрик при следующем клейме вместо сброса на 1
-  streakInsuredAt   DateTime?
+  // Спин игроков и спин стадионов — раздельные бесплатные попытки раз в 4 часа
+  lastFreeSpinAt        DateTime?
+  lastFreeStadiumSpinAt DateTime?
 
-  // Короткий таймер-бонус для удержания (каждые N минут) + отметка,
-  // чтобы не слать уведомление повторно, пока бонус лежит неполученным
-  lastFreeBonusAt     DateTime?
-  freeBonusNotifiedAt DateTime?
-
-  // "Спасательный" бонус — доступен чаще, но только когда монет почти нет
-  lastEmergencyBonusAt DateTime?
-
-  // Платная рулетка «Удача»: счётчик спинов для pity-системы (каждый 100-й — гарантированный буст)
-  luckySpinCount Int @default(0)
-
-  // Один бесплатный спин «Удачи» раз в сутки — чтобы можно было пробовать удачу не только за монеты
-  lastFreeLuckySpinAt DateTime?
-
-  // Аркадный режим «Пенальти» — одна бесплатная серия в сутки, дальше за монеты
-  lastFreeArcadePenaltyAt DateTime?
-
-  // Кубок на выбывание — одна бесплатная попытка в сутки (см. lib/cup.ts)
-  lastFreeCupAt DateTime?
-
-  // Глобальный турнир (64 участника: вы + честные процедурные боты) — редкая раз-в-неделю попытка
-  lastFreeTournamentAt DateTime?
-
-  // World Tour — сюжетный режим: сколько этапов (городов) уже пройдено (см. lib/worldTour.ts)
-  worldTourStage Int @default(0)
-
-  // Battle Pass (один бессрочный сезон в v1, без реальной ротации) — см. lib/battlePass.ts
-  battlePassXp      Int     @default(0)
-  battlePassPremium Boolean @default(false)
-
-  battlePassClaims BattlePassClaim[]
-
-  // Косметическая тема интерфейса из «Патчей сообщества» — только акцентный цвет, без игровой логики
-  cosmeticPatchId String?
-
-  // Энергия — ограничивает платные/PvP-режимы (Дуэль), восстанавливается лениво по времени
-  energy          Int      @default(20)
-  energyUpdatedAt DateTime @default(now())
-
-  // Карьерная статистика пенальти (во всех 3 режимах: послематчевая серия, аркада, Дуэль) — для тиерных ачивок
-  penaltyGoals Int @default(0)
-  penaltySaves Int @default(0)
-
-  // Flash-челлендж: номер 3-дневного цикла, за который уже забрана награда (см. lib/flashChallenge.ts)
-  flashChallengeClaimedCycle Int?
-
-  // Трофейная комната / стадион: пассивный доход, копится лениво по времени (см. lib/stadium.ts)
-  stadiumLevel         Int      @default(1)
-  stadiumCollectedAt   DateTime @default(now())
-
-  duelTrophy DuelTrophy?
-  careerTrophy CareerTrophy?
-  clanMember   ClanMember?
-
-  cards       Card[]
-  listings    Listing[]
-  marketBids  MarketBid[]
-  matches     Match[]
+  cards        Card[]
+  stadiumCards StadiumCard[]
+  listings     Listing[]
+  marketBids   MarketBid[]
   transactions Transaction[]
-  userQuests  UserQuest[]
-  squads      Squad[]
-  sbcCompletions SbcCompletion[]
-  duelMatchesAsAttacker DuelMatch[] @relation("DuelAttacker")
 
   createdAt DateTime @default(now())
 
@@ -205,32 +179,17 @@ model User {
 }
 
 model Card {
-  id         String @id @default(cuid())
-  player     Player @relation(fields: [playerId], references: [id])
-  playerId   String
-  owner      User   @relation(fields: [ownerId], references: [id])
-  ownerId    String
+  id       String @id @default(cuid())
+  player   Player @relation(fields: [playerId], references: [id])
+  playerId String
+  owner    User   @relation(fields: [ownerId], references: [id])
+  ownerId  String
 
   rarity         Rarity
   isListed       Boolean @default(false)
   quickSellPrice Int
 
-  // Коллекционное издание (ruby/filigree-gold/sapphire/emerald/amethyst/obsidian) — редкий
-  // косметический дроп из паков, см. backend/src/lib/specialEditions.ts. null = обычная карта.
-  specialEdition String?
-
   obtainedAt DateTime @default(now())
-
-  // Дисквалификация (красная карточка) или травма — сколько ближайших матчей
-  // команды игрок пропускает. Уменьшается на 1 после каждого сыгранного матча.
-  unavailableMatches Int @default(0)
-
-  // Тренировка: сжигание дубля той же карты даёт +1 к OVR этой конкретной карты (потолок — см. cardStats.ts).
-  // Все карты этого игрока в базе по-прежнему делят Player.overall — буст живёт только на этой карте.
-  trainingBoost Int @default(0)
-
-  // Академия молодёжи: BRONZE/SILVER карта растёт на 1 уровень редкости за время + монеты (см. lib/academy.ts)
-  academyEnrolledAt DateTime?
 
   listing Listing?
 
@@ -239,50 +198,32 @@ model Card {
   @@map("cards")
 }
 
-// ──────────────────────────────────────────
-// Состав команды
-// ──────────────────────────────────────────
-
-model Squad {
-  id     String @id @default(cuid())
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
-  name      String  @default("Состав 1")
-  formation String // "4-4-2" | "4-3-3" | "3-5-2" | "4-2-3-1" | "5-3-2"
-  /// [{ slotId: string, cardId: string | null }]
-  slots     Json
-  isActive  Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@map("squads")
-}
-
 enum ListingStatus {
   ACTIVE
   SOLD
   EXPIRED
 }
 
+// Лот рынка — ровно одно из cardId/stadiumCardId заполнено (проверяется в коде роута).
 model Listing {
-  id       String @id @default(cuid())
-  card     Card   @relation(fields: [cardId], references: [id])
-  cardId   String @unique
+  id String @id @default(cuid())
+
+  card   Card?   @relation(fields: [cardId], references: [id])
+  cardId String? @unique
+
+  stadiumCard   StadiumCard? @relation(fields: [stadiumCardId], references: [id])
+  stadiumCardId String?      @unique
+
   seller   User   @relation(fields: [sellerId], references: [id])
   sellerId String
 
-  // price — стартовая цена аукциона (минимальная ставка). buyNowPrice — опциональный
-  // мгновенный выкуп в обход торгов; если не задан, лот доступен только через ставки.
   price       Int
   buyNowPrice Int?
   status      ListingStatus @default(ACTIVE)
 
   bids MarketBid[]
 
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
   expiresAt DateTime
 
   @@index([status])
@@ -305,67 +246,17 @@ model MarketBid {
 }
 
 // ──────────────────────────────────────────
-// Матчи
-// ──────────────────────────────────────────
-
-enum MatchMode {
-  QUICK
-  DIVISION_RIVALS
-  TOURNAMENT
-  DRAFT
-}
-
-model Match {
-  id     String @id @default(cuid())
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
-  mode         MatchMode
-  opponentName String
-  opponentOvr  Int
-
-  userScore Int @default(0)
-  oppScore  Int @default(0)
-
-  events  Json
-  rewards Json
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@map("matches")
-}
-
-// ──────────────────────────────────────────
 // Экономика
 // ──────────────────────────────────────────
 
 enum TransactionType {
-  PACK_OPEN
-  CASE_SPIN
+  SPIN_PLAYER
+  SPIN_STADIUM
   QUICK_SELL
   MARKET_BUY
   MARKET_SELL
   MARKET_FEE
-  MATCH_REWARD
   DAILY_BONUS
-  FREE_BONUS
-  EMERGENCY_BONUS
-  LUCKY_SPIN
-  QUEST_REWARD
-  REFERRAL_BONUS
-  STARS_PURCHASE
-  LEVEL_UP
-  SBC_SUBMIT
-  ARCADE_PENALTY
-  DUEL
-  ACADEMY
-  STADIUM
-  CUP
-  WORLD_TOUR
-  CLAN
-  BATTLE_PASS
-  GLOBAL_TOURNAMENT
 }
 
 model Transaction {
@@ -381,175 +272,4 @@ model Transaction {
 
   @@index([userId])
   @@map("transactions")
-}
-
-model Quest {
-  id          String @id @default(cuid())
-  code        String @unique
-  title       String
-  description String
-  target      Int
-  reward      Int
-  isDaily     Boolean @default(true)
-
-  userQuests UserQuest[]
-
-  @@map("quests")
-}
-
-model UserQuest {
-  id      String @id @default(cuid())
-  user    User   @relation(fields: [userId], references: [id])
-  userId  String
-  quest   Quest  @relation(fields: [questId], references: [id])
-  questId String
-
-  progress  Int      @default(0)
-  completed Boolean  @default(false)
-  claimed   Boolean  @default(false)
-  expiresAt DateTime
-
-  @@unique([userId, questId, expiresAt])
-  @@map("user_quests")
-}
-
-/** Отметка о выполнении одноразового SBC-вызова — определения самих вызовов захардкожены в lib/sbc.ts, как PACKS/CASES. */
-model SbcCompletion {
-  id     String @id @default(cuid())
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
-  sbcId       String
-  completedAt DateTime @default(now())
-
-  @@unique([userId, sbcId])
-  @@index([userId])
-  @@map("sbc_completions")
-}
-
-// ──────────────────────────────────────────
-// PvP «Дуэль» (пенальти против реального состава соперника)
-// ──────────────────────────────────────────
-
-enum DuelLeague {
-  BRONZE
-  SILVER
-  GOLD
-  CHAMPION
-}
-
-/** Одна строка на пользователя — текущая лига и очки кубков. */
-model DuelTrophy {
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @id
-
-  league DuelLeague @default(BRONZE)
-  points Int        @default(0)
-  wins   Int        @default(0)
-  losses Int         @default(0)
-
-  updatedAt DateTime @updatedAt
-
-  @@map("duel_trophies")
-}
-
-enum CareerLeague {
-  BRONZE
-  SILVER
-  GOLD
-  CHAMPION
-}
-
-/** Лига-карьера «Быстрого матча» (Division Rivals) — отдельная от Дуэли система очков/лиг на обычных полных матчах. */
-model CareerTrophy {
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @id
-
-  league CareerLeague @default(BRONZE)
-  points Int          @default(0)
-  wins   Int          @default(0)
-  losses Int          @default(0)
-
-  updatedAt DateTime @updatedAt
-
-  @@map("career_trophies")
-}
-
-/** История завершённых дуэлей — для ELO-пересчёта и будущего лидерборда. */
-model DuelMatch {
-  id String @id @default(cuid())
-
-  attacker   User   @relation("DuelAttacker", fields: [attackerId], references: [id])
-  attackerId String
-
-  opponentName String
-  opponentOvr  Int
-  isRealOpponent Boolean @default(false)
-
-  attackerScore Int
-  defenderScore Int
-  won           Boolean
-  pointsDelta   Int
-
-  // Реакция-эмоция после матча — чисто самовыражение в истории дуэлей (см. lib/duelEmotes.ts).
-  // Дуэль асинхронная (снимок состава, не живой канал с соперником), поэтому это не чат, а "поза победителя".
-  emote String?
-
-  createdAt DateTime @default(now())
-
-  @@index([attackerId])
-  @@map("duel_matches")
-}
-
-// ──────────────────────────────────────────
-// Кланы
-// ──────────────────────────────────────────
-
-model Clan {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  tag         String  @unique
-  description String?
-  avatarUrl   String?
-  leaderId    String
-
-  createdAt DateTime @default(now())
-
-  members ClanMember[]
-
-  @@map("clans")
-}
-
-model ClanMember {
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @id
-
-  clan   Clan   @relation(fields: [clanId], references: [id], onDelete: Cascade)
-  clanId String
-
-  role     String   @default("MEMBER") // "LEADER" | "MEMBER"
-  joinedAt DateTime @default(now())
-
-  @@index([clanId])
-  @@map("clan_members")
-}
-
-// ──────────────────────────────────────────
-// Battle Pass
-// ──────────────────────────────────────────
-
-/** Отметка о выданной награде конкретного уровня/ветки — не даёт забрать дважды. */
-model BattlePassClaim {
-  id     String @id @default(cuid())
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
-  level Int
-  track String // "FREE" | "PREMIUM"
-
-  claimedAt DateTime @default(now())
-
-  @@unique([userId, level, track])
-  @@index([userId])
-  @@map("battle_pass_claims")
 }

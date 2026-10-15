@@ -38,3 +38,8 @@ export function quickSellPrice(rarity: Rarity, player: number | PlayerStatsLike)
   const factor = typeof player === "number" ? 1 : statFactor(player);
   return Math.round(overall * VALUE_MULTIPLIER[rarity] * factor);
 }
+
+/** Цена быстрой продажи стадиона — по редкости (от вместимости) и самой вместимости. */
+export function stadiumQuickSellPrice(rarity: Rarity, capacity: number): number {
+  return Math.round((capacity / 100) * VALUE_MULTIPLIER[rarity]);
+}

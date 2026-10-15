@@ -34,7 +34,7 @@ export function BidModal({ listing, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80 px-6">
       <div className="w-full max-w-xs rounded-xl border border-white/15 bg-pitch-violet p-5 text-center">
-        <p className="font-semibold">Ставка на {listing.card.player.name}</p>
+        <p className="font-semibold">Ставка на {listing.card?.player.name ?? listing.stadiumCard?.stadium.name}</p>
         <p className="mt-1 text-xs text-white/50">
           {highestBid ? `Текущая ставка: ${highestBid.toLocaleString("ru-RU")} 🪙` : `Старт: ${listing.price.toLocaleString("ru-RU")} 🪙`}
         </p>

@@ -2,22 +2,17 @@ import { useEffect, useState } from "react";
 import { BottomNav, type TabId } from "./components/BottomNav";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { useTelegramAuth } from "./hooks/useTelegramAuth";
-import { CasesScreen } from "./screens/CasesScreen";
-import { InventoryScreen } from "./screens/InventoryScreen";
+import { CollectionScreen } from "./screens/CollectionScreen";
 import { MarketScreen } from "./screens/MarketScreen";
-import { MatchScreen } from "./screens/MatchScreen";
-import { OnboardingScreen } from "./screens/OnboardingScreen";
-import { PacksScreen } from "./screens/PacksScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
-import { SbcScreen } from "./screens/SbcScreen";
-import { TeamScreen } from "./screens/TeamScreen";
+import { SpinScreen } from "./screens/SpinScreen";
+import { StadiumsScreen } from "./screens/StadiumsScreen";
 import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
   const { status, error } = useTelegramAuth();
   const isReady = useAuthStore((s) => s.isReady);
-  const user = useAuthStore((s) => s.user);
-  const [tab, setTab] = useState<TabId>("packs");
+  const [tab, setTab] = useState<TabId>("spin");
 
   useEffect(() => {
     if (import.meta.env.DEV) {
@@ -49,18 +44,11 @@ function App() {
     );
   }
 
-  if (!user?.teamName) {
-    return <OnboardingScreen />;
-  }
-
   return (
     <>
-      {tab === "packs" && <PacksScreen />}
-      {tab === "cases" && <CasesScreen />}
-      {tab === "team" && <TeamScreen />}
-      {tab === "inventory" && <InventoryScreen onNavigateToTeam={() => setTab("team")} />}
-      {tab === "sbc" && <SbcScreen />}
-      {tab === "match" && <MatchScreen />}
+      {tab === "spin" && <SpinScreen />}
+      {tab === "stadiums" && <StadiumsScreen />}
+      {tab === "collection" && <CollectionScreen />}
       {tab === "market" && <MarketScreen />}
       {tab === "profile" && <ProfileScreen />}
       <BottomNav tab={tab} onChange={setTab} />

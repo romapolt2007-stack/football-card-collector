@@ -3,7 +3,6 @@ import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 import { getIo } from "../lib/socket.js";
-import { clearCardFromSquads } from "../lib/squadCleanup.js";
 import { MARKET_FEE_RATE } from "../lib/marketConstants.js";
 import type { Position, Rarity } from "@prisma/client";
 
@@ -13,11 +12,13 @@ const DURATION_HOURS = [1, 6, 24, 168] as const;
 
 const listingInclude = {
   card: { include: { player: { include: { club: { include: { league: true } } } } } },
+  stadiumCard: { include: { stadium: { include: { club: { include: { league: true } } } } } },
   seller: { select: { id: true, username: true, firstName: true } },
   bids: { orderBy: { amount: "desc" as const }, take: 1, include: { bidder: { select: { id: true, username: true, firstName: true } } } },
 } as const;
 
 const listQuerySchema = z.object({
+  kind: z.enum(["player", "stadium"]).optional(),
   leagueId: z.string().optional(),
   clubId: z.string().optional(),
   nation: z.string().optional(),
@@ -45,17 +46,23 @@ router.get("/listings", async (req, res) => {
     price: { gte: f.minPrice, lte: f.maxPrice },
     ...(f.auctionType === "BUY_NOW" ? { buyNowPrice: { not: null } } : {}),
     ...(f.auctionType === "AUCTION" ? { buyNowPrice: null } : {}),
-    card: {
-      ...(f.rarity ? { rarity: f.rarity as Rarity } : {}),
-      player: {
-        ...(f.nation ? { nation: f.nation } : {}),
-        ...(f.position ? { position: f.position as Position } : {}),
-        ...(f.search ? { name: { contains: f.search, mode: "insensitive" as const } } : {}),
-        overall: { gte: f.minOvr, lte: f.maxOvr },
-        ...(f.clubId ? { clubId: f.clubId } : {}),
-        ...(f.leagueId ? { club: { leagueId: f.leagueId } } : {}),
-      },
-    },
+    ...(f.kind === "player" ? { cardId: { not: null } } : {}),
+    ...(f.kind === "stadium" ? { stadiumCardId: { not: null } } : {}),
+    ...(f.kind !== "stadium"
+      ? {
+          card: {
+            ...(f.rarity ? { rarity: f.rarity as Rarity } : {}),
+            player: {
+              ...(f.nation ? { nation: f.nation } : {}),
+              ...(f.position ? { position: f.position as Position } : {}),
+              ...(f.search ? { name: { contains: f.search, mode: "insensitive" as const } } : {}),
+              overall: { gte: f.minOvr, lte: f.maxOvr },
+              ...(f.clubId ? { clubId: f.clubId } : {}),
+              ...(f.leagueId ? { club: { leagueId: f.leagueId } } : {}),
+            },
+          },
+        }
+      : {}),
   };
 
   const orderBy =
@@ -76,20 +83,22 @@ router.get("/listings", async (req, res) => {
   res.json({ listings, feeRate: MARKET_FEE_RATE });
 });
 
-/** "Горячие сделки" — активные лоты с ощутимой скидкой от системной цены скупки (quickSellPrice). */
+/** "Горячие сделки" — активные лоты карт игроков с ощутимой скидкой от системной цены скупки. */
 router.get("/hot", async (_req, res) => {
   const listings = await prisma.listing.findMany({
-    where: { status: "ACTIVE" },
+    where: { status: "ACTIVE", cardId: { not: null } },
     include: listingInclude,
     orderBy: { createdAt: "desc" },
     take: 60,
   });
 
-  const withScore = listings.map((l) => {
-    const referencePrice = l.buyNowPrice ?? l.price;
-    const discount = 1 - referencePrice / Math.max(1, l.card.quickSellPrice * 4);
-    return { listing: l, discount };
-  });
+  const withScore = listings
+    .filter((l) => l.card)
+    .map((l) => {
+      const referencePrice = l.buyNowPrice ?? l.price;
+      const discount = 1 - referencePrice / Math.max(1, l.card!.quickSellPrice * 4);
+      return { listing: l, discount };
+    });
 
   const hot = withScore
     .filter((x) => x.discount > 0.1)
@@ -98,125 +107,6 @@ router.get("/hot", async (_req, res) => {
     .map((x) => x.listing);
 
   res.json({ listings: hot });
-});
-
-/** Тренды цен по редкости: средняя цена продажи за последние 24ч против предыдущих 24ч. */
-router.get("/trends", async (_req, res) => {
-  const now = Date.now();
-  const since48h = new Date(now - 48 * 60 * 60 * 1000);
-
-  const recentSales = await prisma.transaction.findMany({
-    where: { type: "MARKET_SELL", createdAt: { gte: since48h } },
-    select: { amount: true, createdAt: true, meta: true },
-  });
-
-  if (recentSales.length === 0) {
-    res.json({ trends: [] });
-    return;
-  }
-
-  const listingIds = [...new Set(recentSales.map((t) => (t.meta as { listingId?: string })?.listingId).filter((id): id is string => Boolean(id)))];
-  const listings = await prisma.listing.findMany({
-    where: { id: { in: listingIds } },
-    include: { card: true },
-  });
-  const rarityByListing = new Map(listings.map((l) => [l.id, l.card.rarity]));
-
-  const buckets: Record<string, { recent: number[]; prior: number[] }> = {};
-  const cutoff = new Date(now - 24 * 60 * 60 * 1000);
-
-  for (const sale of recentSales) {
-    const listingId = (sale.meta as { listingId?: string })?.listingId;
-    const rarity = listingId ? rarityByListing.get(listingId) : undefined;
-    if (!rarity) continue;
-    buckets[rarity] ??= { recent: [], prior: [] };
-    if (sale.createdAt >= cutoff) buckets[rarity].recent.push(sale.amount);
-    else buckets[rarity].prior.push(sale.amount);
-  }
-
-  const avg = (arr: number[]) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
-
-  const trends = Object.entries(buckets)
-    .map(([rarity, b]) => {
-      const recentAvg = avg(b.recent);
-      const priorAvg = avg(b.prior);
-      if (recentAvg === null || priorAvg === null || priorAvg === 0) return null;
-      const changePct = Math.round(((recentAvg - priorAvg) / priorAvg) * 100);
-      return { rarity, recentAvg: Math.round(recentAvg), changePct };
-    })
-    .filter((t): t is { rarity: string; recentAvg: number; changePct: number } => t !== null);
-
-  res.json({ trends });
-});
-
-/**
- * Fantasy-биржа: топ растущих/падающих в цене ИГРОКОВ (не редкостей) — та же
- * 48ч-методология, что /trends, только группировка по playerId. На реальных
- * продажах, без фейковой волатильности — если данных мало, список короткий
- * или пустой, это честно отражает живой рынок, а не выдумывает активность.
- */
-router.get("/player-trends", async (_req, res) => {
-  const now = Date.now();
-  const since48h = new Date(now - 48 * 60 * 60 * 1000);
-  const cutoff = new Date(now - 24 * 60 * 60 * 1000);
-  const MIN_SALES_PER_BUCKET = 2;
-
-  const recentSales = await prisma.transaction.findMany({
-    where: { type: "MARKET_SELL", createdAt: { gte: since48h } },
-    select: { amount: true, createdAt: true, meta: true },
-  });
-  if (recentSales.length === 0) {
-    res.json({ risers: [], fallers: [] });
-    return;
-  }
-
-  const listingIds = [...new Set(recentSales.map((t) => (t.meta as { listingId?: string })?.listingId).filter((id): id is string => Boolean(id)))];
-  const listings = await prisma.listing.findMany({
-    where: { id: { in: listingIds } },
-    include: { card: { include: { player: { include: { club: true } } } } },
-  });
-  const playerByListing = new Map(listings.map((l) => [l.id, l.card.player]));
-
-  const buckets = new Map<string, { recent: number[]; prior: number[]; player: (typeof listings)[number]["card"]["player"] }>();
-  for (const sale of recentSales) {
-    const listingId = (sale.meta as { listingId?: string })?.listingId;
-    const player = listingId ? playerByListing.get(listingId) : undefined;
-    if (!player) continue;
-    if (!buckets.has(player.id)) buckets.set(player.id, { recent: [], prior: [], player });
-    const bucket = buckets.get(player.id)!;
-    if (sale.createdAt >= cutoff) bucket.recent.push(sale.amount);
-    else bucket.prior.push(sale.amount);
-  }
-
-  const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
-
-  const all = [...buckets.values()]
-    .filter((b) => b.recent.length >= MIN_SALES_PER_BUCKET && b.prior.length >= MIN_SALES_PER_BUCKET)
-    .map((b) => {
-      const recentAvg = avg(b.recent);
-      const priorAvg = avg(b.prior);
-      const changePct = Math.round(((recentAvg - priorAvg) / priorAvg) * 100);
-      return {
-        playerId: b.player.id,
-        name: b.player.name,
-        nationFlag: b.player.nationFlag,
-        overall: b.player.overall,
-        recentAvg: Math.round(recentAvg),
-        changePct,
-      };
-    })
-    .filter((t) => t.changePct !== 0);
-
-  const risers = all
-    .filter((t) => t.changePct > 0)
-    .sort((a, b) => b.changePct - a.changePct)
-    .slice(0, 5);
-  const fallers = all
-    .filter((t) => t.changePct < 0)
-    .sort((a, b) => a.changePct - b.changePct)
-    .slice(0, 5);
-
-  res.json({ risers, fallers });
 });
 
 router.get("/mine", requireAuth, async (req, res) => {
@@ -239,7 +129,7 @@ router.get("/history", requireAuth, async (req, res) => {
   const listingIds = [...new Set(transactions.map((t) => (t.meta as { listingId?: string })?.listingId).filter((id): id is string => Boolean(id)))];
   const listings = await prisma.listing.findMany({
     where: { id: { in: listingIds } },
-    include: { card: { include: { player: { include: { club: true } } } } },
+    include: listingInclude,
   });
   const listingById = new Map(listings.map((l) => [l.id, l]));
 
@@ -251,20 +141,25 @@ router.get("/history", requireAuth, async (req, res) => {
       type: t.type,
       amount: t.amount,
       createdAt: t.createdAt,
-      playerName: listing?.card.player.name ?? null,
-      rarity: listing?.card.rarity ?? null,
+      itemName: listing?.card?.player.name ?? listing?.stadiumCard?.stadium.name ?? null,
+      rarity: listing?.card?.rarity ?? listing?.stadiumCard?.stadium.rarity ?? null,
     };
   });
 
   res.json({ history });
 });
 
-const createListingSchema = z.object({
-  cardId: z.string(),
-  price: z.number().int().positive().max(100_000_000),
-  buyNowPrice: z.number().int().positive().max(100_000_000).optional(),
-  durationHours: z.number().int().refine((h) => (DURATION_HOURS as readonly number[]).includes(h)),
-});
+const createListingSchema = z
+  .object({
+    cardId: z.string().optional(),
+    stadiumCardId: z.string().optional(),
+    price: z.number().int().positive().max(100_000_000),
+    buyNowPrice: z.number().int().positive().max(100_000_000).optional(),
+    durationHours: z.number().int().refine((h) => (DURATION_HOURS as readonly number[]).includes(h)),
+  })
+  .refine((d) => Boolean(d.cardId) !== Boolean(d.stadiumCardId), {
+    message: "Укажите ровно один предмет: cardId или stadiumCardId",
+  });
 
 router.post("/list", requireAuth, async (req, res) => {
   const parsed = createListingSchema.safeParse(req.body);
@@ -277,33 +172,48 @@ router.post("/list", requireAuth, async (req, res) => {
     return;
   }
 
-  const card = await prisma.card.findUnique({ where: { id: parsed.data.cardId } });
-  if (!card || card.ownerId !== req.userId) {
-    res.status(404).json({ error: "Карта не найдена" });
-    return;
-  }
-  if (card.isListed) {
-    res.status(400).json({ error: "Карта уже выставлена на продажу" });
-    return;
-  }
-
-  await clearCardFromSquads(req.userId!, card.id);
-
   const expiresAt = new Date(Date.now() + parsed.data.durationHours * 60 * 60 * 1000);
+
+  if (parsed.data.cardId) {
+    const card = await prisma.card.findUnique({ where: { id: parsed.data.cardId } });
+    if (!card || card.ownerId !== req.userId) {
+      res.status(404).json({ error: "Карта не найдена" });
+      return;
+    }
+    if (card.isListed) {
+      res.status(400).json({ error: "Карта уже выставлена на продажу" });
+      return;
+    }
+
+    const [, listing] = await prisma.$transaction([
+      prisma.card.update({ where: { id: card.id }, data: { isListed: true } }),
+      prisma.listing.create({
+        data: { cardId: card.id, sellerId: req.userId!, price: parsed.data.price, buyNowPrice: parsed.data.buyNowPrice, expiresAt },
+        include: listingInclude,
+      }),
+    ]);
+    getIo()?.emit("market:created", listing);
+    res.status(201).json({ listing });
+    return;
+  }
+
+  const stadiumCard = await prisma.stadiumCard.findUnique({ where: { id: parsed.data.stadiumCardId! } });
+  if (!stadiumCard || stadiumCard.ownerId !== req.userId) {
+    res.status(404).json({ error: "Карта стадиона не найдена" });
+    return;
+  }
+  if (stadiumCard.isListed) {
+    res.status(400).json({ error: "Уже выставлена на продажу" });
+    return;
+  }
+
   const [, listing] = await prisma.$transaction([
-    prisma.card.update({ where: { id: card.id }, data: { isListed: true } }),
+    prisma.stadiumCard.update({ where: { id: stadiumCard.id }, data: { isListed: true } }),
     prisma.listing.create({
-      data: {
-        cardId: card.id,
-        sellerId: req.userId!,
-        price: parsed.data.price,
-        buyNowPrice: parsed.data.buyNowPrice,
-        expiresAt,
-      },
+      data: { stadiumCardId: stadiumCard.id, sellerId: req.userId!, price: parsed.data.price, buyNowPrice: parsed.data.buyNowPrice, expiresAt },
       include: listingInclude,
     }),
   ]);
-
   getIo()?.emit("market:created", listing);
   res.status(201).json({ listing });
 });
@@ -321,7 +231,8 @@ router.post("/listings/:id/cancel", requireAuth, async (req, res) => {
 
   await prisma.$transaction([
     prisma.listing.update({ where: { id: listing.id }, data: { status: "EXPIRED" } }),
-    prisma.card.update({ where: { id: listing.cardId }, data: { isListed: false } }),
+    ...(listing.cardId ? [prisma.card.update({ where: { id: listing.cardId }, data: { isListed: false } })] : []),
+    ...(listing.stadiumCardId ? [prisma.stadiumCard.update({ where: { id: listing.stadiumCardId }, data: { isListed: false } })] : []),
   ]);
 
   getIo()?.emit("market:removed", { listingId: listing.id });
@@ -412,10 +323,11 @@ router.post("/buy", requireAuth, async (req, res) => {
       }
 
       await tx.listing.update({ where: { id: listing.id }, data: { status: "SOLD" } });
-      await tx.card.update({
-        where: { id: listing.cardId },
-        data: { ownerId: req.userId!, isListed: false },
-      });
+      if (listing.cardId) {
+        await tx.card.update({ where: { id: listing.cardId }, data: { ownerId: req.userId!, isListed: false } });
+      } else if (listing.stadiumCardId) {
+        await tx.stadiumCard.update({ where: { id: listing.stadiumCardId }, data: { ownerId: req.userId!, isListed: false } });
+      }
       const buyerAfter = await tx.user.update({
         where: { id: req.userId },
         data: { coins: { decrement: price } },

@@ -1,39 +1,28 @@
 import confetti from "canvas-confetti";
 import { useMemo, useState } from "react";
 import { BidModal } from "../components/market/BidModal";
-import { CreateListingModal } from "../components/market/CreateListingModal";
-import { HotDealsRow } from "../components/market/HotDealsRow";
+import { CreateListingModal, type ListableItem } from "../components/market/CreateListingModal";
 import { ListingCard } from "../components/market/ListingCard";
-import { PlayerTrendsRow } from "../components/market/PlayerTrendsRow";
-import { TrendTicker } from "../components/market/TrendTicker";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { CoinBalance } from "../components/common/CoinBalance";
 import { PillTabs } from "../components/common/PillTabs";
 import {
   useBuyListing,
   useCancelListing,
-  useHotDeals,
   useListings,
   useMarketHistory,
   useMarketLiveUpdates,
-  useMarketTrends,
   useMyListings,
-  usePlayerTrends,
   type MarketFilters,
 } from "../lib/useMarket";
-import { useInventory } from "../lib/queries";
+import { useInventory, useStadiumCollection } from "../lib/queries";
+import { POSITION_RU } from "../lib/ruLabels";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import { useAuthStore } from "../store/useAuthStore";
 import type { Listing, Rarity } from "../types/game";
 
 const RARITIES: Rarity[] = ["BRONZE", "SILVER", "GOLD", "LEGEND", "ICON"];
-const POSITION_GROUPS: { label: string; positions: string[] }[] = [
-  { label: "Вратари", positions: ["GK"] },
-  { label: "Защитники", positions: ["CB", "LB", "RB"] },
-  { label: "Полузащита", positions: ["CDM", "CM", "CAM", "LW", "RW"] },
-  { label: "Нападающие", positions: ["ST", "CF"] },
-];
 const SORT_OPTIONS: { id: MarketFilters["sort"]; label: string }[] = [
   { id: "newest", label: "Новые" },
   { id: "price_asc", label: "Дешевле" },
@@ -46,35 +35,52 @@ type Tab = "browse" | "mine" | "history";
 export function MarketScreen() {
   const user = useAuthStore((s) => s.user);
   const [tab, setTab] = useState<Tab>("browse");
+  const [kind, setKind] = useState<"player" | "stadium">("player");
   const [rarity, setRarity] = useState<Rarity | undefined>(undefined);
-  const [positionGroup, setPositionGroup] = useState<string | undefined>(undefined);
   const [auctionType, setAuctionType] = useState<"AUCTION" | "BUY_NOW" | undefined>(undefined);
   const [sort, setSort] = useState<MarketFilters["sort"]>("newest");
   const [search, setSearch] = useState("");
   const [sellOpen, setSellOpen] = useState(false);
   const [bidding, setBidding] = useState<Listing | null>(null);
 
-  const filters: MarketFilters = { rarity, auctionType, sort, search: search || undefined };
+  const filters: MarketFilters = { kind, rarity, auctionType, sort, search: search || undefined };
   const { data, isLoading } = useListings(filters);
-  const hotDeals = useHotDeals();
-  const trends = useMarketTrends();
-  const playerTrends = usePlayerTrends();
   const myListings = useMyListings();
   const history = useMarketHistory();
   const buyListing = useBuyListing();
   const cancelListing = useCancelListing();
   const { data: inventory } = useInventory();
+  const { data: stadiumInventory } = useStadiumCollection();
   useMarketLiveUpdates();
 
-  const sellableCards = useMemo(() => (inventory ?? []).filter((c) => !c.isListed), [inventory]);
+  const listableCards: ListableItem[] = useMemo(
+    () =>
+      (inventory ?? [])
+        .filter((c) => !c.isListed)
+        .map((c) => ({
+          cardId: c.id,
+          label: c.player.name,
+          sublabel: `${POSITION_RU[c.player.position]} · ${c.player.club.shortName}`,
+          rarity: c.rarity,
+          quickSellPrice: c.quickSellPrice,
+        })),
+    [inventory],
+  );
+  const listableStadiums: ListableItem[] = useMemo(
+    () =>
+      (stadiumInventory ?? [])
+        .filter((s) => !s.isListed)
+        .map((s) => ({
+          stadiumCardId: s.id,
+          label: s.stadium.name,
+          sublabel: `${s.stadium.city} · ${s.stadium.club.name}`,
+          rarity: s.stadium.rarity,
+          quickSellPrice: s.quickSellPrice,
+        })),
+    [stadiumInventory],
+  );
 
-  const visibleListings = useMemo(() => {
-    const list = data?.listings ?? [];
-    if (!positionGroup) return list;
-    const group = POSITION_GROUPS.find((g) => g.label === positionGroup);
-    if (!group) return list;
-    return list.filter((l) => group.positions.includes(l.card.player.position));
-  }, [data, positionGroup]);
+  const visibleListings = data?.listings ?? [];
 
   function handleBuy(listing: Listing) {
     haptics.impact("heavy");
@@ -112,11 +118,15 @@ export function MarketScreen() {
 
       {tab === "browse" && (
         <>
-          {trends.data && trends.data.length > 0 && <TrendTicker trends={trends.data} />}
-          {playerTrends.data && (
-            <PlayerTrendsRow risers={playerTrends.data.risers} fallers={playerTrends.data.fallers} />
-          )}
-          {hotDeals.data && <HotDealsRow listings={hotDeals.data} onSelect={setBidding} />}
+          <PillTabs
+            layoutId="market-kind"
+            active={kind}
+            onChange={(id) => setKind(id as "player" | "stadium")}
+            tabs={[
+              { id: "player", label: "Игроки" },
+              { id: "stadium", label: "Стадионы" },
+            ]}
+          />
 
           <input
             value={search}
@@ -143,20 +153,6 @@ export function MarketScreen() {
                 }}
               >
                 {RARITY_THEME[r].emoji}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex gap-1.5 overflow-x-auto pb-1">
-            {POSITION_GROUPS.map((g) => (
-              <button
-                key={g.label}
-                onClick={() => setPositionGroup((prev) => (prev === g.label ? undefined : g.label))}
-                className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                  positionGroup === g.label ? "border-gold bg-gold/15 text-gold" : "border-white/15 text-white/50"
-                }`}
-              >
-                {g.label}
               </button>
             ))}
           </div>
@@ -195,7 +191,7 @@ export function MarketScreen() {
             onClick={() => setSellOpen(true)}
             className="rounded-full border border-dashed border-white/25 py-2.5 text-sm font-semibold text-white/70"
           >
-            + Выставить карту
+            + Выставить {kind === "player" ? "карту" : "стадион"}
           </button>
 
           {isLoading && <p className="text-sm text-white/50">Загрузка...</p>}
@@ -250,7 +246,7 @@ export function MarketScreen() {
               <div>
                 <p className="text-sm font-semibold">
                   {entry.type === "MARKET_BUY" ? "Покупка" : "Продажа"}
-                  {entry.playerName && <span className="text-white/50"> · {entry.playerName}</span>}
+                  {entry.itemName && <span className="text-white/50"> · {entry.itemName}</span>}
                 </p>
                 <p className="text-xs text-white/40">{new Date(entry.createdAt).toLocaleString("ru-RU")}</p>
               </div>
@@ -264,7 +260,11 @@ export function MarketScreen() {
       )}
 
       {sellOpen && (
-        <CreateListingModal cards={sellableCards} listings={data?.listings ?? []} onClose={() => setSellOpen(false)} />
+        <CreateListingModal
+          items={kind === "player" ? listableCards : listableStadiums}
+          listings={data?.listings ?? []}
+          onClose={() => setSellOpen(false)}
+        />
       )}
       {bidding && <BidModal listing={bidding} onClose={() => setBidding(null)} />}
     </div>

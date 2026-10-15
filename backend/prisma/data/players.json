@@ -1,0 +1,101 @@
+[
+  {"slug": "haaland", "name": "Холанд", "fullName": "Эрлинг Холанд", "club": "mancity", "position": "ST", "nation": "Норвегия", "nationFlag": "🇳🇴", "overall": 93},
+  {"slug": "debruyne", "name": "Де Брёйне", "fullName": "Кевин Де Брёйне", "club": "mancity", "position": "CAM", "nation": "Бельгия", "nationFlag": "🇧🇪", "overall": 91},
+  {"slug": "rodri", "name": "Родри", "fullName": "Родри", "club": "mancity", "position": "CDM", "nation": "Испания", "nationFlag": "🇪🇸", "overall": 91},
+  {"slug": "gvardiol", "name": "Гвардиол", "fullName": "Йошко Гвардиол", "club": "mancity", "position": "CB", "nation": "Хорватия", "nationFlag": "🇭🇷", "overall": 86},
+
+  {"slug": "salah", "name": "Салах", "fullName": "Мохамед Салах", "club": "liverpool", "position": "RW", "nation": "Египет", "nationFlag": "🇪🇬", "overall": 90},
+  {"slug": "vandijk", "name": "ван Дейк", "fullName": "Виргил ван Дейк", "club": "liverpool", "position": "CB", "nation": "Нидерланды", "nationFlag": "🇳🇱", "overall": 90},
+  {"slug": "alisson", "name": "Алиссон", "fullName": "Алиссон Бекер", "club": "liverpool", "position": "GK", "nation": "Бразилия", "nationFlag": "🇧🇷", "overall": 90},
+  {"slug": "gravenberch", "name": "Гравенберх", "fullName": "Райан Гравенберх", "club": "liverpool", "position": "CM", "nation": "Нидерланды", "nationFlag": "🇳🇱", "overall": 78},
+
+  {"slug": "saka", "name": "Сака", "fullName": "Букайо Сака", "club": "arsenal", "position": "RW", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 88},
+  {"slug": "odegaard", "name": "Эдегор", "fullName": "Мартин Эдегор", "club": "arsenal", "position": "CAM", "nation": "Норвегия", "nationFlag": "🇳🇴", "overall": 88},
+  {"slug": "rice", "name": "Райс", "fullName": "Деклан Райс", "club": "arsenal", "position": "CDM", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 87},
+  {"slug": "saliba", "name": "Салиба", "fullName": "Уильям Салиба", "club": "arsenal", "position": "CB", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 86},
+
+  {"slug": "casemiro", "name": "Каземиро", "fullName": "Каземиро", "club": "manutd", "position": "CDM", "nation": "Бразилия", "nationFlag": "🇧🇷", "overall": 82},
+  {"slug": "mainoo", "name": "Майну", "fullName": "Коби Майну", "club": "manutd", "position": "CM", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 76},
+  {"slug": "yoro", "name": "Йоро", "fullName": "Лени Йоро", "club": "manutd", "position": "CB", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 76},
+  {"slug": "hojlund", "name": "Хёйлунн", "fullName": "Расмус Хёйлунн", "club": "manutd", "position": "ST", "nation": "Дания", "nationFlag": "🇩🇰", "overall": 75},
+
+  {"slug": "mbappe", "name": "Мбаппе", "fullName": "Килиан Мбаппе", "club": "realmadrid", "position": "ST", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 93},
+  {"slug": "vinicius", "name": "Винисиус", "fullName": "Винисиус Жуниор", "club": "realmadrid", "position": "LW", "nation": "Бразилия", "nationFlag": "🇧🇷", "overall": 91},
+  {"slug": "bellingham", "name": "Беллингем", "fullName": "Джуд Беллингем", "club": "realmadrid", "position": "CM", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 90},
+  {"slug": "courtois", "name": "Куртуа", "fullName": "Тибо Куртуа", "club": "realmadrid", "position": "GK", "nation": "Бельгия", "nationFlag": "🇧🇪", "overall": 91},
+
+  {"slug": "yamal", "name": "Ямаль", "fullName": "Ламин Ямаль", "club": "barcelona", "position": "RW", "nation": "Испания", "nationFlag": "🇪🇸", "overall": 87},
+  {"slug": "pedri", "name": "Педри", "fullName": "Педри", "club": "barcelona", "position": "CM", "nation": "Испания", "nationFlag": "🇪🇸", "overall": 87},
+  {"slug": "lewandowski", "name": "Левандовски", "fullName": "Роберт Левандовски", "club": "barcelona", "position": "ST", "nation": "Польша", "nationFlag": "🇵🇱", "overall": 88},
+  {"slug": "terstegen", "name": "тер Штеген", "fullName": "Марк-Андре тер Штеген", "club": "barcelona", "position": "GK", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 87},
+
+  {"slug": "griezmann", "name": "Гризманн", "fullName": "Антуан Гризманн", "club": "atletico", "position": "ST", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 87},
+  {"slug": "oblak", "name": "Облак", "fullName": "Ян Облак", "club": "atletico", "position": "GK", "nation": "Словения", "nationFlag": "🇸🇮", "overall": 87},
+  {"slug": "koke", "name": "Коке", "fullName": "Коке", "club": "atletico", "position": "CM", "nation": "Испания", "nationFlag": "🇪🇸", "overall": 82},
+  {"slug": "gimenez", "name": "Хименес", "fullName": "Хосе Мария Хименес", "club": "atletico", "position": "CB", "nation": "Уругвай", "nationFlag": "🇺🇾", "overall": 82},
+
+  {"slug": "ennesyri", "name": "эн-Несири", "fullName": "Юсеф эн-Несири", "club": "sevilla", "position": "ST", "nation": "Марокко", "nationFlag": "🇲🇦", "overall": 76},
+  {"slug": "bade", "name": "Баде", "fullName": "Луа Баде", "club": "sevilla", "position": "CB", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 73},
+  {"slug": "saul", "name": "Саул", "fullName": "Саул Ньигес", "club": "sevilla", "position": "CM", "nation": "Испания", "nationFlag": "🇪🇸", "overall": 74},
+  {"slug": "bono", "name": "Боно", "fullName": "Ясин Буну", "club": "sevilla", "position": "GK", "nation": "Марокко", "nationFlag": "🇲🇦", "overall": 80},
+
+  {"slug": "leao", "name": "Леау", "fullName": "Рафаэл Леау", "club": "milan", "position": "LW", "nation": "Португалия", "nationFlag": "🇵🇹", "overall": 86},
+  {"slug": "theohernandez", "name": "Эрнандес", "fullName": "Тео Эрнандес", "club": "milan", "position": "LB", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 85},
+  {"slug": "maignan", "name": "Менья", "fullName": "Майк Менья", "club": "milan", "position": "GK", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 86},
+  {"slug": "pulisic", "name": "Пулишич", "fullName": "Кристиан Пулишич", "club": "milan", "position": "RW", "nation": "США", "nationFlag": "🇺🇸", "overall": 83},
+
+  {"slug": "lautaro", "name": "Лаутаро", "fullName": "Лаутаро Мартинес", "club": "inter", "position": "ST", "nation": "Аргентина", "nationFlag": "🇦🇷", "overall": 86},
+  {"slug": "bastoni", "name": "Бастони", "fullName": "Алессандро Бастони", "club": "inter", "position": "CB", "nation": "Италия", "nationFlag": "🇮🇹", "overall": 86},
+  {"slug": "barella", "name": "Барелла", "fullName": "Николо Барелла", "club": "inter", "position": "CM", "nation": "Италия", "nationFlag": "🇮🇹", "overall": 86},
+  {"slug": "calhanoglu", "name": "Чалханоглу", "fullName": "Хакан Чалханоглу", "club": "inter", "position": "CDM", "nation": "Турция", "nationFlag": "🇹🇷", "overall": 85},
+
+  {"slug": "osimhen", "name": "Осимхен", "fullName": "Виктор Осимхен", "club": "napoli", "position": "ST", "nation": "Нигерия", "nationFlag": "🇳🇬", "overall": 85},
+  {"slug": "dilorenzo", "name": "Ди Лоренцо", "fullName": "Джованни Ди Лоренцо", "club": "napoli", "position": "RB", "nation": "Италия", "nationFlag": "🇮🇹", "overall": 80},
+  {"slug": "meret", "name": "Мерет", "fullName": "Алекс Мерет", "club": "napoli", "position": "GK", "nation": "Италия", "nationFlag": "🇮🇹", "overall": 78},
+  {"slug": "mctominay", "name": "МакТомини", "fullName": "Скотт МакТомини", "club": "napoli", "position": "CM", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 79},
+
+  {"slug": "vlahovic", "name": "Влахович", "fullName": "Душан Влахович", "club": "juventus", "position": "ST", "nation": "Сербия", "nationFlag": "🇷🇸", "overall": 83},
+  {"slug": "bremer", "name": "Бремер", "fullName": "Глейсон Бремер", "club": "juventus", "position": "CB", "nation": "Бразилия", "nationFlag": "🇧🇷", "overall": 83},
+  {"slug": "digregorio", "name": "Ди Грегорио", "fullName": "Микеле Ди Грегорио", "club": "juventus", "position": "GK", "nation": "Италия", "nationFlag": "🇮🇹", "overall": 78},
+  {"slug": "koopmeiners", "name": "Копмейнерс", "fullName": "Тён Копмейнерс", "club": "juventus", "position": "CM", "nation": "Нидерланды", "nationFlag": "🇳🇱", "overall": 80},
+
+  {"slug": "kane", "name": "Кейн", "fullName": "Гарри Кейн", "club": "bayern", "position": "ST", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 89},
+  {"slug": "kimmich", "name": "Киммих", "fullName": "Йозуа Киммих", "club": "bayern", "position": "CDM", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 88},
+  {"slug": "neuer", "name": "Нойер", "fullName": "Мануэль Нойер", "club": "bayern", "position": "GK", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 88},
+  {"slug": "davies", "name": "Дэвис", "fullName": "Альфонсо Дэвис", "club": "bayern", "position": "LB", "nation": "Канада", "nationFlag": "🇨🇦", "overall": 86},
+
+  {"slug": "wirtz", "name": "Вирц", "fullName": "Флориан Вирц", "club": "leverkusen", "position": "CAM", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 87},
+  {"slug": "xhaka", "name": "Хакаби", "fullName": "Гранит Джака", "club": "leverkusen", "position": "CDM", "nation": "Швейцария", "nationFlag": "🇨🇭", "overall": 83},
+  {"slug": "tah", "name": "Та", "fullName": "Йонатан Та", "club": "leverkusen", "position": "CB", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 83},
+  {"slug": "frimpong", "name": "Фримпонг", "fullName": "Джереми Фримпонг", "club": "leverkusen", "position": "RB", "nation": "Нидерланды", "nationFlag": "🇳🇱", "overall": 82},
+
+  {"slug": "adeyemi", "name": "Адейеми", "fullName": "Карим Адейеми", "club": "dortmund", "position": "LW", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 76},
+  {"slug": "schlotterbeck", "name": "Шлоттербек", "fullName": "Нико Шлоттербек", "club": "dortmund", "position": "CB", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 80},
+  {"slug": "kobel", "name": "Кобель", "fullName": "Грегор Кобель", "club": "dortmund", "position": "GK", "nation": "Швейцария", "nationFlag": "🇨🇭", "overall": 85},
+  {"slug": "reyna", "name": "Рейна", "fullName": "Джованни Рейна", "club": "dortmund", "position": "CAM", "nation": "США", "nationFlag": "🇺🇸", "overall": 71},
+
+  {"slug": "simons", "name": "Симонс", "fullName": "Хави Симонс", "club": "leipzig", "position": "CAM", "nation": "Нидерланды", "nationFlag": "🇳🇱", "overall": 82},
+  {"slug": "openda", "name": "Опенда", "fullName": "Луа Опенда", "club": "leipzig", "position": "ST", "nation": "Бельгия", "nationFlag": "🇧🇪", "overall": 81},
+  {"slug": "sesko", "name": "Шешко", "fullName": "Бенжамин Шешко", "club": "leipzig", "position": "ST", "nation": "Словения", "nationFlag": "🇸🇮", "overall": 79},
+  {"slug": "vandevoordt", "name": "Вандевордт", "fullName": "Мартен Вандевордт", "club": "leipzig", "position": "GK", "nation": "Бельгия", "nationFlag": "🇧🇪", "overall": 76},
+
+  {"slug": "donnarumma", "name": "Доннарумма", "fullName": "Джанлуиджи Доннарумма", "club": "psg", "position": "GK", "nation": "Италия", "nationFlag": "🇮🇹", "overall": 89},
+  {"slug": "hakimi", "name": "Хакими", "fullName": "Ашраф Хакими", "club": "psg", "position": "RB", "nation": "Марокко", "nationFlag": "🇲🇦", "overall": 86},
+  {"slug": "marquinhos", "name": "Маркиньос", "fullName": "Маркиньос", "club": "psg", "position": "CB", "nation": "Бразилия", "nationFlag": "🇧🇷", "overall": 84},
+  {"slug": "barcola", "name": "Барколя", "fullName": "Брэдли Барколя", "club": "psg", "position": "LW", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 80},
+
+  {"slug": "rabiot", "name": "Рабьо", "fullName": "Адриен Рабьо", "club": "marseille", "position": "CM", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 80},
+  {"slug": "greenwood", "name": "Гринвуд", "fullName": "Мейсон Гринвуд", "club": "marseille", "position": "RW", "nation": "Англия", "nationFlag": "🇬🇧", "overall": 82},
+  {"slug": "aubameyang", "name": "Обамеянг", "fullName": "Пьер-Эмерик Обамеянг", "club": "marseille", "position": "ST", "nation": "Габон", "nationFlag": "🇬🇦", "overall": 79},
+  {"slug": "pierre-gabriel", "name": "Пьер-Габриэль", "fullName": "Жильберто Пьер-Габриэль", "club": "marseille", "position": "RB", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 70},
+
+  {"slug": "akliouche", "name": "Аклиуш", "fullName": "Маньес Аклиуш", "club": "monaco", "position": "CAM", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 76},
+  {"slug": "camara", "name": "Камара", "fullName": "Мохамед Камара", "club": "monaco", "position": "CDM", "nation": "Мали", "nationFlag": "🇲🇱", "overall": 77},
+  {"slug": "kehrer", "name": "Керер", "fullName": "Тило Керер", "club": "monaco", "position": "CB", "nation": "Германия", "nationFlag": "🇩🇪", "overall": 76},
+  {"slug": "benyedder", "name": "Бен Йеддер", "fullName": "Висам Бен Йеддер", "club": "monaco", "position": "ST", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 78},
+
+  {"slug": "cherki", "name": "Шерки", "fullName": "Раян Шерки", "club": "lyon", "position": "CAM", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 80},
+  {"slug": "lacazette", "name": "Лаказетт", "fullName": "Александр Лаказетт", "club": "lyon", "position": "ST", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 79},
+  {"slug": "tolisso", "name": "Толиссо", "fullName": "Корантен Толиссо", "club": "lyon", "position": "CM", "nation": "Франция", "nationFlag": "🇫🇷", "overall": 77},
+  {"slug": "anthonylopes", "name": "Лопес", "fullName": "Антони Лопес", "club": "lyon", "position": "GK", "nation": "Португалия", "nationFlag": "🇵🇹", "overall": 76}
+]
