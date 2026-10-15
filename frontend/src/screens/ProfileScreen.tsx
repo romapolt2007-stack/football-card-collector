@@ -4,6 +4,7 @@ import { CommunityPatchesScreen } from "./CommunityPatchesScreen";
 import { StadiumScreen } from "./StadiumScreen";
 import { ReferralScreen } from "./ReferralScreen";
 import { WorldTourScreen } from "./WorldTourScreen";
+import { ClansScreen } from "./ClansScreen";
 import { FreeBonusRoulette } from "../components/profile/FreeBonusRoulette";
 import { ProfileHero } from "../components/profile/ProfileHero";
 import { XpBar } from "../components/profile/XpBar";
@@ -41,6 +42,7 @@ export function ProfileScreen() {
   const [showStadium, setShowStadium] = useState(false);
   const [showReferrals, setShowReferrals] = useState(false);
   const [showWorldTour, setShowWorldTour] = useState(false);
+  const [showClans, setShowClans] = useState(false);
   const stadiumStatus = useStadiumStatus();
   const emergencyBonus = useEmergencyBonusStatus();
   const duelStatus = useDuelStatus();
@@ -134,6 +136,14 @@ export function ProfileScreen() {
             className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
           >
             <span className="text-sm font-semibold">🗺️ World Tour</span>
+            <span className="text-xs text-white/40">Открыть →</span>
+          </button>
+
+          <button
+            onClick={() => setShowClans(true)}
+            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+          >
+            <span className="text-sm font-semibold">⚔️ Кланы</span>
             <span className="text-xs text-white/40">Открыть →</span>
           </button>
 
@@ -263,6 +273,7 @@ export function ProfileScreen() {
       {showStadium && <StadiumScreen onClose={() => setShowStadium(false)} />}
       {showReferrals && <ReferralScreen onClose={() => setShowReferrals(false)} />}
       {showWorldTour && <WorldTourScreen onClose={() => setShowWorldTour(false)} />}
+      {showClans && <ClansScreen onClose={() => setShowClans(false)} />}
     </div>
   );
 }
