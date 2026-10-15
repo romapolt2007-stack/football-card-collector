@@ -141,22 +141,26 @@ export function SpinScreen() {
             </div>
             {status.isLoading ? (
               <p className="text-sm text-white/50">Загрузка...</p>
-            ) : ready ? (
+            ) : (
               <div className="flex w-full max-w-sm flex-col items-center gap-3">
                 <HotStreakMeter streak={status.data?.hotStreak ?? 0} max={status.data?.hotStreakMax ?? 12} />
-                <SpinFilterBar filters={filters} onChange={setFilters} />
-                <button
-                  onClick={handleSpin}
-                  disabled={spin.isPending}
-                  className="spin-button-texture w-full rounded-full bg-gold px-10 py-4 text-base font-extrabold tracking-wide text-pitch-dark disabled:opacity-40"
-                >
-                  {spin.isPending ? "Крутим..." : "КРУТИТЬ"}
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-1 text-center">
-                <p className="text-sm text-white/50">Бесплатный спин через</p>
-                <p className="text-lg font-bold text-gold">{formatCountdown(status.data?.msLeft ?? 0)}</p>
+                {ready ? (
+                  <>
+                    <SpinFilterBar filters={filters} onChange={setFilters} />
+                    <button
+                      onClick={handleSpin}
+                      disabled={spin.isPending}
+                      className="spin-button-texture w-full rounded-full bg-gold px-10 py-4 text-base font-extrabold tracking-wide text-pitch-dark disabled:opacity-40"
+                    >
+                      {spin.isPending ? "Крутим..." : "КРУТИТЬ"}
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <p className="text-sm text-white/50">Бесплатный спин через</p>
+                    <p className="text-lg font-bold text-gold">{formatCountdown(status.data?.msLeft ?? 0)}</p>
+                  </div>
+                )}
               </div>
             )}
             {spin.isError && <p className="text-xs text-red-400">{(spin.error as Error).message}</p>}
