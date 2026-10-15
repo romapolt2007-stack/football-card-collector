@@ -1,7 +1,7 @@
 import type { Rarity } from "@prisma/client";
 import { prisma } from "./prisma.js";
 
-/** Кулдаун бесплатного спина — общий для игроков и стадионов. */
+/** Кулдаун бесплатного спина — теперь только для стадионов (спин игроков платный, без кулдауна). */
 export const FREE_SPIN_COOLDOWN_MS = 4 * 60 * 60 * 1000;
 
 export function freeSpinReady(lastFreeSpinAt: Date | null): boolean {
@@ -18,6 +18,23 @@ export function msUntilFreeSpin(lastFreeSpinAt: Date | null): number {
 /** Внутри позиции игроки с овералом выше порога выпадают реже — сила тоже должна быть трофеем. */
 const HIGH_OVERALL_THRESHOLD = 85;
 const HIGH_OVERALL_WEIGHT_MULTIPLIER = 0.3;
+
+// ──────────────────────────────────────────
+// Платный спин игроков: без кулдауна, игрок сам выбирает сумму ставки —
+// чем больше платит, тем выше шанс выбить игрока с высоким overall (а значит
+// и более высокую редкость, т.к. редкость — чистая функция от overall).
+// ──────────────────────────────────────────
+
+export const MIN_SPIN_COST = 1_000;
+export const MAX_SPIN_COST = 10_000_000;
+
+/** На минимальной ставке — те же шансы, что были при бесплатном спине (0.3x). На максимальной — сильные игроки выпадают в 6 раз ЧАЩЕ обычных, не реже. Шкала логарифмическая — диапазон охватывает 4 порядка. */
+export function paidSpinWeightMultiplier(amount: number): number {
+  const clamped = Math.min(MAX_SPIN_COST, Math.max(MIN_SPIN_COST, amount));
+  const t = Math.log(clamped / MIN_SPIN_COST) / Math.log(MAX_SPIN_COST / MIN_SPIN_COST);
+  const MAX_MULTIPLIER = 6;
+  return HIGH_OVERALL_WEIGHT_MULTIPLIER + t * (MAX_MULTIPLIER - HIGH_OVERALL_WEIGHT_MULTIPLIER);
+}
 
 export interface SpinPlayerFilters {
   leagueId?: string;
@@ -44,7 +61,7 @@ function playerWhere(filters: SpinPlayerFilters) {
  * карт этого игрока уже maxSupply или больше — лимит по факту владения, не
  * отдельный счётчик, поэтому освобождается сам, если копии распроданы/сожжены.
  */
-export async function spinPlayer(filters: SpinPlayerFilters = {}) {
+export async function spinPlayer(filters: SpinPlayerFilters = {}, weightMultiplier = HIGH_OVERALL_WEIGHT_MULTIPLIER) {
   const candidates = await prisma.player.findMany({
     where: playerWhere(filters),
     include: { club: { include: { league: true } }, _count: { select: { cards: true } } },
@@ -57,7 +74,7 @@ export async function spinPlayer(filters: SpinPlayerFilters = {}) {
   const position = positions[Math.floor(Math.random() * positions.length)];
   const inPosition = available.filter((p) => p.position === position);
 
-  const weights = inPosition.map((p) => (p.overall > HIGH_OVERALL_THRESHOLD ? HIGH_OVERALL_WEIGHT_MULTIPLIER : 1));
+  const weights = inPosition.map((p) => (p.overall > HIGH_OVERALL_THRESHOLD ? weightMultiplier : 1));
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * totalWeight;
   for (let i = 0; i < inPosition.length; i++) {
@@ -87,17 +104,17 @@ export async function spinStadium(topTierWeightBonus = 0) {
 // Азарт (Hot Streak) — растущий шанс апгрейда результата спина до LEGEND/ICON
 // ──────────────────────────────────────────
 
-/** Если спин сделан не позже чем через это время ПОСЛЕ готовности кулдауна — считаем, что серию не упустили. */
-export const HOT_STREAK_GRACE_MS = 2 * 60 * 60 * 1000;
+/** Спин без кулдауна — серия растёт, пока игрок крутит без долгих пауз; простой дольше этого — и серия сбрасывается. */
+export const HOT_STREAK_IDLE_RESET_MS = 30 * 60 * 1000;
 export const HOT_STREAK_MAX = 12;
 
-/** Следующее значение серии: +1 за "не упустил момент", ещё +1 за жёсткий фильтр (выбран конкретный клуб). */
-export function nextHotStreak(currentStreak: number, lastFreeSpinAt: Date | null, hardFilter: boolean): number {
+/** Следующее значение серии: +1 за спин без долгой паузы, ещё +1 за жёсткий фильтр (выбран конкретный клуб). */
+export function nextHotStreak(currentStreak: number, lastSpinAt: Date | null, hardFilter: boolean): number {
   let streak: number;
-  if (!lastFreeSpinAt) {
+  if (!lastSpinAt) {
     streak = 1;
   } else {
-    const staleAt = lastFreeSpinAt.getTime() + FREE_SPIN_COOLDOWN_MS + HOT_STREAK_GRACE_MS;
+    const staleAt = lastSpinAt.getTime() + HOT_STREAK_IDLE_RESET_MS;
     streak = Date.now() <= staleAt ? currentStreak + 1 : 1;
   }
   if (hardFilter) streak += 1;

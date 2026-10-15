@@ -125,6 +125,14 @@ export interface SpinStatus {
   hotStreakMax?: number;
 }
 
+export interface PlayerSpinStatus {
+  coins: number;
+  minCost: number;
+  maxCost: number;
+  hotStreak: number;
+  hotStreakMax: number;
+}
+
 export interface PlayerSpinResult {
   player: Player;
   rarity: Rarity;
@@ -133,6 +141,11 @@ export interface PlayerSpinResult {
   hotStreak?: number;
   hotStreakMax?: number;
   wasHotUpgrade?: boolean;
+  coins?: number;
+}
+
+export interface SpinFiltersWithAmount extends SpinFilters {
+  amount: number;
 }
 
 export interface StadiumBuff {

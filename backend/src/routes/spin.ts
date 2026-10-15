@@ -5,11 +5,12 @@ import { prisma } from "../lib/prisma.js";
 import { quickSellPrice } from "../lib/cardValue.js";
 import {
   attemptTopTierUpgrade,
-  freeSpinReady,
   hotStreakUpgradeChance,
   HOT_STREAK_MAX,
-  msUntilFreeSpin,
+  MAX_SPIN_COST,
+  MIN_SPIN_COST,
   nextHotStreak,
+  paidSpinWeightMultiplier,
   spinPlayer,
 } from "../lib/spin.js";
 import { setPendingSpin, takePendingSpin } from "../lib/spinStore.js";
@@ -21,14 +22,16 @@ const router = Router();
 router.get("/status", requireAuth, async (req, res) => {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
   res.json({
-    ready: freeSpinReady(user.lastFreeSpinAt),
-    msLeft: msUntilFreeSpin(user.lastFreeSpinAt),
+    coins: user.coins,
+    minCost: MIN_SPIN_COST,
+    maxCost: MAX_SPIN_COST,
     hotStreak: user.hotStreakCount,
     hotStreakMax: HOT_STREAK_MAX,
   });
 });
 
 const spinSchema = z.object({
+  amount: z.number().int().min(MIN_SPIN_COST).max(MAX_SPIN_COST),
   leagueId: z.string().optional(),
   clubId: z.string().optional(),
   nation: z.string().optional(),
@@ -40,20 +43,27 @@ router.post("/spin", requireAuth, async (req, res) => {
     res.status(400).json({ error: "Некорректное тело запроса" });
     return;
   }
+  const { amount, ...filters } = parsed.data;
 
   const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
-  if (!freeSpinReady(user.lastFreeSpinAt)) {
-    res.status(400).json({ error: "Бесплатный спин ещё не доступен", msLeft: msUntilFreeSpin(user.lastFreeSpinAt) });
+  const streak = nextHotStreak(user.hotStreakCount, user.lastFreeSpinAt, Boolean(filters.clubId));
+
+  // Списываем ставку и фиксируем серию атомарно, одним условным апдейтом —
+  // защита и от повторного нажатия, и от гонки при нехватке монет.
+  const charged = await prisma.user.updateMany({
+    where: { id: user.id, coins: { gte: amount } },
+    data: { coins: { decrement: amount }, lastFreeSpinAt: new Date(), hotStreakCount: streak },
+  });
+  if (charged.count === 0) {
+    res.status(400).json({ error: "Недостаточно монет для такой ставки" });
     return;
   }
+  await prisma.transaction.create({ data: { userId: user.id, type: "SPIN_PLAYER", amount: -amount } });
 
-  const streak = nextHotStreak(user.hotStreakCount, user.lastFreeSpinAt, Boolean(parsed.data.clubId));
-
-  // Кулдаун и серию фиксируем сразу, до генерации результата — защита от повторного нажатия.
-  await prisma.user.update({ where: { id: user.id }, data: { lastFreeSpinAt: new Date(), hotStreakCount: streak } });
-
-  let player = await spinPlayer(parsed.data);
+  let player = await spinPlayer(filters, paidSpinWeightMultiplier(amount));
   if (!player) {
+    // Под эти фильтры никого не нашлось — возвращаем ставку.
+    await prisma.user.update({ where: { id: user.id }, data: { coins: { increment: amount } } });
     res.status(400).json({ error: "Нет игроков под эти фильтры — попробуйте другие" });
     return;
   }
@@ -62,7 +72,7 @@ router.post("/spin", requireAuth, async (req, res) => {
   let wasHotUpgrade = false;
   if (!["LEGEND", "ICON"].includes(player.rarity)) {
     const chance = hotStreakUpgradeChance(streak, stadiumBuff.topTierWeightBonus);
-    const upgraded = await attemptTopTierUpgrade(parsed.data, chance);
+    const upgraded = await attemptTopTierUpgrade(filters, chance);
     if (upgraded) {
       player = upgraded;
       wasHotUpgrade = true;
@@ -81,6 +91,7 @@ router.post("/spin", requireAuth, async (req, res) => {
     hotStreak: streak,
     hotStreakMax: HOT_STREAK_MAX,
     wasHotUpgrade,
+    coins: user.coins - amount,
   });
 });
 

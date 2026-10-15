@@ -1,13 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
-import type { Card, PlayerSpinResult, SpinFilters, SpinStatus, StadiumCard, StadiumSpinResult } from "../types/game";
+import type {
+  Card,
+  PlayerSpinResult,
+  PlayerSpinStatus,
+  SpinFiltersWithAmount,
+  SpinStatus,
+  StadiumCard,
+  StadiumSpinResult,
+} from "../types/game";
 
 export function useSpinStatus() {
   const token = useAuthStore((s) => s.token);
   return useQuery({
     queryKey: ["spin-status"],
-    queryFn: () => api.get<SpinStatus>("/api/spin/status"),
+    queryFn: () => api.get<PlayerSpinStatus>("/api/spin/status"),
     enabled: Boolean(token),
     refetchInterval: 30_000,
   });
@@ -15,9 +23,14 @@ export function useSpinStatus() {
 
 export function useSpinPlayer() {
   const queryClient = useQueryClient();
+  const setUser = useAuthStore((s) => s.setUser);
+  const user = useAuthStore((s) => s.user);
   return useMutation({
-    mutationFn: (filters: SpinFilters = {}) => api.post<PlayerSpinResult>("/api/spin/spin", filters),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["spin-status"] }),
+    mutationFn: (request: SpinFiltersWithAmount) => api.post<PlayerSpinResult>("/api/spin/spin", request),
+    onSuccess: (result) => {
+      if (user && result.coins != null) setUser({ ...user, coins: result.coins });
+      queryClient.invalidateQueries({ queryKey: ["spin-status"] });
+    },
   });
 }
 

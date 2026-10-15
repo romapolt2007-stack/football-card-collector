@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSaveSpinPlayer, useSellSpinPlayer, useSpinPlayer, useSpinStatus } from "../lib/useSpin";
@@ -6,17 +6,10 @@ import { RarityCard } from "../components/cards/RarityCard";
 import { SpinReel } from "../components/spin/SpinReel";
 import { SpinFilterBar } from "../components/spin/SpinFilterBar";
 import { HotStreakMeter } from "../components/spin/HotStreakMeter";
+import { SpinAmountSlider } from "../components/spin/SpinAmountSlider";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { haptics } from "../lib/telegram";
 import type { Card, PlayerSpinResult, SpinFilters } from "../types/game";
-
-function formatCountdown(ms: number): string {
-  const totalMin = Math.ceil(ms / 60_000);
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  if (h > 0) return `${h} ч ${m} мин`;
-  return `${m} мин`;
-}
 
 function previewCard(result: PlayerSpinResult): Card {
   return {
@@ -32,6 +25,8 @@ function previewCard(result: PlayerSpinResult): Card {
 }
 
 const TOP_TIER = new Set(["LEGEND", "ICON"]);
+const DEFAULT_MIN = 1_000;
+const DEFAULT_MAX = 10_000_000;
 
 export function SpinScreen() {
   const user = useAuthStore((s) => s.user);
@@ -40,19 +35,34 @@ export function SpinScreen() {
   const save = useSaveSpinPlayer();
   const sell = useSellSpinPlayer();
   const [filters, setFilters] = useState<SpinFilters>({});
+  const [amount, setAmount] = useState(DEFAULT_MIN);
   const [result, setResult] = useState<PlayerSpinResult | null>(null);
   const [reeling, setReeling] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
+  const minCost = status.data?.minCost ?? DEFAULT_MIN;
+  const maxCost = status.data?.maxCost ?? DEFAULT_MAX;
+  const coins = user?.coins ?? 0;
+  const affordableMax = Math.max(minCost, Math.min(maxCost, coins));
+  const canAfford = coins >= minCost;
+
+  useEffect(() => {
+    setAmount((prev) => Math.min(Math.max(prev, minCost), affordableMax));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minCost, affordableMax]);
+
   function handleSpin() {
     haptics.impact("medium");
     setRevealed(false);
-    spin.mutate(filters, {
-      onSuccess: (r) => {
-        setResult(r);
-        setReeling(true);
+    spin.mutate(
+      { ...filters, amount },
+      {
+        onSuccess: (r) => {
+          setResult(r);
+          setReeling(true);
+        },
       },
-    });
+    );
   }
 
   function handleReelDone() {
@@ -88,7 +98,6 @@ export function SpinScreen() {
     });
   }
 
-  const ready = status.data?.ready ?? false;
   const theme = result ? RARITY_THEME[result.rarity] : null;
 
   return (
@@ -96,7 +105,7 @@ export function SpinScreen() {
       <div className="flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3">
         <h1 className="text-lg font-extrabold text-gold">🎰 Собрать</h1>
         <span className="rounded-full border border-gold/30 bg-black/30 px-3 py-1 text-sm font-bold text-gold">
-          {(user?.coins ?? 0).toLocaleString("ru-RU")} 🪙
+          {coins.toLocaleString("ru-RU")} 🪙
         </span>
       </div>
 
@@ -144,22 +153,22 @@ export function SpinScreen() {
             ) : (
               <div className="flex w-full max-w-sm flex-col items-center gap-3">
                 <HotStreakMeter streak={status.data?.hotStreak ?? 0} max={status.data?.hotStreakMax ?? 12} />
-                {ready ? (
+                <SpinFilterBar filters={filters} onChange={setFilters} />
+                {canAfford ? (
                   <>
-                    <SpinFilterBar filters={filters} onChange={setFilters} />
+                    <SpinAmountSlider amount={amount} onChange={setAmount} min={minCost} max={affordableMax} />
                     <button
                       onClick={handleSpin}
                       disabled={spin.isPending}
                       className="spin-button-texture w-full rounded-full bg-gold px-10 py-4 text-base font-extrabold tracking-wide text-pitch-dark disabled:opacity-40"
                     >
-                      {spin.isPending ? "Крутим..." : "КРУТИТЬ"}
+                      {spin.isPending ? "Крутим..." : `КРУТИТЬ за ${amount.toLocaleString("ru-RU")} 🪙`}
                     </button>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center gap-1 text-center">
-                    <p className="text-sm text-white/50">Бесплатный спин через</p>
-                    <p className="text-lg font-bold text-gold">{formatCountdown(status.data?.msLeft ?? 0)}</p>
-                  </div>
+                  <p className="text-center text-sm text-white/50">
+                    Нужно минимум {minCost.toLocaleString("ru-RU")} 🪙 на спин
+                  </p>
                 )}
               </div>
             )}
