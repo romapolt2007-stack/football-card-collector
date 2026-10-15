@@ -8,6 +8,7 @@ import { quickSellPrice } from "../lib/cardValue.js";
 import { incrementQuestProgress } from "../lib/quests.js";
 import { addXp } from "../lib/xp.js";
 import { HAPPY_HOUR_DISCOUNT, isHappyHour, packPrice } from "../lib/happyHours.js";
+import { rollSpecialEdition, SPECIAL_EDITION_VALUE_MULTIPLIER } from "../lib/specialEditions.js";
 
 const PACK_OPEN_XP = 20;
 
@@ -72,12 +73,15 @@ router.post("/open", requireAuth, async (req, res) => {
 
     const cards = [];
     for (const d of drawn) {
+      const specialEdition = rollSpecialEdition();
+      const basePrice = quickSellPrice(d.rarity, d.player);
       const card = await tx.card.create({
         data: {
           playerId: d.player.id,
           ownerId: user.id,
           rarity: d.rarity,
-          quickSellPrice: quickSellPrice(d.rarity, d.player),
+          specialEdition,
+          quickSellPrice: specialEdition ? Math.round(basePrice * SPECIAL_EDITION_VALUE_MULTIPLIER) : basePrice,
         },
         include: { player: { include: { club: { include: { league: true } } } } },
       });

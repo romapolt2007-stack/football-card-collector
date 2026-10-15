@@ -215,6 +215,10 @@ model Card {
   isListed       Boolean @default(false)
   quickSellPrice Int
 
+  // Коллекционное издание (ruby/filigree-gold/sapphire/emerald/amethyst/obsidian) — редкий
+  // косметический дроп из паков, см. backend/src/lib/specialEditions.ts. null = обычная карта.
+  specialEdition String?
+
   obtainedAt DateTime @default(now())
 
   // Дисквалификация (красная карточка) или травма — сколько ближайших матчей

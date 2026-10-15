@@ -1,5 +1,6 @@
 import type { Card } from "../../types/game";
 import { RARITY_THEME } from "./rarityTheme";
+import { editionById } from "./specialEditionThemes";
 import { ClubCrest } from "./ClubCrest";
 import { PlayerPortrait } from "./PlayerPortrait";
 import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
@@ -23,7 +24,9 @@ const PENNANT_CLIP =
   "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
 
 export function RarityCard({ card, size = "md", onClick }: Props) {
-  const theme = RARITY_THEME[card.rarity];
+  const rarityTheme = RARITY_THEME[card.rarity];
+  const edition = editionById(card.specialEdition);
+  const theme = edition ? { ...rarityTheme, ...edition, statBg: "rgba(0,0,0,0.3)" } : rarityTheme;
   const { player } = card;
   const isIcon = card.rarity === "ICON";
   const isLegend = card.rarity === "LEGEND";
@@ -49,8 +52,17 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
         className="pointer-events-none absolute inset-0"
         style={{ background: "linear-gradient(140deg, rgba(255,255,255,0.22) 0%, transparent 38%)" }}
       />
+      {edition && <div className={`${edition.patternClass} pointer-events-none absolute inset-0`} />}
       {isLegend && <div className="holo-sweep pointer-events-none absolute inset-0" />}
       {isIcon && <IconSparkles />}
+      {edition && (
+        <span
+          className="absolute left-1.5 top-1.5 z-10 rounded px-1.5 py-0.5 text-[0.6em] font-extrabold uppercase tracking-wide"
+          style={{ background: "rgba(0,0,0,0.45)", color: edition.borderColor }}
+        >
+          {edition.tag}
+        </span>
+      )}
       {isUnavailable && (
         <span className="absolute right-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white">
           {card.unavailableMatches}

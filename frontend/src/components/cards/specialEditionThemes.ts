@@ -72,3 +72,10 @@ export const SPECIAL_EDITIONS: SpecialEditionTheme[] = [
     patternClass: "carbon-texture",
   },
 ];
+
+const EDITION_BY_ID: Record<string, SpecialEditionTheme> = Object.fromEntries(SPECIAL_EDITIONS.map((e) => [e.id, e]));
+
+/** Тема издания по id карты (card.specialEdition) — undefined, если карта обычная. */
+export function editionById(id: string | null | undefined): SpecialEditionTheme | undefined {
+  return id ? EDITION_BY_ID[id] : undefined;
+}
