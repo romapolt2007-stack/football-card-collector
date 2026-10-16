@@ -28,21 +28,30 @@ export function ClubCrest({ club, size = 48 }: Props) {
   const { colorPrimary: p, colorSecondary: s, shortName } = club;
   const clipId = `shield-${club.id}`;
   const ringId = `ring-${club.id}`;
+  const glowId = `glow-${club.id}`;
 
   return (
-    <svg width={size} height={(size * 103) / 100} viewBox="0 0 100 103">
+    <svg width={size} height={(size * 103) / 100} viewBox="0 0 100 103" style={{ overflow: "visible" }}>
       <defs>
         <clipPath id={clipId}>
           <path d={SHIELD_PATH} />
         </clipPath>
         <linearGradient id={ringId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#fff6d8" />
-          <stop offset="50%" stopColor="#e3a825" />
+          <stop offset="30%" stopColor="#ffd166" />
+          <stop offset="55%" stopColor="#e3a825" />
+          <stop offset="80%" stopColor="#fff6d8" />
           <stop offset="100%" stopColor="#8a5a06" />
         </linearGradient>
+        <radialGradient id={glowId} cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stopColor="#ffd166" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#ffd166" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
-      <path d={OUTER_RING_PATH} fill="none" stroke={`url(#${ringId})`} strokeWidth="2.5" />
+      <circle cx="50" cy="48" r="55" fill={`url(#${glowId})`} />
+      <path d={OUTER_RING_PATH} fill="none" stroke="rgba(0,0,0,0.45)" strokeWidth="4" transform="translate(0.8,1.2)" />
+      <path d={OUTER_RING_PATH} fill="none" stroke={`url(#${ringId})`} strokeWidth="3" />
 
       <g clipPath={`url(#${clipId})`}>
         <rect width="100" height="100" fill={p} />
@@ -75,9 +84,11 @@ export function ClubCrest({ club, size = 48 }: Props) {
         {/* Рельефный блик сверху и тень снизу — объёмный "3D" вид щита. */}
         <ellipse cx="42" cy="18" rx="38" ry="16" fill="rgba(255,255,255,0.28)" />
         <rect y="70" width="100" height="30" fill="rgba(0,0,0,0.28)" />
+        {/* Диагональная металлическая полоса блика — премиальный "глянцевый" эффект. */}
+        <polygon points="-10,30 15,10 35,90 10,100" fill="rgba(255,255,255,0.14)" />
       </g>
-      <path d={SHIELD_PATH} fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" />
-      <path d={SHIELD_PATH} fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1" transform="translate(0.6,0.6)" />
+      <path d={SHIELD_PATH} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2.5" />
+      <path d={SHIELD_PATH} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="1" transform="translate(0.6,0.6)" />
 
       {Array.from({ length: starCount }, (_, i) => {
         const scale = 0.45;
