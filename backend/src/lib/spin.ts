@@ -1,7 +1,7 @@
 import type { Rarity } from "@prisma/client";
 import { prisma } from "./prisma.js";
 
-/** Кулдаун бесплатного спина — теперь только для стадионов (спин игроков платный, без кулдауна). */
+/** Кулдаун бесплатного спина — только для стадионов (спин игроков платный, без кулдауна). */
 export const FREE_SPIN_COOLDOWN_MS = 4 * 60 * 60 * 1000;
 
 export function freeSpinReady(lastFreeSpinAt: Date | null): boolean {
@@ -15,25 +15,63 @@ export function msUntilFreeSpin(lastFreeSpinAt: Date | null): number {
   return Math.max(0, left);
 }
 
-/** Внутри позиции игроки с овералом выше порога выпадают реже — сила тоже должна быть трофеем. */
-const HIGH_OVERALL_THRESHOLD = 85;
-const HIGH_OVERALL_WEIGHT_MULTIPLIER = 0.3;
+/** Только для стадионов — крупные арены реже, вес ниже 1. */
+const STADIUM_HIGH_CAPACITY_WEIGHT = 0.3;
 
 // ──────────────────────────────────────────
-// Платный спин игроков: без кулдауна, игрок сам выбирает сумму ставки —
-// чем больше платит, тем выше шанс выбить игрока с высоким overall (а значит
-// и более высокую редкость, т.к. редкость — чистая функция от overall).
+// Платный спин игроков: без кулдауна, ставка от 1 000 до 10 000 000.
+// Редкость выбирается ПЕРВОЙ по фиксированным весам (не зависит от того, кто
+// конкретно попадётся) — так топ-карты вроде Холанда выпадают строго по
+// своему проценту, а не "случайно чаще, чем должны". Игрок внутри выпавшей
+// редкости выбирается уже потом, равномерно среди подходящих под фильтр.
 // ──────────────────────────────────────────
 
 export const MIN_SPIN_COST = 1_000;
 export const MAX_SPIN_COST = 10_000_000;
 
-/** На минимальной ставке — те же шансы, что были при бесплатном спине (0.3x). На максимальной — сильные игроки выпадают в 6 раз ЧАЩЕ обычных, не реже. Шкала логарифмическая — диапазон охватывает 4 порядка. */
-export function paidSpinWeightMultiplier(amount: number): number {
+const RARITY_ORDER: Rarity[] = ["BRONZE", "SILVER", "GOLD", "LEGEND", "ICON"];
+
+/** Базовые шансы (на минимальной ставке, без баффов) — Бронза ~60%, Серебро ~25%, Золото ~12%, Легенда ~2.5%, Икона ~0.5% (резерв под игроков 94+). */
+export const RARITY_WEIGHTS_BASE: Record<Rarity, number> = {
+  BRONZE: 60,
+  SILVER: 25,
+  GOLD: 12,
+  LEGEND: 2.5,
+  ICON: 0.5,
+};
+
+/** Распределение на максимальной ставке — топ-редкости ощутимо вероятнее, но всё ещё не гарантированы. */
+const RARITY_WEIGHTS_TOP: Record<Rarity, number> = {
+  BRONZE: 8,
+  SILVER: 17,
+  GOLD: 35,
+  LEGEND: 30,
+  ICON: 10,
+};
+
+function stakeFactor(amount: number): number {
   const clamped = Math.min(MAX_SPIN_COST, Math.max(MIN_SPIN_COST, amount));
-  const t = Math.log(clamped / MIN_SPIN_COST) / Math.log(MAX_SPIN_COST / MIN_SPIN_COST);
-  const MAX_MULTIPLIER = 6;
-  return HIGH_OVERALL_WEIGHT_MULTIPLIER + t * (MAX_MULTIPLIER - HIGH_OVERALL_WEIGHT_MULTIPLIER);
+  return Math.log(clamped / MIN_SPIN_COST) / Math.log(MAX_SPIN_COST / MIN_SPIN_COST);
+}
+
+/** Линейная интерполяция весов от BASE (ставка = минимум) к TOP (ставка = максимум), плюс небольшой сдвиг от баффа стадиона. */
+export function rarityWeightsForSpin(amount: number, stadiumBonus = 0): Record<Rarity, number> {
+  const t = Math.min(1, Math.max(0, stakeFactor(amount) + stadiumBonus));
+  const weights = {} as Record<Rarity, number>;
+  for (const r of RARITY_ORDER) {
+    weights[r] = RARITY_WEIGHTS_BASE[r] + (RARITY_WEIGHTS_TOP[r] - RARITY_WEIGHTS_BASE[r]) * t;
+  }
+  return weights;
+}
+
+function rollRarity(weights: Record<Rarity, number>): Rarity {
+  const total = RARITY_ORDER.reduce((sum, r) => sum + weights[r], 0);
+  let roll = Math.random() * total;
+  for (const r of RARITY_ORDER) {
+    roll -= weights[r];
+    if (roll <= 0) return r;
+  }
+  return RARITY_ORDER[RARITY_ORDER.length - 1];
 }
 
 export interface SpinPlayerFilters {
@@ -50,38 +88,44 @@ function playerWhere(filters: SpinPlayerFilters) {
   };
 }
 
-/**
- * Крутит игрока: сначала позиция из тех, что реально есть в отфильтрованном
- * (лига/клуб/страна) пуле — так сужение фильтров никогда не даёт "пустой"
- * результат из-за того, что в клубе, например, нет вратаря в базе — затем
- * взвешенный выбор внутри позиции. Редкость не рестится отдельно — она уже
- * закреплена на Player.rarity при сидировании (чистая функция от overall).
- *
- * Ультра-редкие игроки (Player.maxSupply) исключаются из пула, когда живых
- * карт этого игрока уже maxSupply или больше — лимит по факту владения, не
- * отдельный счётчик, поэтому освобождается сам, если копии распроданы/сожжены.
- */
-export async function spinPlayer(filters: SpinPlayerFilters = {}, weightMultiplier = HIGH_OVERALL_WEIGHT_MULTIPLIER) {
+/** Живые (не распроданные сверх maxSupply) кандидаты под фильтр в конкретной редкости. */
+async function candidatesForRarity(filters: SpinPlayerFilters, rarity: Rarity) {
   const candidates = await prisma.player.findMany({
-    where: playerWhere(filters),
+    where: { ...playerWhere(filters), rarity },
     include: { club: { include: { league: true } }, _count: { select: { cards: true } } },
   });
+  return candidates.filter((p) => p.maxSupply == null || p._count.cards < p.maxSupply);
+}
 
-  const available = candidates.filter((p) => p.maxSupply == null || p._count.cards < p.maxSupply);
-  if (available.length === 0) return null;
+/**
+ * Крутит игрока: редкость — по фиксированным весам (см. rarityWeightsForSpin),
+ * затем равномерный выбор игрока этой редкости среди подходящих под фильтр
+ * (лига/клуб/страна). Если в выпавшей редкости под фильтром никого нет —
+ * спускаемся по лесенке вниз (а если и там пусто — поднимаемся вверх), чтобы
+ * узкий фильтр никогда не давал "пустой" результат, если хоть кто-то подходит.
+ */
+export async function spinPlayer(filters: SpinPlayerFilters, amount: number, stadiumBonus = 0) {
+  const weights = rarityWeightsForSpin(amount, stadiumBonus);
+  const startIdx = RARITY_ORDER.indexOf(rollRarity(weights));
 
-  const positions = [...new Set(available.map((p) => p.position))];
-  const position = positions[Math.floor(Math.random() * positions.length)];
-  const inPosition = available.filter((p) => p.position === position);
-
-  const weights = inPosition.map((p) => (p.overall > HIGH_OVERALL_THRESHOLD ? weightMultiplier : 1));
-  const totalWeight = weights.reduce((a, b) => a + b, 0);
-  let roll = Math.random() * totalWeight;
-  for (let i = 0; i < inPosition.length; i++) {
-    roll -= weights[i];
-    if (roll <= 0) return inPosition[i];
+  for (let i = startIdx; i >= 0; i--) {
+    const pool = await candidatesForRarity(filters, RARITY_ORDER[i]);
+    if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)];
   }
-  return inPosition[inPosition.length - 1];
+  for (let i = startIdx + 1; i < RARITY_ORDER.length; i++) {
+    const pool = await candidatesForRarity(filters, RARITY_ORDER[i]);
+    if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)];
+  }
+  return null;
+}
+
+/** Гарантированная топ-карта (награда за полную шкалу "Азарт") — ICON, а если таких нет под фильтром, то LEGEND, а если и их нет — GOLD. */
+export async function spinPlayerGuaranteedTop(filters: SpinPlayerFilters) {
+  for (const rarity of ["ICON", "LEGEND", "GOLD"] as Rarity[]) {
+    const pool = await candidatesForRarity(filters, rarity);
+    if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)];
+  }
+  return null;
 }
 
 export async function spinStadium(topTierWeightBonus = 0) {
@@ -89,7 +133,7 @@ export async function spinStadium(topTierWeightBonus = 0) {
   if (candidates.length === 0) return null;
 
   const weights = candidates.map((s) =>
-    s.capacity > 65000 ? HIGH_OVERALL_WEIGHT_MULTIPLIER + topTierWeightBonus * 3 : 1,
+    s.capacity > 65000 ? STADIUM_HIGH_CAPACITY_WEIGHT + topTierWeightBonus * 3 : 1,
   );
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * totalWeight;
@@ -101,15 +145,31 @@ export async function spinStadium(topTierWeightBonus = 0) {
 }
 
 // ──────────────────────────────────────────
-// Азарт (Hot Streak) — растущий шанс апгрейда результата спина до LEGEND/ICON
+// Азарт (Hot Streak) — серия спинов без долгих пауз заполняет шкалу; по
+// достижении порога следующий спин ГАРАНТИРОВАННО топ-редкости (ICON/LEGEND/
+// GOLD по убыванию доступности), затем серия сбрасывается. Порог зависит от
+// уровня аккаунта: чем больше всего спинов сделано за всю историю, тем выше
+// уровень и тем короче путь до гарантии.
 // ──────────────────────────────────────────
 
-/** Спин без кулдауна — серия растёт, пока игрок крутит без долгих пауз; простой дольше этого — и серия сбрасывается. */
 export const HOT_STREAK_IDLE_RESET_MS = 30 * 60 * 1000;
-export const HOT_STREAK_MAX = 12;
+export const SPINS_PER_LEVEL = 25;
+export const HOT_STREAK_BASE_THRESHOLD = 150;
+export const HOT_STREAK_LEVEL_REDUCTION = 2;
+export const HOT_STREAK_MIN_THRESHOLD = 30;
 
-/** Следующее значение серии: +1 за спин без долгой паузы, ещё +1 за жёсткий фильтр (выбран конкретный клуб). */
-export function nextHotStreak(currentStreak: number, lastSpinAt: Date | null, hardFilter: boolean): number {
+export function playerLevel(totalSpins: number): number {
+  return 1 + Math.floor(totalSpins / SPINS_PER_LEVEL);
+}
+
+/** Порог "Азарта" = 150 - уровень*2, но не ниже 30 (иначе гарантия станет слишком частой на высоких уровнях). */
+export function hotStreakThreshold(totalSpins: number): number {
+  const level = playerLevel(totalSpins);
+  return Math.max(HOT_STREAK_MIN_THRESHOLD, HOT_STREAK_BASE_THRESHOLD - level * HOT_STREAK_LEVEL_REDUCTION);
+}
+
+/** Следующее значение серии: +1 за спин без долгой паузы, ещё +1 за жёсткий фильтр (выбран конкретный клуб). Капается порогом (нет смысла копить сверх него). */
+export function nextHotStreak(currentStreak: number, lastSpinAt: Date | null, hardFilter: boolean, threshold: number): number {
   let streak: number;
   if (!lastSpinAt) {
     streak = 1;
@@ -118,25 +178,5 @@ export function nextHotStreak(currentStreak: number, lastSpinAt: Date | null, ha
     streak = Date.now() <= staleAt ? currentStreak + 1 : 1;
   }
   if (hardFilter) streak += 1;
-  return Math.min(HOT_STREAK_MAX, streak);
-}
-
-export function hotStreakUpgradeChance(streak: number, stadiumTopTierBonus: number): number {
-  return Math.min(0.5, streak * 0.03 + stadiumTopTierBonus);
-}
-
-const TOP_TIER: Rarity[] = ["LEGEND", "ICON"];
-
-/** Попытка "подброса" — если повезло, подменяет результат на LEGEND/ICON из того же отфильтрованного пула. */
-export async function attemptTopTierUpgrade(filters: SpinPlayerFilters, chance: number) {
-  if (chance <= 0 || Math.random() >= chance) return null;
-
-  const candidates = await prisma.player.findMany({
-    where: { ...playerWhere(filters), rarity: { in: TOP_TIER } },
-    include: { club: { include: { league: true } }, _count: { select: { cards: true } } },
-  });
-  const available = candidates.filter((p) => p.maxSupply == null || p._count.cards < p.maxSupply);
-  if (available.length === 0) return null;
-
-  return available[Math.floor(Math.random() * available.length)];
+  return Math.min(threshold, streak);
 }

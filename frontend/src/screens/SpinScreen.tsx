@@ -6,7 +6,6 @@ import { RarityCard } from "../components/cards/RarityCard";
 import { SpinReel } from "../components/spin/SpinReel";
 import { SpinFilterBar } from "../components/spin/SpinFilterBar";
 import { HotStreakMeter } from "../components/spin/HotStreakMeter";
-import { SpinAmountSlider } from "../components/spin/SpinAmountSlider";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { haptics } from "../lib/telegram";
 import type { Card, PlayerSpinResult, SpinFilters } from "../types/game";
@@ -27,6 +26,13 @@ function previewCard(result: PlayerSpinResult): Card {
 const TOP_TIER = new Set(["LEGEND", "ICON"]);
 const DEFAULT_MIN = 1_000;
 const DEFAULT_MAX = 10_000_000;
+const AMOUNT_PRESETS = [1_000, 10_000, 100_000, 1_000_000, 10_000_000];
+
+function formatPreset(n: number): string {
+  if (n >= 1_000_000) return `${n / 1_000_000}M`;
+  if (n >= 1_000) return `${n / 1_000}k`;
+  return `${n}`;
+}
 
 export function SpinScreen() {
   const user = useAuthStore((s) => s.user);
@@ -111,7 +117,7 @@ export function SpinScreen() {
 
       <div className="flex flex-1 flex-col items-center justify-center gap-5 px-4">
         {reeling && result ? (
-          <SpinReel targetRarity={result.rarity} onDone={handleReelDone} />
+          <SpinReel targetRarity={result.rarity} player={result.player} onDone={handleReelDone} />
         ) : revealed && result ? (
           <div className="flex flex-col items-center gap-4">
             <div
@@ -123,8 +129,8 @@ export function SpinScreen() {
               <RarityCard card={previewCard(result)} size="lg" />
             </div>
             <p className="text-sm text-white/60">Примерная стоимость: {result.estimatedValue.toLocaleString("ru-RU")} 🪙</p>
-            {result.wasHotUpgrade && (
-              <p className="animate-pulse text-sm font-extrabold text-orange-400">🔥 Азарт сработал — апгрейд редкости!</p>
+            {result.wasGuaranteedTop && (
+              <p className="animate-pulse text-sm font-extrabold text-orange-400">🎁 Азарт сработал — гарантированная топ-карта!</p>
             )}
             <div className="flex gap-3">
               <button
@@ -145,22 +151,45 @@ export function SpinScreen() {
           </div>
         ) : (
           <>
-            <div className="flex h-48 w-36 items-center justify-center rounded-2xl border-2 border-dashed border-gold/30 text-5xl">
-              🎴
+            <div className="relative flex h-[270px] w-[200px] items-center justify-center overflow-hidden rounded-[22px] border-[3px] border-gold/40 bg-black/40">
+              <div className="holo-idle-glow pointer-events-none absolute inset-0" />
+              <span className="relative text-5xl opacity-60">🎴</span>
             </div>
             {status.isLoading ? (
               <p className="text-sm text-white/50">Загрузка...</p>
             ) : (
               <div className="flex w-full max-w-sm flex-col items-center gap-3">
-                <HotStreakMeter streak={status.data?.hotStreak ?? 0} max={status.data?.hotStreakMax ?? 12} />
+                <HotStreakMeter
+                  streak={status.data?.hotStreak ?? 0}
+                  threshold={status.data?.hotStreakThreshold ?? 150}
+                  level={status.data?.level ?? 1}
+                />
                 <SpinFilterBar filters={filters} onChange={setFilters} />
                 {canAfford ? (
                   <>
-                    <SpinAmountSlider amount={amount} onChange={setAmount} min={minCost} max={affordableMax} />
+                    <div className="flex w-full gap-1.5">
+                      {AMOUNT_PRESETS.filter((p) => p >= minCost && p <= affordableMax).map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => {
+                            haptics.select();
+                            setAmount(p);
+                          }}
+                          className="flex-1 rounded-xl border py-2 text-xs font-bold"
+                          style={{
+                            borderColor: amount === p ? "rgba(255,209,102,0.6)" : "rgba(255,255,255,0.15)",
+                            color: amount === p ? "#ffd166" : "rgba(255,255,255,0.6)",
+                            background: amount === p ? "rgba(255,209,102,0.12)" : "transparent",
+                          }}
+                        >
+                          {formatPreset(p)}
+                        </button>
+                      ))}
+                    </div>
                     <button
                       onClick={handleSpin}
                       disabled={spin.isPending}
-                      className="spin-button-texture w-full rounded-full bg-gold px-10 py-4 text-base font-extrabold tracking-wide text-pitch-dark disabled:opacity-40"
+                      className="spin-pulse w-full rounded-full bg-[linear-gradient(135deg,#ffe28a,#ffb020,#ff8a00)] px-10 py-5 text-lg font-extrabold tracking-wide text-pitch-dark disabled:animate-none disabled:opacity-40"
                     >
                       {spin.isPending ? "Крутим..." : `КРУТИТЬ за ${amount.toLocaleString("ru-RU")} 🪙`}
                     </button>

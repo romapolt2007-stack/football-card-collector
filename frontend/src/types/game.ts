@@ -129,8 +129,9 @@ export interface PlayerSpinStatus {
   coins: number;
   minCost: number;
   maxCost: number;
+  level: number;
   hotStreak: number;
-  hotStreakMax: number;
+  hotStreakThreshold: number;
 }
 
 export interface PlayerSpinResult {
@@ -138,9 +139,10 @@ export interface PlayerSpinResult {
   rarity: Rarity;
   estimatedValue: number;
   sellPrice: number;
+  level?: number;
   hotStreak?: number;
-  hotStreakMax?: number;
-  wasHotUpgrade?: boolean;
+  hotStreakThreshold?: number;
+  wasGuaranteedTop?: boolean;
   coins?: number;
 }
 

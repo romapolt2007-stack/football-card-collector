@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { FilterPicker, type FilterOption } from "./FilterPicker";
-import { useLeagues, useNations } from "../../lib/useMeta";
+import { useLeagues } from "../../lib/useMeta";
 import { haptics } from "../../lib/telegram";
 import type { SpinFilters } from "../../types/game";
 
@@ -9,11 +9,10 @@ interface Props {
   onChange: (filters: SpinFilters) => void;
 }
 
-type ActiveSheet = "league" | "club" | "nation" | null;
+type ActiveSheet = "league" | "club" | null;
 
 export function SpinFilterBar({ filters, onChange }: Props) {
   const { data: leagues } = useLeagues();
-  const { data: nations } = useNations();
   const [sheet, setSheet] = useState<ActiveSheet>(null);
 
   const leagueOptions: FilterOption[] = useMemo(
@@ -27,17 +26,11 @@ export function SpinFilterBar({ filters, onChange }: Props) {
     return pool.map((c) => ({ id: c.id, label: c.name, icon: c.shortName.slice(0, 2), accent: c.colorPrimary }));
   }, [filters.leagueId, selectedLeague, leagues]);
 
-  const nationOptions: FilterOption[] = useMemo(
-    () => (nations ?? []).map((n) => ({ id: n.nation, label: n.nation, icon: n.flag })),
-    [nations],
-  );
-
   const selectedClub = clubOptions.find((c) => c.id === filters.clubId);
-  const selectedNation = nationOptions.find((n) => n.id === filters.nation);
 
   return (
     <>
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="grid w-full grid-cols-2 gap-2">
         <FilterPill
           label="Лига"
           value={selectedLeague?.name}
@@ -52,14 +45,6 @@ export function SpinFilterBar({ filters, onChange }: Props) {
           onClick={() => {
             haptics.select();
             setSheet("club");
-          }}
-        />
-        <FilterPill
-          label="Страна"
-          value={selectedNation?.label}
-          onClick={() => {
-            haptics.select();
-            setSheet("nation");
           }}
         />
       </div>
@@ -82,15 +67,6 @@ export function SpinFilterBar({ filters, onChange }: Props) {
           onClose={() => setSheet(null)}
         />
       )}
-      {sheet === "nation" && (
-        <FilterPicker
-          title="Выбрать страну"
-          options={nationOptions}
-          selectedId={filters.nation}
-          onSelect={(id) => onChange({ ...filters, nation: id })}
-          onClose={() => setSheet(null)}
-        />
-      )}
     </>
   );
 }
@@ -99,14 +75,14 @@ function FilterPill({ label, value, onClick }: { label: string; value?: string; 
   return (
     <button
       onClick={onClick}
-      className="flex shrink-0 flex-col items-start rounded-xl border px-3 py-1.5 text-left"
+      className="flex w-full flex-col items-start rounded-xl border px-4 py-2.5 text-left"
       style={{
         borderColor: value ? "rgba(255,209,102,0.5)" : "rgba(255,255,255,0.15)",
         background: value ? "rgba(255,209,102,0.1)" : "rgba(255,255,255,0.04)",
       }}
     >
-      <span className="text-[9px] uppercase tracking-wide text-white/40">{label}</span>
-      <span className={`max-w-[110px] truncate text-xs font-bold ${value ? "text-gold" : "text-white/60"}`}>
+      <span className="text-[10px] uppercase tracking-wide text-white/40">{label}</span>
+      <span className={`w-full truncate text-sm font-bold ${value ? "text-gold" : "text-white/60"}`}>
         {value ?? "Любой"}
       </span>
     </button>
