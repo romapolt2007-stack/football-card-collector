@@ -6,6 +6,7 @@ import { RarityCard } from "../components/cards/RarityCard";
 import { SpinReel } from "../components/spin/SpinReel";
 import { SpinFilterBar } from "../components/spin/SpinFilterBar";
 import { HotStreakMeter } from "../components/spin/HotStreakMeter";
+import { SpinAmountSlider } from "../components/spin/SpinAmountSlider";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { haptics } from "../lib/telegram";
 import type { Card, PlayerSpinResult, SpinFilters } from "../types/game";
@@ -26,13 +27,6 @@ function previewCard(result: PlayerSpinResult): Card {
 const TOP_TIER = new Set(["LEGEND", "ICON"]);
 const DEFAULT_MIN = 1_000;
 const DEFAULT_MAX = 10_000_000;
-const AMOUNT_PRESETS = [1_000, 10_000, 100_000, 1_000_000, 10_000_000];
-
-function formatPreset(n: number): string {
-  if (n >= 1_000_000) return `${n / 1_000_000}M`;
-  if (n >= 1_000) return `${n / 1_000}k`;
-  return `${n}`;
-}
 
 export function SpinScreen() {
   const user = useAuthStore((s) => s.user);
@@ -153,7 +147,15 @@ export function SpinScreen() {
           <>
             <div className="relative flex h-[270px] w-[200px] items-center justify-center overflow-hidden rounded-[22px] border-[3px] border-gold/40 bg-black/40">
               <div className="holo-idle-glow pointer-events-none absolute inset-0" />
-              <span className="relative text-5xl opacity-60">🎴</span>
+              <svg viewBox="0 0 120 160" className="relative h-[70%] w-[70%] opacity-50">
+                <rect x="4" y="4" width="112" height="152" rx="4" fill="none" stroke="#ffd166" strokeWidth="2" />
+                <line x1="4" y1="80" x2="116" y2="80" stroke="#ffd166" strokeWidth="2" />
+                <circle cx="60" cy="80" r="16" fill="none" stroke="#ffd166" strokeWidth="2" />
+                <circle cx="60" cy="80" r="2" fill="#ffd166" />
+                <rect x="30" y="4" width="60" height="26" fill="none" stroke="#ffd166" strokeWidth="2" />
+                <rect x="30" y="130" width="60" height="26" fill="none" stroke="#ffd166" strokeWidth="2" />
+                <circle cx="60" cy="70" r="7" fill="#ff3b5c" opacity="0.9" />
+              </svg>
             </div>
             {status.isLoading ? (
               <p className="text-sm text-white/50">Загрузка...</p>
@@ -167,25 +169,7 @@ export function SpinScreen() {
                 <SpinFilterBar filters={filters} onChange={setFilters} />
                 {canAfford ? (
                   <>
-                    <div className="flex w-full gap-1.5">
-                      {AMOUNT_PRESETS.filter((p) => p >= minCost && p <= affordableMax).map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => {
-                            haptics.select();
-                            setAmount(p);
-                          }}
-                          className="flex-1 rounded-xl border py-2 text-xs font-bold"
-                          style={{
-                            borderColor: amount === p ? "rgba(255,209,102,0.6)" : "rgba(255,255,255,0.15)",
-                            color: amount === p ? "#ffd166" : "rgba(255,255,255,0.6)",
-                            background: amount === p ? "rgba(255,209,102,0.12)" : "transparent",
-                          }}
-                        >
-                          {formatPreset(p)}
-                        </button>
-                      ))}
-                    </div>
+                    <SpinAmountSlider amount={amount} onChange={setAmount} min={minCost} max={affordableMax} />
                     <button
                       onClick={handleSpin}
                       disabled={spin.isPending}
