@@ -109,12 +109,7 @@ function OptionRow({
       }}
     >
       {iconNode ? (
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
-          style={{ border: `1.5px solid ${active ? "#ffd166" : "rgba(255,255,255,0.15)"}` }}
-        >
-          {iconNode}
-        </span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center">{iconNode}</span>
       ) : (
         <span
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
