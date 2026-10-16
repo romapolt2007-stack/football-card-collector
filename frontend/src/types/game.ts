@@ -107,6 +107,7 @@ export interface Listing {
   stadiumCard: StadiumCard | null;
   seller: { id: string; username: string | null; firstName: string | null };
   bids: MarketBid[];
+  avgSalePrice: number | null;
 }
 
 export interface MarketHistoryEntry {
@@ -200,4 +201,11 @@ export interface SpinFilters {
   leagueId?: string;
   clubId?: string;
   nation?: string;
+}
+
+export interface SpinOdds {
+  amount: number;
+  minCost: number;
+  maxCost: number;
+  percentages: Record<Rarity, number>;
 }

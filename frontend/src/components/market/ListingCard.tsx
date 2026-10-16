@@ -84,6 +84,12 @@ export function ListingCard({ listing, isMine, onBuy, onBid, onCancel, isBusy }:
             <span className="font-extrabold text-gold">{listing.buyNowPrice.toLocaleString("ru-RU")} 🪙</span>
           </div>
         )}
+        {listing.avgSalePrice != null && (
+          <div className="flex items-center justify-between opacity-60">
+            <span>Средняя цена</span>
+            <span className="font-semibold">{listing.avgSalePrice.toLocaleString("ru-RU")} 🪙</span>
+          </div>
+        )}
       </div>
 
       {isMine ? (

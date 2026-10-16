@@ -9,6 +9,7 @@ import {
   MIN_SPIN_COST,
   nextHotStreak,
   playerLevel,
+  rarityWeightsForSpin,
   spinPlayer,
   spinPlayerGuaranteedTop,
 } from "../lib/spin.js";
@@ -28,6 +29,18 @@ router.get("/status", requireAuth, async (req, res) => {
     hotStreak: user.hotStreakCount,
     hotStreakThreshold: hotStreakThreshold(user.totalSpins),
   });
+});
+
+/** Кнопка "Шансы" — текущие проценты редкости для заданной ставки (с учётом баффа стадиона). */
+router.get("/odds", requireAuth, async (req, res) => {
+  const amount = Math.min(MAX_SPIN_COST, Math.max(MIN_SPIN_COST, Number(req.query.amount) || MIN_SPIN_COST));
+  const stadiumBuff = await getUserStadiumBuff(req.userId!);
+  const weights = rarityWeightsForSpin(amount, stadiumBuff.topTierWeightBonus);
+  const total = Object.values(weights).reduce((a, b) => a + b, 0);
+  const percentages = Object.fromEntries(
+    Object.entries(weights).map(([rarity, w]) => [rarity, Math.round((w / total) * 1000) / 10]),
+  );
+  res.json({ amount, minCost: MIN_SPIN_COST, maxCost: MAX_SPIN_COST, percentages });
 });
 
 const spinSchema = z.object({

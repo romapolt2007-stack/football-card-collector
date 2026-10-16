@@ -7,6 +7,7 @@ import { SpinReel } from "../components/spin/SpinReel";
 import { SpinFilterBar } from "../components/spin/SpinFilterBar";
 import { HotStreakMeter } from "../components/spin/HotStreakMeter";
 import { SpinAmountSlider } from "../components/spin/SpinAmountSlider";
+import { OddsModal } from "../components/spin/OddsModal";
 import { RARITY_THEME } from "../components/cards/rarityTheme";
 import { haptics } from "../lib/telegram";
 import type { Card, PlayerSpinResult, SpinFilters } from "../types/game";
@@ -39,6 +40,7 @@ export function SpinScreen() {
   const [result, setResult] = useState<PlayerSpinResult | null>(null);
   const [reeling, setReeling] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [oddsOpen, setOddsOpen] = useState(false);
 
   const minCost = status.data?.minCost ?? DEFAULT_MIN;
   const maxCost = status.data?.maxCost ?? DEFAULT_MAX;
@@ -104,9 +106,20 @@ export function SpinScreen() {
     <div className="velvet-texture flex h-dvh flex-col overflow-y-auto pb-24">
       <div className="flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3">
         <h1 className="text-lg font-extrabold text-gold">🎰 Собрать</h1>
-        <span className="rounded-full border border-gold/30 bg-black/30 px-3 py-1 text-sm font-bold text-gold">
-          {coins.toLocaleString("ru-RU")} 🪙
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              haptics.select();
+              setOddsOpen(true);
+            }}
+            className="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs font-bold text-white/70"
+          >
+            📊 Шансы
+          </button>
+          <span className="rounded-full border border-gold/30 bg-black/30 px-3 py-1 text-sm font-bold text-gold">
+            {coins.toLocaleString("ru-RU")} 🪙
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-5 px-4">
@@ -189,6 +202,7 @@ export function SpinScreen() {
           </>
         )}
       </div>
+      {oddsOpen && <OddsModal amount={amount} onClose={() => setOddsOpen(false)} />}
     </div>
   );
 }

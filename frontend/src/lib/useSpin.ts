@@ -6,6 +6,7 @@ import type {
   PlayerSpinResult,
   PlayerSpinStatus,
   SpinFiltersWithAmount,
+  SpinOdds,
   SpinStatus,
   StadiumCard,
   StadiumSpinResult,
@@ -18,6 +19,17 @@ export function useSpinStatus() {
     queryFn: () => api.get<PlayerSpinStatus>("/api/spin/status"),
     enabled: Boolean(token),
     refetchInterval: 30_000,
+  });
+}
+
+/** Для кнопки "Шансы" — текущие проценты редкости при заданной ставке. */
+export function useSpinOdds(amount: number) {
+  const token = useAuthStore((s) => s.token);
+  return useQuery({
+    queryKey: ["spin-odds", amount],
+    queryFn: () => api.get<SpinOdds>(`/api/spin/odds?amount=${amount}`),
+    enabled: Boolean(token) && amount > 0,
+    staleTime: 10_000,
   });
 }
 

@@ -6,13 +6,38 @@ import { getIo } from "../lib/socket.js";
 import { MARKET_FEE_RATE } from "../lib/marketConstants.js";
 import { getUserStadiumBuff } from "../lib/stadiumBuffs.js";
 import { todaysLeagueTrends } from "../lib/marketTrends.js";
-import type { Position, Rarity } from "@prisma/client";
+import { getAverageSalePrices } from "../lib/marketStats.js";
+import type { Listing, Position, Rarity } from "@prisma/client";
 
 const router = Router();
 
 const DURATION_HOURS = [1, 6, 24, 168] as const;
 /** Базовый лимит активных лотов на игрока — расширяется баффом лучшего владеемого стадиона. */
 const BASE_LISTING_LIMIT = 10;
+/** Защита от мультиаккаунтов — слишком новый аккаунт не может торговать на рынке. */
+const MIN_ACCOUNT_AGE_MS = 24 * 60 * 60 * 1000;
+
+async function requireMarketEligible(userId: string): Promise<string | null> {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { createdAt: true } });
+  const ageMs = Date.now() - user.createdAt.getTime();
+  if (ageMs >= MIN_ACCOUNT_AGE_MS) return null;
+  const hoursLeft = Math.ceil((MIN_ACCOUNT_AGE_MS - ageMs) / (60 * 60 * 1000));
+  return `Торговля на рынке доступна через ${hoursLeft} ч после регистрации — защита от мультиаккаунтов`;
+}
+
+type ListingWithIds = Listing & { card?: { playerId: string } | null; stadiumCard?: { stadiumId: string } | null };
+
+async function withAvgSalePrice<T extends ListingWithIds>(listings: T[]) {
+  const { playerAvg, stadiumAvg } = await getAverageSalePrices();
+  return listings.map((l) => ({
+    ...l,
+    avgSalePrice: l.card?.playerId
+      ? (playerAvg.get(l.card.playerId) ?? null)
+      : l.stadiumCard?.stadiumId
+        ? (stadiumAvg.get(l.stadiumCard.stadiumId) ?? null)
+        : null,
+  }));
+}
 
 router.get("/trends-today", async (_req, res) => {
   const trends = await todaysLeagueTrends();
@@ -89,7 +114,7 @@ router.get("/listings", async (req, res) => {
     orderBy,
     take: 100,
   });
-  res.json({ listings, feeRate: MARKET_FEE_RATE });
+  res.json({ listings: await withAvgSalePrice(listings), feeRate: MARKET_FEE_RATE });
 });
 
 /** "Горячие сделки" — активные лоты карт игроков с ощутимой скидкой от системной цены скупки. */
@@ -115,7 +140,7 @@ router.get("/hot", async (_req, res) => {
     .slice(0, 12)
     .map((x) => x.listing);
 
-  res.json({ listings: hot });
+  res.json({ listings: await withAvgSalePrice(hot) });
 });
 
 router.get("/mine", requireAuth, async (req, res) => {
@@ -125,7 +150,7 @@ router.get("/mine", requireAuth, async (req, res) => {
     orderBy: { createdAt: "desc" },
     take: 50,
   });
-  res.json({ listings });
+  res.json({ listings: await withAvgSalePrice(listings) });
 });
 
 router.get("/history", requireAuth, async (req, res) => {
@@ -171,6 +196,12 @@ const createListingSchema = z
   });
 
 router.post("/list", requireAuth, async (req, res) => {
+  const ineligible = await requireMarketEligible(req.userId!);
+  if (ineligible) {
+    res.status(403).json({ error: ineligible });
+    return;
+  }
+
   const parsed = createListingSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Некорректное тело запроса" });
@@ -261,6 +292,12 @@ router.post("/listings/:id/cancel", requireAuth, async (req, res) => {
 const bidSchema = z.object({ amount: z.number().int().positive() });
 
 router.post("/listings/:id/bid", requireAuth, async (req, res) => {
+  const ineligible = await requireMarketEligible(req.userId!);
+  if (ineligible) {
+    res.status(403).json({ error: ineligible });
+    return;
+  }
+
   const parsed = bidSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Некорректная ставка" });
@@ -304,6 +341,12 @@ router.post("/listings/:id/bid", requireAuth, async (req, res) => {
 const buySchema = z.object({ listingId: z.string() });
 
 router.post("/buy", requireAuth, async (req, res) => {
+  const ineligible = await requireMarketEligible(req.userId!);
+  if (ineligible) {
+    res.status(403).json({ error: ineligible });
+    return;
+  }
+
   const parsed = buySchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Некорректное тело запроса" });
