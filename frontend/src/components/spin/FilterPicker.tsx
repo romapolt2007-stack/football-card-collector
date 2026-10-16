@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { haptics } from "../../lib/telegram";
 
@@ -5,6 +6,7 @@ export interface FilterOption {
   id: string;
   label: string;
   icon?: string;
+  iconNode?: ReactNode;
   accent?: string;
 }
 
@@ -62,6 +64,7 @@ export function FilterPicker({ title, options, selectedId, onSelect, onClose }: 
             <OptionRow
               key={opt.id}
               icon={opt.icon ?? opt.label[0]}
+              iconNode={opt.iconNode}
               label={opt.label}
               accent={opt.accent}
               active={opt.id === selectedId}
@@ -81,12 +84,14 @@ export function FilterPicker({ title, options, selectedId, onSelect, onClose }: 
 
 function OptionRow({
   icon,
+  iconNode,
   label,
   accent,
   active,
   onClick,
 }: {
   icon: string;
+  iconNode?: ReactNode;
   label: string;
   accent?: string;
   active: boolean;
@@ -103,15 +108,24 @@ function OptionRow({
         boxShadow: active ? "inset 0 0 0 1px rgba(255,209,102,0.4)" : "inset 0 0 0 1px rgba(255,255,255,0.06)",
       }}
     >
-      <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
-        style={{
-          background: accent ?? (active ? "rgba(255,209,102,0.22)" : "rgba(255,255,255,0.08)"),
-          border: `1.5px solid ${active ? "#ffd166" : "rgba(255,255,255,0.15)"}`,
-        }}
-      >
-        {icon}
-      </span>
+      {iconNode ? (
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+          style={{ border: `1.5px solid ${active ? "#ffd166" : "rgba(255,255,255,0.15)"}` }}
+        >
+          {iconNode}
+        </span>
+      ) : (
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+          style={{
+            background: accent ?? (active ? "rgba(255,209,102,0.22)" : "rgba(255,255,255,0.08)"),
+            border: `1.5px solid ${active ? "#ffd166" : "rgba(255,255,255,0.15)"}`,
+          }}
+        >
+          {icon}
+        </span>
+      )}
       <span className={`text-sm font-medium ${active ? "text-gold" : "text-white/85"}`}>{label}</span>
     </button>
   );

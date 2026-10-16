@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { FilterPicker, type FilterOption } from "./FilterPicker";
+import { LeagueCrest } from "../cards/LeagueCrest";
+import { ClubCrest } from "../cards/ClubCrest";
 import { useLeagues } from "../../lib/useMeta";
 import { haptics } from "../../lib/telegram";
 import type { SpinFilters } from "../../types/game";
@@ -16,14 +18,18 @@ export function SpinFilterBar({ filters, onChange }: Props) {
   const [sheet, setSheet] = useState<ActiveSheet>(null);
 
   const leagueOptions: FilterOption[] = useMemo(
-    () => (leagues ?? []).map((l) => ({ id: l.id, label: l.name, icon: "🏆" })),
+    () => (leagues ?? []).map((l) => ({ id: l.id, label: l.name, iconNode: <LeagueCrest leagueId={l.id} size={36} /> })),
     [leagues],
   );
 
   const selectedLeague = leagues?.find((l) => l.id === filters.leagueId);
   const clubOptions: FilterOption[] = useMemo(() => {
     const pool = filters.leagueId ? (selectedLeague?.clubs ?? []) : (leagues ?? []).flatMap((l) => l.clubs);
-    return pool.map((c) => ({ id: c.id, label: c.name, icon: c.shortName.slice(0, 2), accent: c.colorPrimary }));
+    return pool.map((c) => ({
+      id: c.id,
+      label: c.name,
+      iconNode: <ClubCrest club={{ id: c.id, shortName: c.shortName, colorPrimary: c.colorPrimary, colorSecondary: c.colorSecondary }} size={32} />,
+    }));
   }, [filters.leagueId, selectedLeague, leagues]);
 
   const selectedClub = clubOptions.find((c) => c.id === filters.clubId);
