@@ -8,10 +8,6 @@ export function initTelegram() {
   WebApp.expand();
   WebApp.setHeaderColor("#0b0f2b");
   WebApp.setBackgroundColor("#0b0f2b");
-  // Полноэкранный режим скрывает нативный хедер Telegram (имя мини-аппы + системный
-  // крестик) — доступен только в клиентах с Bot API 8.0+, поэтому вызываем через
-  // необязательный рантайм-метод: в старых клиентах тихо ничего не произойдёт.
-  (WebApp as unknown as { requestFullscreen?: () => void }).requestFullscreen?.();
 }
 
 export function getInitData(): string {
