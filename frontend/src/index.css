@@ -435,6 +435,29 @@
     animation: holo-idle-pulse 2.6s ease-in-out infinite;
   }
 
+  /* Тонкий фирменный скроллбар для выдвижных листов фильтров */
+  .filter-sheet-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 209, 102, 0.35) transparent;
+  }
+
+  .filter-sheet-scroll::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .filter-sheet-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .filter-sheet-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 209, 102, 0.35);
+    border-radius: 999px;
+  }
+
+  .filter-sheet-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 209, 102, 0.55);
+  }
+
   /* ─── Удача: бархатный фон оверлея и премиальная рамка раскрытой карты ─── */
 
   .velvet-texture {
