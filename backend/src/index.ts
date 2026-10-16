@@ -62,8 +62,11 @@ app.use("/api/market", marketRouter);
 
 // Последний рубеж: любая ошибка, долетевшая сюда (в т.ч. async, благодаря
 // express-async-errors выше) — отвечаем 500, а не роняем процесс.
-app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("Необработанная ошибка в запросе:", err);
+app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const e = err as { name?: string; message?: string; code?: string; meta?: unknown; stack?: string };
+  console.error(
+    `Необработанная ошибка в запросе [${req.method} ${req.path}]: name=${e?.name} code=${e?.code} message=${e?.message} meta=${JSON.stringify(e?.meta)}\n${e?.stack}`,
+  );
   if (!res.headersSent) res.status(500).json({ error: "Внутренняя ошибка сервера" });
 });
 
