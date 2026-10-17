@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
-import { useLeagues, useStadiumBuff } from "../../lib/useMeta";
+import { useLeagues } from "../../lib/useMeta";
 import { useSaveSpinPlayer, useSaveSpinStadium, useSpinPlayer, useSpinStadiumStaked, useSpinStatus } from "../../lib/useSpin";
 import type { PlayerSpinResult, StadiumSpinResult } from "../../types/game";
 import { MockBottomNav, type MockTab } from "./MockBottomNav";
@@ -32,7 +32,6 @@ export function MockPreviewApp() {
 
   const realLeagues = useLeagues();
   const status = useSpinStatus();
-  const buff = useStadiumBuff();
   const spinPlayerMutation = useSpinPlayer();
   const savePlayerMutation = useSaveSpinPlayer();
   const spinStadiumMutation = useSpinStadiumStaked();
@@ -89,9 +88,8 @@ export function MockPreviewApp() {
   const totalSpins = status.data?.totalSpins ?? 0;
   const xp = totalSpins % SPINS_PER_LEVEL;
   const coins = status.data?.coins ?? 0;
-  // "Удача" пока derived от баффа лучшего стадиона (0-8% → 0-80) — отдельной покупаемой механики
-  // "Удача" в бэкенде нет, см. итоговую сводку по шагу подключения к API.
-  const luck = Math.round((buff.data?.topTierWeightBonus ?? 0) * 1000);
+  const hotStreak = status.data?.hotStreak ?? 0;
+  const hotStreakThreshold = status.data?.hotStreakThreshold ?? 150;
 
   function handleOpenPicker() {
     setPickerOpen(true);
@@ -174,9 +172,8 @@ export function MockPreviewApp() {
           onSpin={handleSpin}
           spinDisabled={!token || !leagueId || activeMutation.isPending}
           errorText={errorText}
-          level={level}
-          xpPct={Math.round((xp / SPINS_PER_LEVEL) * 100)}
-          luck={luck}
+          hotStreak={hotStreak}
+          hotStreakThreshold={hotStreakThreshold}
           coins={coins}
         />
       )}

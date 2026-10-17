@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { useTelegramAuth } from "./hooks/useTelegramAuth";
-import { useLeagues, useStadiumBuff } from "./lib/useMeta";
+import { useLeagues } from "./lib/useMeta";
 import { useSaveSpinPlayer, useSaveSpinStadium, useSpinPlayer, useSpinStadiumStaked, useSpinStatus } from "./lib/useSpin";
 import { MockBottomNav, type MockTab } from "./mockups/nomerok/MockBottomNav";
 import { MockLeagueClubSheet, type PickerClub, type PickerLeague } from "./mockups/nomerok/MockLeagueClubSheet";
@@ -35,7 +35,6 @@ function App() {
 
   const realLeagues = useLeagues();
   const spinStatus = useSpinStatus();
-  const buff = useStadiumBuff();
   const spinPlayerMutation = useSpinPlayer();
   const savePlayerMutation = useSaveSpinPlayer();
   const spinStadiumMutation = useSpinStadiumStaked();
@@ -121,9 +120,8 @@ function App() {
   const totalSpins = spinStatus.data?.totalSpins ?? 0;
   const xp = totalSpins % SPINS_PER_LEVEL;
   const coins = spinStatus.data?.coins ?? 0;
-  // "Удача" пока derived от баффа лучшего стадиона (0-8% → 0-80) — отдельной покупаемой механики
-  // "Удача" в бэкенде нет.
-  const luck = Math.round((buff.data?.topTierWeightBonus ?? 0) * 1000);
+  const hotStreak = spinStatus.data?.hotStreak ?? 0;
+  const hotStreakThreshold = spinStatus.data?.hotStreakThreshold ?? 150;
 
   function handlePickerSelect(selLeagueId: string, selClubId: string | null) {
     if (mode === "players") {
@@ -212,9 +210,8 @@ function App() {
           onSpin={handleSpin}
           spinDisabled={!leagueId || activeMutation.isPending}
           errorText={errorText}
-          level={level}
-          xpPct={Math.round((xp / SPINS_PER_LEVEL) * 100)}
-          luck={luck}
+          hotStreak={hotStreak}
+          hotStreakThreshold={hotStreakThreshold}
           coins={coins}
         />
       )}

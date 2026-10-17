@@ -1,4 +1,6 @@
 import { useState, type ReactNode } from "react";
+import { AzartBar } from "./AzartBar";
+import { AzartDetailSheet } from "./AzartDetailSheet";
 import { MockRedDot } from "./MockBottomNav";
 import { MOCK_BANNERS, MOCK_PREVIEW_PLAYER } from "./mockData";
 import { MOCK_ACCENT_GRADIENT, MOCK_ACTIVE_COLOR, MOCK_ACTIVE_TINT, MOCK_BG, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_PRIMARY_GRADIENT, MOCK_PRIMARY_TEXT } from "./theme";
@@ -24,9 +26,8 @@ interface Props {
   onSpin: () => void;
   spinDisabled?: boolean;
   errorText?: string | null;
-  level: number;
-  xpPct: number;
-  luck: number;
+  hotStreak: number;
+  hotStreakThreshold: number;
   coins: number;
 }
 
@@ -68,12 +69,12 @@ export function MockPlayScreen({
   onSpin,
   spinDisabled,
   errorText,
-  level,
-  xpPct,
-  luck,
+  hotStreak,
+  hotStreakThreshold,
   coins,
 }: Props) {
   const [multiplierOpen, setMultiplierOpen] = useState(false);
+  const [azartOpen, setAzartOpen] = useState(false);
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden" style={{ background: MOCK_BG }}>
@@ -84,19 +85,9 @@ export function MockPlayScreen({
           <MockRedDot />
         </button>
 
-        <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
-          <span className="text-[11px] font-bold">Ур. {level}</span>
-          <span className="h-1 w-8 overflow-hidden rounded-full bg-white/10">
-            <span className="block h-full rounded-full" style={{ width: `${xpPct}%`, background: MOCK_ACTIVE_COLOR }} />
-          </span>
-        </div>
+        <AzartBar streak={hotStreak} threshold={hotStreakThreshold} onOpen={() => setAzartOpen(true)} />
 
-        <div className="flex items-center gap-1 rounded-full px-2.5 py-1.5" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
-          <span>🍀</span>
-          <span className="text-[11px] font-bold">{luck}</span>
-        </div>
-
-        <div className="ml-auto flex flex-col items-end leading-tight">
+        <div className="flex flex-col items-end leading-tight">
           <span className="text-[10px] text-white/40">Баланс</span>
           <span className="text-sm font-extrabold">{coins.toLocaleString("ru-RU")} 🪙</span>
         </div>
@@ -240,6 +231,8 @@ export function MockPlayScreen({
           {!reeling && <span className="rounded-[10px] bg-black/25 px-3 py-1.5 text-sm">{spinPrice.toLocaleString("ru-RU")} 🪙</span>}
         </button>
       </div>
+
+      {azartOpen && <AzartDetailSheet streak={hotStreak} threshold={hotStreakThreshold} onClose={() => setAzartOpen(false)} />}
     </div>
   );
 }
