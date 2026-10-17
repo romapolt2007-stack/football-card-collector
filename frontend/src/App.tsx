@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { useTelegramAuth } from "./hooks/useTelegramAuth";
 import { useLeagues } from "./lib/useMeta";
-import { useSaveSpinPlayer, useSaveSpinStadium, useSpinPlayer, useSpinStadiumStaked, useSpinStatus } from "./lib/useSpin";
+import {
+  useSaveSpinPlayer,
+  useSaveSpinStadium,
+  useSellSpinPlayer,
+  useSellSpinStadium,
+  useSpinPlayer,
+  useSpinStadiumStaked,
+  useSpinStatus,
+} from "./lib/useSpin";
 import { MockBottomNav, type MockTab } from "./mockups/nomerok/MockBottomNav";
 import { MockLeagueClubSheet, type PickerClub, type PickerLeague } from "./mockups/nomerok/MockLeagueClubSheet";
 import { MockMoreScreen } from "./mockups/nomerok/MockMoreScreen";
@@ -37,8 +45,10 @@ function App() {
   const spinStatus = useSpinStatus();
   const spinPlayerMutation = useSpinPlayer();
   const savePlayerMutation = useSaveSpinPlayer();
+  const sellPlayerMutation = useSellSpinPlayer();
   const spinStadiumMutation = useSpinStadiumStaked();
   const saveStadiumMutation = useSaveSpinStadium();
+  const sellStadiumMutation = useSellSpinStadium();
 
   const [playerLeagueId, setPlayerLeagueId] = useState<string | null>(null);
   const [playerClubId, setPlayerClubId] = useState<string | null>(null);
@@ -152,16 +162,23 @@ function App() {
     }
   }
 
-  // Экран "Играть" не спрашивает "продать/сохранить" — карта сразу уходит в коллекцию,
-  // чтобы оплаченный спин никогда не терялся (бэкенд хранит только один "pending" результат за раз).
+  // Барабан останавливается — карта раскрыта и ждёт решения игрока (Продать / В коллекцию).
   function handlePlayerReelDone() {
     setReeling(false);
-    savePlayerMutation.mutate();
   }
 
   function handleStadiumReelDone() {
     setReeling(false);
-    saveStadiumMutation.mutate();
+  }
+
+  function handleSellResult() {
+    if (mode === "players") sellPlayerMutation.mutate(undefined, { onSuccess: () => setPlayerResult(null) });
+    else sellStadiumMutation.mutate(undefined, { onSuccess: () => setStadiumResult(null) });
+  }
+
+  function handleSaveResult() {
+    if (mode === "players") savePlayerMutation.mutate(undefined, { onSuccess: () => setPlayerResult(null) });
+    else saveStadiumMutation.mutate(undefined, { onSuccess: () => setStadiumResult(null) });
   }
 
   function handleTileClick(id: string) {
@@ -190,6 +207,9 @@ function App() {
 
   const activeMutation = mode === "players" ? spinPlayerMutation : spinStadiumMutation;
   const errorText = activeMutation.isError ? (activeMutation.error as Error).message : null;
+  const sellPrice = mode === "players" ? playerResult?.sellPrice : stadiumResult?.sellPrice;
+  const resolvingResult =
+    mode === "players" ? savePlayerMutation.isPending || sellPlayerMutation.isPending : saveStadiumMutation.isPending || sellStadiumMutation.isPending;
 
   return (
     <>
@@ -213,6 +233,10 @@ function App() {
           hotStreak={hotStreak}
           hotStreakThreshold={hotStreakThreshold}
           coins={coins}
+          sellPrice={sellPrice}
+          onSell={handleSellResult}
+          onSave={handleSaveResult}
+          resolvingResult={resolvingResult}
         />
       )}
       {tab === "collection" && <CollectionScreen />}

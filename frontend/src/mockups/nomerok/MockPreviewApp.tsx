@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useLeagues } from "../../lib/useMeta";
-import { useSaveSpinPlayer, useSaveSpinStadium, useSpinPlayer, useSpinStadiumStaked, useSpinStatus } from "../../lib/useSpin";
+import {
+  useSaveSpinPlayer,
+  useSaveSpinStadium,
+  useSellSpinPlayer,
+  useSellSpinStadium,
+  useSpinPlayer,
+  useSpinStadiumStaked,
+  useSpinStatus,
+} from "../../lib/useSpin";
 import type { PlayerSpinResult, StadiumSpinResult } from "../../types/game";
 import { MockBottomNav, type MockTab } from "./MockBottomNav";
 import { MockLeagueClubSheet, type PickerClub, type PickerLeague } from "./MockLeagueClubSheet";
@@ -34,8 +42,10 @@ export function MockPreviewApp() {
   const status = useSpinStatus();
   const spinPlayerMutation = useSpinPlayer();
   const savePlayerMutation = useSaveSpinPlayer();
+  const sellPlayerMutation = useSellSpinPlayer();
   const spinStadiumMutation = useSpinStadiumStaked();
   const saveStadiumMutation = useSaveSpinStadium();
+  const sellStadiumMutation = useSellSpinStadium();
 
   const [playerLeagueId, setPlayerLeagueId] = useState<string | null>(null);
   const [playerClubId, setPlayerClubId] = useState<string | null>(null);
@@ -124,16 +134,23 @@ export function MockPreviewApp() {
     }
   }
 
-  // Экран 1 в этом макете не спрашивает "продать/сохранить" — карта сразу уходит в коллекцию,
-  // чтобы оплаченный спин никогда не терялся (бэкенд хранит только один "pending" результат за раз).
+  // Барабан останавливается — карта раскрыта и ждёт решения игрока (Продать / В коллекцию).
   function handlePlayerReelDone() {
     setReeling(false);
-    savePlayerMutation.mutate();
   }
 
   function handleStadiumReelDone() {
     setReeling(false);
-    saveStadiumMutation.mutate();
+  }
+
+  function handleSellResult() {
+    if (mode === "players") sellPlayerMutation.mutate(undefined, { onSuccess: () => setPlayerResult(null) });
+    else sellStadiumMutation.mutate(undefined, { onSuccess: () => setStadiumResult(null) });
+  }
+
+  function handleSaveResult() {
+    if (mode === "players") savePlayerMutation.mutate(undefined, { onSuccess: () => setPlayerResult(null) });
+    else saveStadiumMutation.mutate(undefined, { onSuccess: () => setStadiumResult(null) });
   }
 
   const hasResult = mode === "players" ? Boolean(playerResult) : Boolean(stadiumResult);
@@ -152,6 +169,9 @@ export function MockPreviewApp() {
 
   const activeMutation = mode === "players" ? spinPlayerMutation : spinStadiumMutation;
   const errorText = activeMutation.isError ? (activeMutation.error as Error).message : null;
+  const sellPrice = mode === "players" ? playerResult?.sellPrice : stadiumResult?.sellPrice;
+  const resolvingResult =
+    mode === "players" ? savePlayerMutation.isPending || sellPlayerMutation.isPending : saveStadiumMutation.isPending || sellStadiumMutation.isPending;
 
   return (
     <>
@@ -175,6 +195,10 @@ export function MockPreviewApp() {
           hotStreak={hotStreak}
           hotStreakThreshold={hotStreakThreshold}
           coins={coins}
+          sellPrice={sellPrice}
+          onSell={handleSellResult}
+          onSave={handleSaveResult}
+          resolvingResult={resolvingResult}
         />
       )}
       {tab === "more" && <MockMoreScreen onBack={() => setTab("play")} level={level} xp={xp} xpToNext={SPINS_PER_LEVEL} coins={coins} />}

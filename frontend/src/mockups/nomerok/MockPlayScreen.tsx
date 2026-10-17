@@ -29,6 +29,11 @@ interface Props {
   hotStreak: number;
   hotStreakThreshold: number;
   coins: number;
+  /** Цена быстрой продажи выпавшей карты — показывается прямо на кнопке "Продать". */
+  sellPrice?: number;
+  onSell?: () => void;
+  onSave?: () => void;
+  resolvingResult?: boolean;
 }
 
 /** Силуэт игрока — собственная абстрактная графика, не фото. */
@@ -72,6 +77,10 @@ export function MockPlayScreen({
   hotStreak,
   hotStreakThreshold,
   coins,
+  sellPrice,
+  onSell,
+  onSave,
+  resolvingResult,
 }: Props) {
   const [multiplierOpen, setMultiplierOpen] = useState(false);
   const [azartOpen, setAzartOpen] = useState(false);
@@ -164,7 +173,28 @@ export function MockPlayScreen({
           </div>
         )}
         <p className="text-[11px] text-white/35">{reeling ? "Крутим..." : hasResult ? "Твой результат" : "Пример карточки"}</p>
-        {!reeling && <p className="text-xs text-white/50">{hasResult ? "Жми «Крутить» ещё раз" : "Жми «Крутить»"}</p>}
+        {!reeling && !hasResult && <p className="text-xs text-white/50">Жми «Крутить»</p>}
+        {!reeling && hasResult && (
+          <div className="mt-1 flex w-full max-w-[280px] gap-2">
+            <button
+              onClick={onSell}
+              disabled={resolvingResult}
+              className="flex-1 rounded-[12px] border px-3 py-3 text-xs font-bold disabled:opacity-50"
+              style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.18)", color: "#e8e8ea" }}
+            >
+              Продать
+              {sellPrice != null && <span className="block text-[10px] font-semibold opacity-70">{sellPrice.toLocaleString("ru-RU")} 🪙</span>}
+            </button>
+            <button
+              onClick={onSave}
+              disabled={resolvingResult}
+              className="flex-1 rounded-[12px] px-3 py-3 text-xs font-extrabold text-[#2c1b00] disabled:opacity-60"
+              style={{ background: "linear-gradient(135deg, #ffe28a, #ffb020, #ff8a00)" }}
+            >
+              В коллекцию
+            </button>
+          </div>
+        )}
         {errorText && <p className="max-w-[260px] text-center text-xs text-red-400">{errorText}</p>}
       </div>
 
@@ -172,7 +202,7 @@ export function MockPlayScreen({
       <div className="flex items-center gap-2 px-3 pb-2">
         <button
           onClick={onOpenPicker}
-          disabled={reeling}
+          disabled={reeling || hasResult}
           className="flex flex-1 items-center justify-between rounded-[12px] px-3 py-2.5 text-xs font-semibold disabled:opacity-50"
           style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
         >
@@ -216,12 +246,12 @@ export function MockPlayScreen({
       <div className="px-3 pb-[96px]">
         <button
           onClick={onSpin}
-          disabled={reeling || spinDisabled}
-          className="flex w-full items-center justify-between rounded-[14px] px-6 py-4 text-base font-extrabold disabled:opacity-60"
+          disabled={reeling || spinDisabled || hasResult}
+          className="flex w-full items-center justify-between rounded-[14px] px-6 py-4 text-base font-extrabold disabled:opacity-40"
           style={{ background: MOCK_PRIMARY_GRADIENT, color: MOCK_PRIMARY_TEXT, textShadow: "0 1px 2px rgba(255,255,255,0.35)" }}
         >
-          {reeling ? "Крутим..." : "Крутить"}
-          {!reeling && <span className="rounded-[10px] bg-black/25 px-3 py-1.5 text-sm">{spinPrice.toLocaleString("ru-RU")} 🪙</span>}
+          {reeling ? "Крутим..." : hasResult ? "Выбери действие выше" : "Крутить"}
+          {!reeling && !hasResult && <span className="rounded-[10px] bg-black/25 px-3 py-1.5 text-sm">{spinPrice.toLocaleString("ru-RU")} 🪙</span>}
         </button>
       </div>
 
