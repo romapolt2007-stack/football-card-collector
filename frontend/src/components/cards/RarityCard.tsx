@@ -54,10 +54,14 @@ const STAT_LABELS_EN = [
 const CARD_CLIP =
   "polygon(8% 2%, 20% 0%, 50% 0%, 80% 0%, 92% 2%, 100% 8%, 100% 88%, 85% 94%, 50% 100%, 15% 94%, 0% 88%, 0% 8%)";
 
-/** "Обсидиановое стекло" — глубокий тёмный фон для ВСЕХ карт (не зависит от редкости), премиальная
- * база под золотую рамку. Сама редкость при этом не теряется — см. ниже её каналы (свечение за
- * силуэтом, подсветка цифр). */
+/** "Обсидиановое стекло" — глубокий тёмный фон для большинства карт (не зависит от редкости),
+ * премиальная база под золотую рамку. Сама редкость при этом не теряется — см. ниже её каналы
+ * (свечение за силуэтом, подсветка цифр). */
 const OBSIDIAN_BG = "radial-gradient(130% 90% at 50% 0%, #232329 0%, #121216 46%, #050506 100%)";
+
+/** Только "Икона" — фирменный бордово-обсидиановый фон вместо нейтрального, для максимального
+ * вау-эффекта редчайшей карты. */
+const ICON_BG = "radial-gradient(135% 95% at 50% 0%, #4a1026 0%, #2a0a18 42%, #0c0308 100%)";
 
 /** Шлифованный металл — полоса светлых/тёмных золотых бликов имитирует брашированную
  * поверхность, а не плоскую заливку. */
@@ -82,13 +86,15 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
       className={`relative shrink-0 aspect-[3/5] ${SIZE_CLASSES[size]} ${onClick ? "cursor-pointer" : ""}`}
       style={{
         background: BRUSHED_GOLD,
-        boxShadow: "0 0 3px 1px rgba(255,223,145,0.9), 0 0 24px 5px rgba(255,197,94,0.5)",
+        boxShadow: isIcon
+          ? "0 0 3px 1px rgba(255,223,145,0.95), 0 0 20px 4px rgba(255,197,94,0.55), 0 0 36px 10px rgba(255,59,92,0.4)"
+          : "0 0 3px 1px rgba(255,223,145,0.9), 0 0 24px 5px rgba(255,197,94,0.5)",
         clipPath: CARD_CLIP,
       }}
     >
       <div
         className={`absolute overflow-hidden ${isIcon ? "icon-pulse" : ""} ${PADDING_CLASSES[size]}`}
-        style={{ inset: FRAME_THICKNESS[size], background: OBSIDIAN_BG, color: "#f5f1e6", clipPath: CARD_CLIP }}
+        style={{ inset: FRAME_THICKNESS[size], background: isIcon ? ICON_BG : OBSIDIAN_BG, color: "#f5f1e6", clipPath: CARD_CLIP }}
       >
         <div className="carbon-texture pointer-events-none absolute inset-0 opacity-40" />
         <div
@@ -96,6 +102,14 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
           style={{ background: "linear-gradient(140deg, rgba(255,255,255,0.14) 0%, transparent 34%)" }}
         />
         {isLegend && <div className="holo-sweep pointer-events-none absolute inset-0" />}
+        {isIcon && (
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: "linear-gradient(115deg, transparent 38%, rgba(255,59,92,0.35) 50%, transparent 62%)",
+            }}
+          />
+        )}
         {isIcon && <IconSparkles />}
 
         <div className="relative flex items-start justify-between">
