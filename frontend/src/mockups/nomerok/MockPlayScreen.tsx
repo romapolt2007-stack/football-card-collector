@@ -3,7 +3,7 @@ import { AzartBar } from "./AzartBar";
 import { AzartDetailSheet } from "./AzartDetailSheet";
 import { MockRedDot } from "./MockBottomNav";
 import { MOCK_BANNERS, MOCK_PREVIEW_PLAYER } from "./mockData";
-import { MOCK_ACCENT_GRADIENT, MOCK_ACTIVE_COLOR, MOCK_ACTIVE_TINT, MOCK_BG, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_PRIMARY_GRADIENT, MOCK_PRIMARY_TEXT } from "./theme";
+import { MOCK_ACTIVE_COLOR, MOCK_ACTIVE_TINT, MOCK_BG, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_PRIMARY_GRADIENT, MOCK_PRIMARY_TEXT } from "./theme";
 
 type SpinMode = "players" | "stadiums";
 type Multiplier = 1 | 2 | 5 | 10;
@@ -93,7 +93,7 @@ export function MockPlayScreen({
         </div>
       </div>
 
-      {/* 1.2 — переключатель режима + магазин */}
+      {/* 1.2 — переключатель режима, на всю ширину */}
       <div className="mt-3 flex items-center gap-2 px-3">
         <div className="flex flex-1 rounded-[12px] p-1" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
           {(["players", "stadiums"] as const).map((m) => (
@@ -108,13 +108,6 @@ export function MockPlayScreen({
             </button>
           ))}
         </div>
-        <button className="relative flex items-center gap-1 rounded-[12px] px-3 py-2.5 text-xs font-extrabold text-white" style={{ background: MOCK_ACCENT_GRADIENT }}>
-          ⭐ Магазин
-          <MockRedDot />
-        </button>
-        <button className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
-          ⚙
-        </button>
       </div>
 
       {/* 1.3 — баннеры */}
