@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { MockRedDot } from "./MockBottomNav";
 import { MOCK_BANNERS, MOCK_PREVIEW_PLAYER } from "./mockData";
-import { MOCK_ACCENT_GRADIENT, MOCK_ACTIVE_COLOR, MOCK_ACTIVE_TINT, MOCK_BG, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_PRIMARY_GRADIENT } from "./theme";
+import { MOCK_ACCENT_GRADIENT, MOCK_ACTIVE_COLOR, MOCK_ACTIVE_TINT, MOCK_BG, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_PRIMARY_GRADIENT, MOCK_PRIMARY_TEXT } from "./theme";
 
 type SpinMode = "players" | "stadiums";
 type Multiplier = 1 | 2 | 5 | 10;
@@ -233,11 +233,11 @@ export function MockPlayScreen({
         <button
           onClick={onSpin}
           disabled={reeling || spinDisabled}
-          className="flex w-full items-center justify-between rounded-[14px] px-6 py-4 text-base font-extrabold text-[#2c1b00] disabled:opacity-60"
-          style={{ background: MOCK_PRIMARY_GRADIENT }}
+          className="flex w-full items-center justify-between rounded-[14px] px-6 py-4 text-base font-extrabold disabled:opacity-60"
+          style={{ background: MOCK_PRIMARY_GRADIENT, color: MOCK_PRIMARY_TEXT, textShadow: "0 1px 2px rgba(255,255,255,0.35)" }}
         >
           {reeling ? "Крутим..." : "Крутить"}
-          {!reeling && <span className="rounded-[10px] bg-black/20 px-3 py-1.5 text-sm">{spinPrice.toLocaleString("ru-RU")} 🪙</span>}
+          {!reeling && <span className="rounded-[10px] bg-black/25 px-3 py-1.5 text-sm">{spinPrice.toLocaleString("ru-RU")} 🪙</span>}
         </button>
       </div>
     </div>
