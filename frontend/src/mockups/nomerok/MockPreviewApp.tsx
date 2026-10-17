@@ -10,6 +10,7 @@ import { MockPlayScreen } from "./MockPlayScreen";
 import { RealPlayerReel, RealPlayerResultCard } from "./RealPlayerReel";
 import { RealStadiumReel, RealStadiumResultCard } from "./RealStadiumReel";
 import { flagForLeague } from "./leagueFlags";
+import { MOCK_BG } from "./theme";
 
 type SpinMode = "players" | "stadiums";
 type Multiplier = 1 | 2 | 5 | 10;
@@ -181,7 +182,7 @@ export function MockPreviewApp() {
       )}
       {tab === "more" && <MockMoreScreen onBack={() => setTab("play")} level={level} xp={xp} xpToNext={SPINS_PER_LEVEL} coins={coins} />}
       {(tab === "collection" || tab === "market" || tab === "friends") && (
-        <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6 text-center" style={{ background: "#0E1013" }}>
+        <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6 text-center" style={{ background: MOCK_BG }}>
           <p className="text-sm text-white/40">Экран «{tab}» — вне макета, не верстаем на этом шаге</p>
         </div>
       )}

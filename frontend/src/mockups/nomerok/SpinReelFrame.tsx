@@ -4,6 +4,7 @@ import { RARITY_THEME } from "../../components/cards/rarityTheme";
 import { haptics } from "../../lib/telegram";
 import { sfx } from "../../lib/sfx";
 import type { Rarity } from "../../types/game";
+import { MOCK_PANEL } from "./theme";
 
 const ALL_RARITIES: Rarity[] = ["BRONZE", "SILVER", "GOLD", "LEGEND", "ICON"];
 const TOP_TIER: Rarity[] = ["LEGEND", "ICON"];
@@ -77,7 +78,7 @@ export function SpinReelFrame({ rarity, resultNode, onDone }: Props) {
     <motion.div
       ref={containerRef}
       className="relative h-[220px] w-[170px] overflow-hidden rounded-[20px] border-[3px]"
-      style={{ background: "#1C2026", boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 0 26px 2px ${theme.borderColor}55` }}
+      style={{ background: MOCK_PANEL, boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 0 26px 2px ${theme.borderColor}55` }}
       animate={containerHeight ? { borderColor: borderColorSequence } : undefined}
       transition={{ duration: TOTAL_DURATION_MS / 1000, ease: "linear" }}
     >

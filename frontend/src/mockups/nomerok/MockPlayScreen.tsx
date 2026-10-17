@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { MockRedDot } from "./MockBottomNav";
 import { MOCK_BANNERS, MOCK_PREVIEW_PLAYER } from "./mockData";
-import { MOCK_GREEN_GRADIENT, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_SHOP_GRADIENT } from "./theme";
+import { MOCK_ACCENT_GRADIENT, MOCK_ACTIVE_COLOR, MOCK_ACTIVE_TINT, MOCK_BG, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_PRIMARY_GRADIENT } from "./theme";
 
 type SpinMode = "players" | "stadiums";
 type Multiplier = 1 | 2 | 5 | 10;
@@ -34,9 +34,9 @@ interface Props {
 function PlayerSilhouette() {
   return (
     <svg viewBox="0 0 100 130" className="h-24 w-20 opacity-70">
-      <circle cx="50" cy="26" r="16" fill="#3DDC5A" opacity="0.35" />
-      <path d="M50 44c-16 0-28 12-30 30l-4 40h68l-4-40c-2-18-14-30-30-30z" fill="#3DDC5A" opacity="0.22" />
-      <path d="M50 44c-16 0-28 12-30 30l-4 40h68l-4-40c-2-18-14-30-30-30z" fill="none" stroke="#3DDC5A" strokeWidth="2" opacity="0.6" />
+      <circle cx="50" cy="26" r="16" fill={MOCK_ACTIVE_COLOR} opacity="0.35" />
+      <path d="M50 44c-16 0-28 12-30 30l-4 40h68l-4-40c-2-18-14-30-30-30z" fill={MOCK_ACTIVE_COLOR} opacity="0.22" />
+      <path d="M50 44c-16 0-28 12-30 30l-4 40h68l-4-40c-2-18-14-30-30-30z" fill="none" stroke={MOCK_ACTIVE_COLOR} strokeWidth="2" opacity="0.6" />
     </svg>
   );
 }
@@ -45,9 +45,9 @@ function PlayerSilhouette() {
 function StadiumSilhouette() {
   return (
     <svg viewBox="0 0 120 90" className="h-20 w-28 opacity-70">
-      <path d="M4 70 Q60 20 116 70 L116 80 Q60 40 4 80 Z" fill="#3DDC5A" opacity="0.25" />
-      <path d="M4 70 Q60 20 116 70" fill="none" stroke="#3DDC5A" strokeWidth="2" opacity="0.6" />
-      <circle cx="60" cy="58" r="10" fill="none" stroke="#3DDC5A" strokeWidth="1.5" opacity="0.5" />
+      <path d="M4 70 Q60 20 116 70 L116 80 Q60 40 4 80 Z" fill={MOCK_ACTIVE_COLOR} opacity="0.25" />
+      <path d="M4 70 Q60 20 116 70" fill="none" stroke={MOCK_ACTIVE_COLOR} strokeWidth="2" opacity="0.6" />
+      <circle cx="60" cy="58" r="10" fill="none" stroke={MOCK_ACTIVE_COLOR} strokeWidth="1.5" opacity="0.5" />
     </svg>
   );
 }
@@ -76,7 +76,7 @@ export function MockPlayScreen({
   const [multiplierOpen, setMultiplierOpen] = useState(false);
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden" style={{ background: "#0E1013" }}>
+    <div className="flex h-dvh flex-col overflow-hidden" style={{ background: MOCK_BG }}>
       {/* 1.1 — верхняя панель */}
       <div className="flex items-center justify-between gap-2 px-3 pt-[calc(env(safe-area-inset-top)+10px)]">
         <button onClick={onOpenMore} className="relative flex h-9 w-9 items-center justify-center rounded-full" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
@@ -87,7 +87,7 @@ export function MockPlayScreen({
         <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
           <span className="text-[11px] font-bold">Ур. {level}</span>
           <span className="h-1 w-8 overflow-hidden rounded-full bg-white/10">
-            <span className="block h-full rounded-full" style={{ width: `${xpPct}%`, background: "#3DDC5A" }} />
+            <span className="block h-full rounded-full" style={{ width: `${xpPct}%`, background: MOCK_ACTIVE_COLOR }} />
           </span>
         </div>
 
@@ -104,23 +104,20 @@ export function MockPlayScreen({
 
       {/* 1.2 — переключатель режима + магазин */}
       <div className="mt-3 flex items-center gap-2 px-3">
-        <div className="flex flex-1 rounded-[16px] p-1" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
+        <div className="flex flex-1 rounded-[12px] p-1" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
           {(["players", "stadiums"] as const).map((m) => (
             <button
               key={m}
               onClick={() => onModeChange(m)}
               disabled={reeling}
-              className="flex-1 rounded-[12px] py-2 text-xs font-bold transition disabled:opacity-50"
-              style={{ background: mode === m ? "#3DDC5A" : "transparent", color: mode === m ? "#0E1013" : "rgba(255,255,255,0.55)" }}
+              className="flex-1 rounded-[9px] py-2 text-xs font-bold transition disabled:opacity-50"
+              style={{ background: mode === m ? MOCK_ACTIVE_TINT : "transparent", color: mode === m ? MOCK_ACTIVE_COLOR : "rgba(255,255,255,0.55)" }}
             >
               {m === "players" ? "Игроки" : "Стадионы"}
             </button>
           ))}
         </div>
-        <button
-          className="relative flex items-center gap-1 rounded-[14px] px-3 py-2.5 text-xs font-extrabold text-[#2A1B00]"
-          style={{ background: MOCK_SHOP_GRADIENT }}
-        >
+        <button className="relative flex items-center gap-1 rounded-[12px] px-3 py-2.5 text-xs font-extrabold text-white" style={{ background: MOCK_ACCENT_GRADIENT }}>
           ⭐ Магазин
           <MockRedDot />
         </button>
@@ -134,8 +131,8 @@ export function MockPlayScreen({
         {MOCK_BANNERS.map((b) => (
           <div
             key={b.id}
-            className="relative flex w-[78%] shrink-0 flex-col justify-center rounded-[18px] px-4 py-3"
-            style={{ background: "linear-gradient(135deg,#2A0F14,#1C2026)", border: "1px solid rgba(255,212,0,0.35)" }}
+            className="relative flex w-[78%] shrink-0 flex-col justify-center rounded-[14px] px-4 py-3"
+            style={{ background: `linear-gradient(135deg, ${MOCK_PANEL}, #241a6b)`, border: "1px solid rgba(255,209,102,0.3)" }}
           >
             <p className="text-xs font-extrabold">{b.title}</p>
             <p className="mt-0.5 text-[10px] text-white/50">{b.subtitle}</p>
@@ -152,7 +149,7 @@ export function MockPlayScreen({
         </div>
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
-            <span key={i} className="h-1.5 w-1.5 rounded-full" style={{ background: i < 2 ? "#3DDC5A" : "rgba(255,255,255,0.15)" }} />
+            <span key={i} className="h-1.5 w-1.5 rounded-full" style={{ background: i < 2 ? MOCK_ACTIVE_COLOR : "rgba(255,255,255,0.15)" }} />
           ))}
         </div>
 
@@ -162,7 +159,7 @@ export function MockPlayScreen({
           resultSlot
         ) : (
           <div
-            className="relative flex h-[220px] w-[170px] flex-col items-center justify-center gap-2 rounded-[20px]"
+            className="relative flex h-[220px] w-[170px] flex-col items-center justify-center gap-2 rounded-[16px]"
             style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
           >
             {mode === "players" ? <PlayerSilhouette /> : <StadiumSilhouette />}
@@ -192,7 +189,7 @@ export function MockPlayScreen({
         <button
           onClick={onOpenPicker}
           disabled={reeling}
-          className="flex flex-1 items-center justify-between rounded-[14px] px-3 py-2.5 text-xs font-semibold disabled:opacity-50"
+          className="flex flex-1 items-center justify-between rounded-[12px] px-3 py-2.5 text-xs font-semibold disabled:opacity-50"
           style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
         >
           <span className="truncate">{selectedLabel}</span>
@@ -200,12 +197,12 @@ export function MockPlayScreen({
         </button>
         <button
           onClick={() => setMultiplierOpen((v) => !v)}
-          className="relative flex items-center gap-1 rounded-[14px] px-3 py-2.5 text-xs font-semibold"
+          className="relative flex items-center gap-1 rounded-[12px] px-3 py-2.5 text-xs font-semibold"
           style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
         >
           Множитель x{multiplier} <span className="text-white/40">⌄</span>
           {multiplierOpen && (
-            <div className="absolute bottom-[110%] right-0 flex flex-col overflow-hidden rounded-[12px]" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
+            <div className="absolute bottom-[110%] right-0 flex flex-col overflow-hidden rounded-[10px]" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
               {([1, 2, 5, 10] as const).map((m) => (
                 <button
                   key={m}
@@ -224,7 +221,7 @@ export function MockPlayScreen({
         </button>
         <button
           disabled
-          className="shrink-0 rounded-[14px] px-3 py-2.5 text-xs font-bold opacity-30"
+          className="shrink-0 rounded-[12px] px-3 py-2.5 text-xs font-bold opacity-30"
           style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
         >
           5x
@@ -236,11 +233,11 @@ export function MockPlayScreen({
         <button
           onClick={onSpin}
           disabled={reeling || spinDisabled}
-          className="flex w-full items-center justify-between rounded-[18px] px-6 py-4 text-base font-extrabold text-[#0E1013] disabled:opacity-60"
-          style={{ background: MOCK_GREEN_GRADIENT }}
+          className="flex w-full items-center justify-between rounded-[14px] px-6 py-4 text-base font-extrabold text-[#2c1b00] disabled:opacity-60"
+          style={{ background: MOCK_PRIMARY_GRADIENT }}
         >
           {reeling ? "Крутим..." : "Крутить"}
-          {!reeling && <span className="rounded-[12px] bg-black/20 px-3 py-1.5 text-sm">{spinPrice.toLocaleString("ru-RU")} 🪙</span>}
+          {!reeling && <span className="rounded-[10px] bg-black/20 px-3 py-1.5 text-sm">{spinPrice.toLocaleString("ru-RU")} 🪙</span>}
         </button>
       </div>
     </div>

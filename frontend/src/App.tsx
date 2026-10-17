@@ -10,6 +10,7 @@ import { MockPlayScreen } from "./mockups/nomerok/MockPlayScreen";
 import { RealPlayerReel, RealPlayerResultCard } from "./mockups/nomerok/RealPlayerReel";
 import { RealStadiumReel, RealStadiumResultCard } from "./mockups/nomerok/RealStadiumReel";
 import { flagForLeague } from "./mockups/nomerok/leagueFlags";
+import { MOCK_BG } from "./mockups/nomerok/theme";
 import { CollectionScreen } from "./screens/CollectionScreen";
 import { MarketScreen } from "./screens/MarketScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
@@ -220,7 +221,7 @@ function App() {
       {tab === "collection" && <CollectionScreen />}
       {tab === "market" && <MarketScreen />}
       {tab === "friends" && (
-        <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6 text-center" style={{ background: "#0E1013" }}>
+        <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6 text-center" style={{ background: MOCK_BG }}>
           <p className="text-sm text-white/40">Рефералка скоро появится здесь</p>
         </div>
       )}

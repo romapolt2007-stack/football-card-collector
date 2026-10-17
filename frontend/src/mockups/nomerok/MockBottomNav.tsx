@@ -1,4 +1,4 @@
-import { MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_RED_DOT } from "./theme";
+import { MOCK_ACTIVE_COLOR, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_RED_DOT } from "./theme";
 
 export type MockTab = "play" | "collection" | "market" | "friends" | "more";
 
@@ -15,12 +15,13 @@ const TABS: { id: MockTab; label: string; icon: string }[] = [
   { id: "more", label: "Ещё", icon: "•••" },
 ];
 
-/** Нижняя навигация макета "Номерок-стиль" — плавающая панель, 5 вкладок. Только вёрстка, без логики. */
+/** Нижняя навигация — сплошная полоса на всю ширину с верхней границей (как в исходной версии
+ * приложения), а не плавающая закруглённая панель. */
 export function MockBottomNav({ tab, onChange }: Props) {
   return (
     <nav
-      className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+10px)] z-40 flex rounded-[22px] p-1.5 backdrop-blur-xl"
-      style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}`, boxShadow: "0 8px 30px rgba(0,0,0,0.4)" }}
+      className="fixed inset-x-0 bottom-0 z-40 flex border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+      style={{ background: `${MOCK_PANEL}f2`, borderColor: MOCK_PANEL_BORDER }}
     >
       {TABS.map((t) => {
         const active = tab === t.id;
@@ -28,11 +29,12 @@ export function MockBottomNav({ tab, onChange }: Props) {
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
-            className="relative flex flex-1 flex-col items-center gap-0.5 rounded-[16px] py-2 text-[10px] font-semibold transition"
-            style={{ background: active ? "rgba(61,220,90,0.14)" : "transparent", color: active ? "#3DDC5A" : "rgba(255,255,255,0.45)" }}
+            className="relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold"
+            style={{ color: active ? MOCK_ACTIVE_COLOR : "rgba(255,255,255,0.45)" }}
           >
             <span className="text-base leading-none">{t.icon}</span>
             <span>{t.label}</span>
+            {active && <span className="absolute -top-[1px] h-[2px] w-8 rounded-full" style={{ background: MOCK_ACTIVE_COLOR }} />}
           </button>
         );
       })}

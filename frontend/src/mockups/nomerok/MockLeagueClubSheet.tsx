@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MOCK_PANEL, MOCK_PANEL_BORDER } from "./theme";
+import { MOCK_ACTIVE_COLOR, MOCK_ACTIVE_TINT, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_SHEET_BG } from "./theme";
 
 export interface PickerLeague {
   id: string;
@@ -54,7 +54,7 @@ export function MockLeagueClubSheet({
       <div
         onClick={(e) => e.stopPropagation()}
         className="flex max-h-[80vh] w-full max-w-md flex-col rounded-t-[24px] pb-[env(safe-area-inset-bottom)]"
-        style={{ background: "#15181D", border: `1px solid ${MOCK_PANEL_BORDER}`, borderBottom: "none" }}
+        style={{ background: MOCK_SHEET_BG, border: `1px solid ${MOCK_PANEL_BORDER}`, borderBottom: "none" }}
       >
         <div className="flex justify-center pt-2.5">
           <span className="h-1 w-10 rounded-full bg-white/15" />
@@ -78,9 +78,9 @@ export function MockLeagueClubSheet({
                 onClick={() => setLeagueId(l.id)}
                 className="flex items-center gap-2 rounded-[14px] px-3 py-2.5 text-left text-xs font-bold transition"
                 style={{
-                  background: active ? "rgba(61,220,90,0.16)" : MOCK_PANEL,
-                  border: `1px solid ${active ? "#3DDC5A" : MOCK_PANEL_BORDER}`,
-                  color: active ? "#3DDC5A" : "white",
+                  background: active ? MOCK_ACTIVE_TINT : MOCK_PANEL,
+                  border: `1px solid ${active ? MOCK_ACTIVE_COLOR : MOCK_PANEL_BORDER}`,
+                  color: active ? MOCK_ACTIVE_COLOR : "white",
                 }}
               >
                 <span>{l.flag}</span>
@@ -97,7 +97,7 @@ export function MockLeagueClubSheet({
               onClick={() => onSelect(leagueId, null)}
               className="mb-2 flex w-full items-center justify-between rounded-[14px] px-3 py-3"
               style={{
-                background: !selectedClubId && selectedLeagueId === leagueId ? "rgba(61,220,90,0.1)" : MOCK_PANEL,
+                background: !selectedClubId && selectedLeagueId === leagueId ? MOCK_ACTIVE_TINT : MOCK_PANEL,
                 border: `1px solid ${MOCK_PANEL_BORDER}`,
               }}
             >
@@ -115,7 +115,7 @@ export function MockLeagueClubSheet({
                   key={c.id}
                   onClick={() => onSelect(leagueId, c.id)}
                   className="mb-2 flex w-full items-center gap-3 rounded-[14px] px-3 py-3"
-                  style={{ background: checked ? "rgba(61,220,90,0.1)" : MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
+                  style={{ background: checked ? MOCK_ACTIVE_TINT : MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
                 >
                   <span
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-[10px] font-extrabold"
@@ -133,7 +133,7 @@ export function MockLeagueClubSheet({
                   </div>
                   <span className="text-xs font-semibold text-white/50">x{c.priceMultiplier}</span>
                   {checked && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] text-[#0E1013]" style={{ background: "#3DDC5A" }}>
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] text-[#2c1b00]" style={{ background: MOCK_ACTIVE_COLOR }}>
                       ✓
                     </span>
                   )}
@@ -146,7 +146,7 @@ export function MockLeagueClubSheet({
             <button
               onClick={() => onSelect(leagueId, null)}
               className="flex w-full items-center justify-between rounded-[14px] px-3 py-3"
-              style={{ background: "rgba(61,220,90,0.1)", border: `1px solid ${MOCK_PANEL_BORDER}` }}
+              style={{ background: MOCK_ACTIVE_TINT, border: `1px solid ${MOCK_PANEL_BORDER}` }}
             >
               <div className="text-left">
                 <p className="text-sm font-bold">{leagueId === allLeaguesId ? "Крутить все лиги" : "Крутить всю страну"}</p>

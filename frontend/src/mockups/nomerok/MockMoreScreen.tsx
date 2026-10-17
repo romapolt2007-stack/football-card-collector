@@ -1,5 +1,5 @@
 import { MOCK_MENU_TILES, MOCK_SHOP_CHIPS } from "./mockData";
-import { MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_RED_DOT, MOCK_SHOP_GRADIENT } from "./theme";
+import { MOCK_ACCENT_GRADIENT, MOCK_ACTIVE_COLOR, MOCK_BG, MOCK_PANEL, MOCK_PANEL_BORDER, MOCK_RED_DOT } from "./theme";
 
 interface Props {
   onBack: () => void;
@@ -29,7 +29,7 @@ function ProfileRing({ level, pct }: { level: number; pct: number }) {
   return (
     <svg viewBox="0 0 48 48" className="h-12 w-12 shrink-0 -rotate-90">
       <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
-      <circle cx="24" cy="24" r={r} fill="none" stroke="#3DDC5A" strokeWidth="4" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} />
+      <circle cx="24" cy="24" r={r} fill="none" stroke={MOCK_ACTIVE_COLOR} strokeWidth="4" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} />
       <text x="24" y="24" transform="rotate(90 24 24)" textAnchor="middle" dominantBaseline="central" className="fill-white text-[13px] font-extrabold">
         {level}
       </text>
@@ -41,7 +41,7 @@ export function MockMoreScreen({ onBack, level, xp, xpToNext, coins, onOpenProfi
   const xpPct = Math.round((xp / xpToNext) * 100);
 
   return (
-    <div className="flex h-dvh flex-col overflow-y-auto pb-[112px]" style={{ background: "#0E1013" }}>
+    <div className="flex h-dvh flex-col overflow-y-auto pb-[112px]" style={{ background: MOCK_BG }}>
       <div className="flex items-center justify-center px-3 pt-[calc(env(safe-area-inset-top)+10px)]">
         <button onClick={onBack} className="absolute left-3 text-lg">
           ‹
@@ -93,18 +93,18 @@ export function MockMoreScreen({ onBack, level, xp, xpToNext, coins, onOpenProfi
       </div>
 
       {/* 3.4 — карточка магазина */}
-      <div className="mx-3 mt-4 rounded-[20px] p-4" style={{ background: MOCK_SHOP_GRADIENT }}>
+      <div className="mx-3 mt-4 rounded-[16px] p-4" style={{ background: MOCK_ACCENT_GRADIENT }}>
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-white text-lg">⭐</span>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-white/15 text-lg">⭐</span>
           <div className="flex-1">
-            <p className="text-sm font-extrabold text-[#2A1B00]">Магазин</p>
-            <p className="text-[11px] text-[#2A1B00]/70">Паки, наборы и усиления за ⭐ звёзды</p>
+            <p className="text-sm font-extrabold text-white">Магазин</p>
+            <p className="text-[11px] text-white/70">Паки, наборы и усиления за ⭐ звёзды</p>
           </div>
-          <button className="rounded-full bg-[#1C2026] px-4 py-2 text-xs font-extrabold text-white">Открыть</button>
+          <button className="rounded-full bg-black/25 px-4 py-2 text-xs font-extrabold text-white">Открыть</button>
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {MOCK_SHOP_CHIPS.map((chip) => (
-            <span key={chip} className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#2A1B00]">
+            <span key={chip} className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-[#3c1a66]">
               {chip}
             </span>
           ))}
