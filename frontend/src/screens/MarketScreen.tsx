@@ -17,7 +17,6 @@ import {
   type MarketFilters,
 } from "../lib/useMarket";
 import { useInventory, useStadiumCollection } from "../lib/queries";
-import { POSITION_RU } from "../lib/ruLabels";
 import { haptics } from "../lib/telegram";
 import { sfx } from "../lib/sfx";
 import { useAuthStore } from "../store/useAuthStore";
@@ -61,7 +60,7 @@ export function MarketScreen() {
         .map((c) => ({
           cardId: c.id,
           label: c.player.name,
-          sublabel: `${POSITION_RU[c.player.position]} · ${c.player.club.shortName}`,
+          sublabel: `${c.player.position} · ${c.player.club.shortName}`,
           rarity: c.rarity,
           quickSellPrice: c.quickSellPrice,
         })),

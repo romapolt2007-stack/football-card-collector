@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { ClubCrest } from "../cards/ClubCrest";
 import { StadiumIllustration } from "../cards/StadiumIllustration";
 import { RARITY_THEME } from "../cards/rarityTheme";
-import { POSITION_RU } from "../../lib/ruLabels";
 import type { Listing } from "../../types/game";
 
 interface Props {
@@ -49,7 +48,7 @@ export function ListingCard({ listing, isMine, onBuy, onBid, onCancel, isBusy }:
           <div className="flex items-start justify-between">
             <div className="flex flex-col items-center leading-none">
               <span className="text-xl font-extrabold">{listing.card.player.overall}</span>
-              <span className="mt-0.5 text-[0.65em] font-bold opacity-80">{POSITION_RU[listing.card.player.position]}</span>
+              <span className="mt-0.5 text-[0.65em] font-bold opacity-80">{listing.card.player.position}</span>
             </div>
             <ClubCrest club={listing.card.player.club} size={32} />
           </div>

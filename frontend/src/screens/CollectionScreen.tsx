@@ -11,7 +11,6 @@ import { PillTabs } from "../components/common/PillTabs";
 import { CreateListingModal, type ListableItem } from "../components/market/CreateListingModal";
 import { useInventory, useQuickSell, useQuickSellBulk, useStadiumCollection, useStadiumQuickSell } from "../lib/queries";
 import { useMyListings } from "../lib/useMarket";
-import { POSITION_RU } from "../lib/ruLabels";
 import { haptics } from "../lib/telegram";
 import { useAuthStore } from "../store/useAuthStore";
 import type { Card, Rarity, StadiumCard } from "../types/game";
@@ -68,7 +67,7 @@ export function CollectionScreen() {
         .map((c) => ({
           cardId: c.id,
           label: c.player.name,
-          sublabel: `${POSITION_RU[c.player.position]} · ${c.player.club.shortName}`,
+          sublabel: `${c.player.position} · ${c.player.club.shortName}`,
           rarity: c.rarity,
           quickSellPrice: c.quickSellPrice,
         })),
