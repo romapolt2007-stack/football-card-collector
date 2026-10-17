@@ -1,7 +1,8 @@
 import type { Card } from "../../types/game";
 import { RARITY_THEME } from "./rarityTheme";
 import { ClubCrest } from "./ClubCrest";
-import { PlayerPortrait } from "./PlayerPortrait";
+import { PlayerActionSilhouette } from "./PlayerActionSilhouette";
+import { hashString } from "./nationLooks";
 import { POSITION_RU, STAT_LABELS_RU } from "../../lib/ruLabels";
 
 interface Props {
@@ -17,9 +18,30 @@ const SIZE_CLASSES: Record<NonNullable<Props["size"]>, string> = {
   full: "w-full text-[11px]",
 };
 
-/** Силуэт "щит/баннер" с заострением снизу — фирменная форма карты, для всех размеров. */
-const PENNANT_CLIP =
-  "polygon(5% 0%, 95% 0%, 100% 3%, 100% 90%, 84% 95%, 50% 100%, 16% 95%, 0% 90%, 0% 3%)";
+const SILHOUETTE_SIZE: Record<NonNullable<Props["size"]>, number> = {
+  sm: 46,
+  md: 60,
+  lg: 82,
+  full: 78,
+};
+
+const PADDING_CLASSES: Record<NonNullable<Props["size"]>, string> = {
+  sm: "p-2.5 pb-2",
+  md: "p-3 pb-2.5",
+  lg: "p-3.5 pb-3",
+  full: "p-3.5 pb-3",
+};
+
+/** Фирменная форма карты — мягко скруглённый верх (несколько точек вместо прямой линии
+ * аппроксимируют кривую), заострение к низу. Полностью своя форма, не копия чьего-то ассета. */
+const CARD_CLIP =
+  "polygon(8% 2%, 20% 0%, 50% 0%, 80% 0%, 92% 2%, 100% 8%, 100% 88%, 85% 94%, 50% 100%, 15% 94%, 0% 88%, 0% 8%)";
+
+/** Стабильный "игровой номер" 1-99 — чисто декоративный элемент карты (хэш от id игрока), в игре
+ * нигде не хранится и не заявляется как настоящий номер футболиста. */
+function jerseyNumber(playerId: string): number {
+  return 1 + (hashString(playerId) % 99);
+}
 
 export function RarityCard({ card, size = "md", onClick }: Props) {
   const theme = RARITY_THEME[card.rarity];
@@ -31,13 +53,13 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
   return (
     <div
       onClick={onClick}
-      className={`relative aspect-[3/4.2] shrink-0 overflow-hidden pb-4 border-[3px] p-3 ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative aspect-[3/5] shrink-0 overflow-hidden border-[3px] ${PADDING_CLASSES[size]} ${SIZE_CLASSES[size]} ${isIcon ? "icon-pulse" : ""} ${onClick ? "cursor-pointer" : ""}`}
       style={{
         background: theme.background,
         borderColor: theme.borderColor,
-        boxShadow: theme.glow,
+        boxShadow: `0 0 0 1px rgba(255,255,255,0.1), 0 0 18px 3px ${theme.borderColor}70, ${theme.glow}`,
         color: theme.textColor,
-        clipPath: PENNANT_CLIP,
+        clipPath: CARD_CLIP,
       }}
     >
       <div className="pointer-events-none absolute inset-0 bg-black/18" />
@@ -54,35 +76,22 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
           <span className="text-2xl font-extrabold" style={isFull ? { textShadow: `0 0 10px ${theme.borderColor}88` } : undefined}>
             {player.overall}
           </span>
-          <span className="mt-0.5 text-[0.7em] font-bold opacity-80">{POSITION_RU[player.position]}</span>
+          <span className="mt-0.5 text-[0.7em] font-bold opacity-80">
+            {POSITION_RU[player.position]} · №{jerseyNumber(player.id)}
+          </span>
         </div>
         <div className="flex flex-col items-end gap-1 text-right">
           <span className="text-lg leading-none">{player.nationFlag}</span>
-          <span
-            className="rounded px-1.5 py-0.5 text-[0.65em] font-semibold"
-            style={{ background: theme.statBg }}
-          >
-            {player.club.shortName}
-          </span>
+          <ClubCrest club={player.club} size={isFull ? 26 : 18} />
         </div>
       </div>
 
-      <div className="relative mt-1 flex flex-col items-center">
-        <div className="relative">
-          <PlayerPortrait accent={theme.borderColor} size={isFull ? 84 : 64} nation={player.nation} playerId={player.id} />
-          <div
-            className="absolute -bottom-1 -right-1 rounded-full border-2 bg-black/50 p-0.5"
-            style={{ borderColor: theme.borderColor }}
-          >
-            <ClubCrest club={player.club} size={20} />
-          </div>
-        </div>
-        <p className="mt-1.5 truncate text-center text-[0.85em] font-bold tracking-wide uppercase">
-          {player.name}
-        </p>
+      <div className="relative flex flex-col items-center">
+        <PlayerActionSilhouette accent={theme.borderColor} size={SILHOUETTE_SIZE[size]} />
+        <p className="truncate text-center text-[0.85em] font-bold tracking-wide uppercase">{player.name}</p>
       </div>
 
-      <div className="relative mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
+      <div className="relative mt-1.5 grid grid-cols-2 gap-x-2 gap-y-0.5">
         {STAT_LABELS_RU.map(([label, key]) => (
           <div key={label} className="flex items-center justify-between gap-1">
             <span className="font-extrabold" style={isFull ? { textShadow: `0 0 6px ${theme.borderColor}66` } : undefined}>
