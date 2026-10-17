@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-pitch-dark: #0b0f2b;
-  --color-pitch-violet: #1b1246;
-  --color-pitch-blue: #241a6b;
+  --color-pitch-dark: #070f12;
+  --color-pitch-violet: #102228;
+  --color-pitch-blue: #15303a;
   --color-gold: #ffd166;
   --color-bronze: #cd7f32;
   --color-silver: #c0c0c8;

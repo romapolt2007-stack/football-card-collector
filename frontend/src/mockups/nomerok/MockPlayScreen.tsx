@@ -116,7 +116,7 @@ export function MockPlayScreen({
           <div
             key={b.id}
             className="relative flex w-[78%] shrink-0 flex-col justify-center rounded-[14px] px-4 py-3"
-            style={{ background: `linear-gradient(135deg, ${MOCK_PANEL}, #241a6b)`, border: "1px solid rgba(255,209,102,0.3)" }}
+            style={{ background: `linear-gradient(135deg, ${MOCK_PANEL}, #15303a)`, border: "1px solid rgba(255,209,102,0.3)" }}
           >
             <p className="text-xs font-extrabold">{b.title}</p>
             <p className="mt-0.5 text-[10px] text-white/50">{b.subtitle}</p>

@@ -6,8 +6,8 @@ export function initTelegram() {
   if (!isInsideTelegram) return;
   WebApp.ready();
   WebApp.expand();
-  WebApp.setHeaderColor("#0b0f2b");
-  WebApp.setBackgroundColor("#0b0f2b");
+  WebApp.setHeaderColor("#070f12");
+  WebApp.setBackgroundColor("#070f12");
 }
 
 export function getInitData(): string {

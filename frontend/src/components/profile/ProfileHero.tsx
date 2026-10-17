@@ -16,7 +16,7 @@ export function ProfileHero({ user }: Props) {
       className="relative overflow-hidden rounded-2xl border border-white/10 p-5"
       style={{
         background:
-          "radial-gradient(circle at 20% 20%, rgba(255,209,102,0.12) 0%, transparent 55%), radial-gradient(circle at 80% 10%, rgba(90,209,255,0.12) 0%, transparent 50%), linear-gradient(160deg, #15102e 0%, #0b0f2b 100%)",
+          "radial-gradient(circle at 20% 20%, rgba(255,209,102,0.12) 0%, transparent 55%), radial-gradient(circle at 80% 10%, rgba(94,234,212,0.12) 0%, transparent 50%), linear-gradient(160deg, #132026 0%, #070f12 100%)",
       }}
     >
       <div className="flex items-center gap-4">
