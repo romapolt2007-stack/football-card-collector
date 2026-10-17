@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 import { stadiumQuickSellPrice } from "../lib/cardValue.js";
-import { freeSpinReady, msUntilFreeSpin, spinStadium } from "../lib/spin.js";
+import { freeSpinReady, MAX_SPIN_COST, MIN_SPIN_COST, msUntilFreeSpin, spinStadium, spinStadiumStaked } from "../lib/spin.js";
 import { setPendingSpin, takePendingSpin } from "../lib/spinStore.js";
 import { findStadiumCase, openStadiumCase, STADIUM_CASES } from "../lib/stadiumCases.js";
 import { getUserStadiumBuff } from "../lib/stadiumBuffs.js";
@@ -56,6 +56,47 @@ router.post("/spin", requireAuth, async (req, res) => {
   setPendingSpin(user.id, { kind: "stadium", stadiumId: stadium.id, rarity: stadium.rarity, price });
 
   res.json({ stadium, rarity: stadium.rarity, estimatedValue: price * 4, sellPrice: price });
+});
+
+const spinStakedSchema = z.object({
+  amount: z.number().int().min(MIN_SPIN_COST).max(MAX_SPIN_COST),
+  leagueId: z.string().optional(),
+  clubId: z.string().optional(),
+});
+
+/** Платный спин стадионов по ставке + фильтру лиги/клуба — тот же принцип, что POST /api/spin/spin
+ * для игроков. Отдельный от /spin (бесплатный раз в 24ч, без фильтров), чтобы не ломать его. */
+router.post("/spin-staked", requireAuth, async (req, res) => {
+  const parsed = spinStakedSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Некорректное тело запроса" });
+    return;
+  }
+  const { amount, ...filters } = parsed.data;
+
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
+  const charged = await prisma.user.updateMany({
+    where: { id: user.id, coins: { gte: amount } },
+    data: { coins: { decrement: amount } },
+  });
+  if (charged.count === 0) {
+    res.status(400).json({ error: "Недостаточно монет для такой ставки" });
+    return;
+  }
+  await prisma.transaction.create({ data: { userId: user.id, type: "SPIN_STADIUM", amount: -amount } });
+
+  const buff = await getUserStadiumBuff(user.id);
+  const stadium = await spinStadiumStaked(filters, amount, buff.topTierWeightBonus);
+  if (!stadium) {
+    await prisma.user.update({ where: { id: user.id }, data: { coins: { increment: amount } } });
+    res.status(400).json({ error: "Нет стадионов под эти фильтры — попробуйте другие" });
+    return;
+  }
+
+  const price = stadiumQuickSellPrice(stadium.rarity, stadium.capacity);
+  setPendingSpin(user.id, { kind: "stadium", stadiumId: stadium.id, rarity: stadium.rarity, price });
+
+  res.json({ stadium, rarity: stadium.rarity, estimatedValue: price * 4, sellPrice: price, coins: user.coins - amount });
 });
 
 const openCaseSchema = z.object({ caseId: z.string() });

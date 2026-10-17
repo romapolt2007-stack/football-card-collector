@@ -64,7 +64,7 @@ export function MockLeagueClubSheet({
         <div className="flex flex-col items-center gap-1 px-5 pb-3 pt-3 text-center">
           <h2 className="text-base font-extrabold">Что крутить</h2>
           <p className="text-xs text-white/45">
-            {mode === "players" ? "Выбери лигу и клуб — или крути всю лигу" : "Выбери страну лиги — или крути все стадионы"}
+            {mode === "players" ? "Выбери лигу и клуб — или крути всю лигу" : "Выбери лигу и клуб — или крути все стадионы лиги"}
           </p>
         </div>
 
@@ -90,8 +90,8 @@ export function MockLeagueClubSheet({
           })}
         </div>
 
-        {/* 2.3 / 2.4 — список клубов (только режим "Игроки") */}
-        {mode === "players" && leagueId !== allLeaguesId ? (
+        {/* 2.3 / 2.4 — список клубов */}
+        {leagueId !== allLeaguesId ? (
           <div className="mt-3 flex-1 overflow-y-auto px-5 pb-6">
             <button
               onClick={() => onSelect(leagueId, null)}
@@ -102,8 +102,8 @@ export function MockLeagueClubSheet({
               }}
             >
               <div className="text-left">
-                <p className="text-sm font-bold">Любой клуб лиги</p>
-                <p className="text-[11px] text-white/40">дешевле, любой игрок лиги</p>
+                <p className="text-sm font-bold">{mode === "players" ? "Любой клуб лиги" : "Все стадионы лиги"}</p>
+                <p className="text-[11px] text-white/40">{mode === "players" ? "дешевле, любой игрок лиги" : "дешевле, любой стадион лиги"}</p>
               </div>
               <span className="text-xs font-semibold text-white/50">x{anyClubPriceMultiplier}</span>
             </button>
@@ -126,7 +126,9 @@ export function MockLeagueClubSheet({
                   <div className="flex-1 text-left">
                     <p className="text-sm font-bold">{c.name}</p>
                     <p className="text-[11px] text-white/40">
-                      {c.playerCount} игроков{c.stadiumCapacity != null ? ` · стадион ${c.stadiumCapacity.toLocaleString("ru-RU")}` : ""}
+                      {mode === "players"
+                        ? `${c.playerCount} игроков${c.stadiumCapacity != null ? ` · стадион ${c.stadiumCapacity.toLocaleString("ru-RU")}` : ""}`
+                        : `стадион ${c.stadiumCapacity!.toLocaleString("ru-RU")} мест`}
                     </p>
                   </div>
                   <span className="text-xs font-semibold text-white/50">x{c.priceMultiplier}</span>

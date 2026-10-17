@@ -112,6 +112,18 @@ export function useSpinStadium() {
   });
 }
 
+/** Платный спин стадионов по ставке + фильтру лиги/клуба — аналог useSpinPlayer, для макета "Номерок-стиль". */
+export function useSpinStadiumStaked() {
+  const setUser = useAuthStore((s) => s.setUser);
+  const user = useAuthStore((s) => s.user);
+  return useMutation({
+    mutationFn: (request: SpinFiltersWithAmount) => api.post<StadiumSpinResult & { coins: number }>("/api/stadiums/spin-staked", request),
+    onSuccess: (result) => {
+      if (user) setUser({ ...user, coins: result.coins });
+    },
+  });
+}
+
 export function useSaveSpinStadium() {
   const queryClient = useQueryClient();
   return useMutation({

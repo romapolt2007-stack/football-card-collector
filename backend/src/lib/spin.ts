@@ -128,6 +128,45 @@ export async function spinPlayerGuaranteedTop(filters: SpinPlayerFilters) {
   return null;
 }
 
+export interface SpinStadiumFilters {
+  leagueId?: string;
+  clubId?: string;
+}
+
+function stadiumWhere(filters: SpinStadiumFilters) {
+  return {
+    ...(filters.leagueId ? { club: { leagueId: filters.leagueId } } : {}),
+    ...(filters.clubId ? { clubId: filters.clubId } : {}),
+  };
+}
+
+async function candidatesForStadiumRarity(filters: SpinStadiumFilters, rarity: Rarity) {
+  return prisma.stadium.findMany({
+    where: { ...stadiumWhere(filters), rarity },
+    include: { club: { include: { league: true } } },
+  });
+}
+
+/**
+ * Платный спин стадионов по тому же принципу, что и игроков (см. spinPlayer): редкость — по
+ * ставке через rarityWeightsForSpin, затем равномерный выбор среди стадионов под фильтр
+ * (лига/клуб); лесенка вниз/вверх по редкости, если в выпавшей под фильтром никого нет.
+ */
+export async function spinStadiumStaked(filters: SpinStadiumFilters, amount: number, stadiumBonus = 0) {
+  const weights = rarityWeightsForSpin(amount, stadiumBonus);
+  const startIdx = RARITY_ORDER.indexOf(rollRarity(weights));
+
+  for (let i = startIdx; i >= 0; i--) {
+    const pool = await candidatesForStadiumRarity(filters, RARITY_ORDER[i]);
+    if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)];
+  }
+  for (let i = startIdx + 1; i < RARITY_ORDER.length; i++) {
+    const pool = await candidatesForStadiumRarity(filters, RARITY_ORDER[i]);
+    if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)];
+  }
+  return null;
+}
+
 export async function spinStadium(topTierWeightBonus = 0) {
   const candidates = await prisma.stadium.findMany({ include: { club: { include: { league: true } } } });
   if (candidates.length === 0) return null;
