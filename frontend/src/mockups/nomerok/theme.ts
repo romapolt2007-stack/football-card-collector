@@ -1,17 +1,18 @@
-// Токены стиля для "костяка" интерфейса (Играть/Ещё/шторка выбора) — завязаны на уже
-// существующий фирменный стиль приложения (тёмно-синий "pitch" + золото + аметист), а не на
-// палитру стороннего референса, которую мы использовали только как черновик по расположению.
+// Токены стиля для "костяка" интерфейса (Играть/Ещё/шторка выбора).
+// Фон/панели/акценты — смесь вариантов "G" (почти чёрный, зелёный подтон) и "J" (ледяной сине-
+// стальной) из обсуждённых палитр: тёмно-тёплый почти-чёрный с бирюзовым подтоном, кнопка
+// "Крутить" остаётся на своей отдельной "фишке" — градиенте цветов редкости карт (вариант "L").
 
-export const MOCK_BG = "#0b0f2b"; // = --color-pitch-dark
-export const MOCK_PANEL = "#1b1246"; // = --color-pitch-violet
-export const MOCK_SHEET_BG = "#120c33";
+export const MOCK_BG = "#070f12"; // почти чёрный, смесь зелёного (G) и синего (J) подтона
+export const MOCK_PANEL = "#102228"; // тёмная бирюза-уголь
+export const MOCK_SHEET_BG = "#0a1a1f";
 // Вариант "L" — кнопка "Крутить" собрана из цветов редкости карт (бронза→серебро→золото→легенда→
 // икона), уже существующих в игре (rarityTheme.ts). Эта палитра осмысленна только в контексте
 // именно этой игры — её нельзя спутать ни с одним другим приложением.
 export const MOCK_PRIMARY_GRADIENT = "linear-gradient(90deg, #cd7f32, #e6e8ec, #ffd166, #b24bf3, #ff3b5c)";
 export const MOCK_PRIMARY_TEXT = "#171320";
-export const MOCK_ACCENT_GRADIENT = "linear-gradient(135deg, #c77dff, #7c3aed)"; // аметист — для магазина/акцентов
-export const MOCK_ACTIVE_COLOR = "#ffd166"; // = --color-gold
-export const MOCK_ACTIVE_TINT = "rgba(255,209,102,0.14)";
+export const MOCK_ACCENT_GRADIENT = "linear-gradient(135deg, #c4b5fd, #8b5cf6)"; // сиреневый (J) — для магазина/акцентов
+export const MOCK_ACTIVE_COLOR = "#5eead4"; // бирюза на стыке изумруда (G) и льда (J)
+export const MOCK_ACTIVE_TINT = "rgba(94,234,212,0.14)";
 export const MOCK_RED_DOT = "#ff3b5c"; // = --color-icon, уже используется в приложении для акцентных точек
 export const MOCK_PANEL_BORDER = "rgba(255,255,255,0.08)";
