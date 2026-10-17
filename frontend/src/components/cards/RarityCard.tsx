@@ -54,14 +54,18 @@ const STAT_LABELS_EN = [
 const CARD_CLIP =
   "polygon(8% 2%, 20% 0%, 50% 0%, 80% 0%, 92% 2%, 100% 8%, 100% 88%, 85% 94%, 50% 100%, 15% 94%, 0% 88%, 0% 8%)";
 
-/** "Обсидиановое стекло" — глубокий тёмный фон для большинства карт (не зависит от редкости),
- * премиальная база под золотую рамку. Сама редкость при этом не теряется — см. ниже её каналы
- * (свечение за силуэтом, подсветка цифр). */
-const OBSIDIAN_BG = "radial-gradient(130% 90% at 50% 0%, #232329 0%, #121216 46%, #050506 100%)";
-
 /** Только "Икона" — фирменный бордово-обсидиановый фон вместо нейтрального, для максимального
  * вау-эффекта редчайшей карты. */
 const ICON_BG = "radial-gradient(135% 95% at 50% 0%, #4a1026 0%, #2a0a18 42%, #0c0308 100%)";
+
+/** Динамичный фиолетовый фон с диагональными "энергетическими" полосами — премиальная база под
+ * золотую рамку для всех карт, кроме "Иконы". Своя абстрактная композиция, не копия чужой
+ * текстуры. */
+const ENERGY_BG = "radial-gradient(130% 95% at 50% 0%, #3c1a66 0%, #1d0e3a 46%, #0a0616 100%)";
+const ENERGY_STREAKS =
+  "linear-gradient(112deg, transparent 22%, rgba(190,130,255,0.4) 30%, transparent 40%)," +
+  "linear-gradient(112deg, transparent 48%, rgba(255,140,210,0.28) 56%, transparent 66%)," +
+  "linear-gradient(112deg, transparent 70%, rgba(130,170,255,0.22) 78%, transparent 88%)";
 
 /** Шлифованный металл — полоса светлых/тёмных золотых бликов имитирует брашированную
  * поверхность, а не плоскую заливку. */
@@ -94,9 +98,10 @@ export function RarityCard({ card, size = "md", onClick }: Props) {
     >
       <div
         className={`absolute overflow-hidden ${isIcon ? "icon-pulse" : ""} ${PADDING_CLASSES[size]}`}
-        style={{ inset: FRAME_THICKNESS[size], background: isIcon ? ICON_BG : OBSIDIAN_BG, color: "#f5f1e6", clipPath: CARD_CLIP }}
+        style={{ inset: FRAME_THICKNESS[size], background: isIcon ? ICON_BG : ENERGY_BG, color: "#f5f1e6", clipPath: CARD_CLIP }}
       >
         <div className="carbon-texture pointer-events-none absolute inset-0 opacity-40" />
+        {!isIcon && <div className="pointer-events-none absolute inset-0" style={{ background: ENERGY_STREAKS }} />}
         <div
           className="pointer-events-none absolute inset-0"
           style={{ background: "linear-gradient(140deg, rgba(255,255,255,0.14) 0%, transparent 34%)" }}
