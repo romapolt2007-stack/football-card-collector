@@ -7,6 +7,8 @@ interface Props {
   xp: number;
   xpToNext: number;
   coins: number;
+  onOpenProfile?: () => void;
+  onTileClick?: (id: string) => void;
 }
 
 const TILE_ICONS: Record<string, string> = {
@@ -35,7 +37,7 @@ function ProfileRing({ level, pct }: { level: number; pct: number }) {
   );
 }
 
-export function MockMoreScreen({ onBack, level, xp, xpToNext, coins }: Props) {
+export function MockMoreScreen({ onBack, level, xp, xpToNext, coins, onOpenProfile, onTileClick }: Props) {
   const xpPct = Math.round((xp / xpToNext) * 100);
 
   return (
@@ -48,7 +50,11 @@ export function MockMoreScreen({ onBack, level, xp, xpToNext, coins }: Props) {
       </div>
 
       {/* 3.1 — карточка профиля */}
-      <button className="mx-3 mt-4 flex items-center gap-3 rounded-[18px] px-4 py-3.5 text-left" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
+      <button
+        onClick={onOpenProfile}
+        className="mx-3 mt-4 flex items-center gap-3 rounded-[18px] px-4 py-3.5 text-left"
+        style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
+      >
         <ProfileRing level={level} pct={xpPct} />
         <div>
           <p className="text-sm font-extrabold">Уровень {level}</p>
@@ -71,7 +77,12 @@ export function MockMoreScreen({ onBack, level, xp, xpToNext, coins }: Props) {
       {/* 3.3 — сетка разделов */}
       <div className="mx-3 mt-4 grid grid-cols-4 gap-2.5">
         {MOCK_MENU_TILES.map((t) => (
-          <button key={t.id} className="flex flex-col items-center gap-1.5 rounded-[16px] py-3.5" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
+          <button
+            key={t.id}
+            onClick={() => onTileClick?.(t.id)}
+            className="flex flex-col items-center gap-1.5 rounded-[16px] py-3.5 active:scale-[0.97]"
+            style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
+          >
             <span className="relative flex h-9 w-9 items-center justify-center rounded-full text-base" style={{ background: `${t.color}26`, color: t.color }}>
               {TILE_ICONS[t.icon]}
               {t.badge && <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full" style={{ background: MOCK_RED_DOT }} />}
