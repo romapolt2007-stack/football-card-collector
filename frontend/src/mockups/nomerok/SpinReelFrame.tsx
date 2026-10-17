@@ -10,9 +10,9 @@ const ALL_RARITIES: Rarity[] = ["BRONZE", "SILVER", "GOLD", "LEGEND", "ICON"];
 const TOP_TIER: Rarity[] = ["LEGEND", "ICON"];
 
 const ITEM_HEIGHT = 92;
-const STRIP_LENGTH = 32;
-const WINNER_INDEX = 26;
-const TOTAL_DURATION_MS = 3000;
+const STRIP_LENGTH = 50;
+const WINNER_INDEX = 42;
+const TOTAL_DURATION_MS = 5600;
 
 interface Props {
   /** Итоговая редкость — уже известна (с сервера или замокана) до старта анимации, как в боевом SpinReel.tsx. */
@@ -24,12 +24,15 @@ interface Props {
 
 /** Общий "движок" барабана ("карточка в карточке") для Экрана 1 — переиспользуется и реальным,
  * и ещё-моковым (Стадионы) результатом спина. Лента мини-карточек редкости крутится в рамке,
- * рамка светится цветом текущей редкости, топ-редкости — доп. "нырок" + вспышка/вибрация. */
+ * рамка светится цветом текущей редкости. Длиннее и с бóльшим "драматизмом", чем раньше: разгон →
+ * крейсерская скорость → лёгкая заминка-"зацепка" → промах мимо победной карты → возврат на неё.
+ * Топ-редкости получают более глубокий промах и доп. паузу перед разворотом. */
 export function SpinReelFrame({ rarity, resultNode, onDone }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const hasLaunchedRef = useRef(false);
+  const tickerCancelRef = useRef<(() => void) | null>(null);
 
   const isTopTier = TOP_TIER.includes(rarity);
   const theme = RARITY_THEME[rarity];
@@ -41,8 +44,8 @@ export function SpinReelFrame({ rarity, resultNode, onDone }: Props) {
   );
 
   const borderColorSequence = useMemo(() => {
-    const seq = strip.filter((_, i) => i % 3 === 0).map((r) => RARITY_THEME[r].borderColor);
-    seq.push(theme.borderColor, theme.borderColor);
+    const seq = strip.filter((_, i) => i % 2 === 0).map((r) => RARITY_THEME[r].borderColor);
+    seq.push(theme.borderColor, theme.borderColor, theme.borderColor);
     return seq;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -56,13 +59,17 @@ export function SpinReelFrame({ rarity, resultNode, onDone }: Props) {
       hasLaunchedRef.current = true;
       sfx.launch();
       haptics.impact("medium");
+      tickerCancelRef.current = sfx.reelTicker(TOTAL_DURATION_MS);
     }
+    return () => tickerCancelRef.current?.();
   }, [containerHeight]);
 
   const targetY = -(WINNER_INDEX * ITEM_HEIGHT + ITEM_HEIGHT / 2 - containerHeight / 2);
-  const overshootY = targetY - ITEM_HEIGHT * 0.5;
+  const hitchY = targetY * 0.58 + ITEM_HEIGHT * 0.25; // лёгкая заминка на подходе — чуть отстаёт от "идеальной" траектории
+  const overshootY = targetY - ITEM_HEIGHT * (isTopTier ? 1.35 : 0.55);
 
   function handleSettled() {
+    tickerCancelRef.current?.();
     if (isTopTier) {
       sfx.fanfare();
       haptics.notify("success");
@@ -71,7 +78,7 @@ export function SpinReelFrame({ rarity, resultNode, onDone }: Props) {
       haptics.impact("light");
     }
     setRevealed(true);
-    window.setTimeout(onDone, 900);
+    window.setTimeout(onDone, 1000);
   }
 
   return (
@@ -79,7 +86,7 @@ export function SpinReelFrame({ rarity, resultNode, onDone }: Props) {
       ref={containerRef}
       className="relative h-[220px] w-[170px] overflow-hidden rounded-[20px] border-[3px]"
       style={{ background: MOCK_PANEL, boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 0 26px 2px ${theme.borderColor}55` }}
-      animate={containerHeight ? { borderColor: borderColorSequence } : undefined}
+      animate={containerHeight ? { borderColor: borderColorSequence, scale: [1, 1.015, 1, 1.015, 1] } : undefined}
       transition={{ duration: TOTAL_DURATION_MS / 1000, ease: "linear" }}
     >
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 h-[2px] -translate-y-1/2 bg-white/50" />
@@ -89,14 +96,19 @@ export function SpinReelFrame({ rarity, resultNode, onDone }: Props) {
         <motion.div
           className="flex flex-col"
           initial={{ y: 0 }}
-          animate={containerHeight ? { y: isTopTier ? [0, overshootY, targetY] : [0, targetY] } : { y: 0 }}
+          animate={containerHeight ? { y: [0, hitchY, overshootY, targetY] } : { y: 0 }}
           transition={
             containerHeight
               ? {
                   duration: TOTAL_DURATION_MS / 1000,
-                  y: isTopTier
-                    ? { times: [0, 0.88, 1], ease: [[0.11, 0.58, 0.18, 1], [0.34, 1.56, 0.64, 1]] }
-                    : { ease: [0.11, 0.58, 0.18, 1] },
+                  y: {
+                    times: [0, 0.52, 0.86, 1],
+                    ease: [
+                      [0.1, 0.55, 0.2, 1],
+                      [0.45, 0, 0.55, 1],
+                      [0.34, 1.56, 0.64, 1],
+                    ],
+                  },
                 }
               : { duration: 0 }
           }
