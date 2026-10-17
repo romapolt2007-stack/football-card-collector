@@ -131,6 +131,7 @@ export interface PlayerSpinStatus {
   minCost: number;
   maxCost: number;
   level: number;
+  totalSpins: number;
   hotStreak: number;
   hotStreakThreshold: number;
 }
@@ -189,7 +190,15 @@ export interface DailyClaimResult {
 }
 
 export interface LeagueWithClubs extends League {
-  clubs: { id: string; name: string; shortName: string; colorPrimary: string; colorSecondary: string }[];
+  clubs: {
+    id: string;
+    name: string;
+    shortName: string;
+    colorPrimary: string;
+    colorSecondary: string;
+    playerCount: number;
+    stadiumCapacity: number | null;
+  }[];
 }
 
 export interface NationOption {

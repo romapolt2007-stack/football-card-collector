@@ -26,6 +26,7 @@ router.get("/status", requireAuth, async (req, res) => {
     minCost: MIN_SPIN_COST,
     maxCost: MAX_SPIN_COST,
     level: playerLevel(user.totalSpins),
+    totalSpins: user.totalSpins,
     hotStreak: user.hotStreakCount,
     hotStreakThreshold: hotStreakThreshold(user.totalSpins),
   });

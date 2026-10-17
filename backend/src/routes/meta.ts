@@ -7,9 +7,31 @@ const router = Router();
 router.get("/leagues", async (_req, res) => {
   const leagues = await prisma.league.findMany({
     orderBy: { order: "asc" },
-    include: { clubs: { orderBy: { name: "asc" }, select: { id: true, name: true, shortName: true, colorPrimary: true, colorSecondary: true } } },
+    include: {
+      clubs: {
+        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          shortName: true,
+          colorPrimary: true,
+          colorSecondary: true,
+          _count: { select: { players: true } },
+          stadium: { select: { capacity: true } },
+        },
+      },
+    },
   });
-  res.json({ leagues });
+  res.json({
+    leagues: leagues.map((l) => ({
+      ...l,
+      clubs: l.clubs.map(({ _count, stadium, ...club }) => ({
+        ...club,
+        playerCount: _count.players,
+        stadiumCapacity: stadium?.capacity ?? null,
+      })),
+    })),
+  });
 });
 
 /** Список стран игроков (для фильтра "Страна") — по факту присутствия в базе, без дублей. */
