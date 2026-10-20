@@ -28,7 +28,7 @@ router.get("/status", requireAuth, async (req, res) => {
     level: playerLevel(user.totalSpins),
     totalSpins: user.totalSpins,
     hotStreak: user.hotStreakCount,
-    hotStreakThreshold: hotStreakThreshold(user.totalSpins),
+    hotStreakThreshold: hotStreakThreshold(),
   });
 });
 
@@ -60,7 +60,7 @@ router.post("/spin", requireAuth, async (req, res) => {
   const { amount, ...filters } = parsed.data;
 
   const user = await prisma.user.findUniqueOrThrow({ where: { id: req.userId } });
-  const threshold = hotStreakThreshold(user.totalSpins);
+  const threshold = hotStreakThreshold();
   const nextStreak = nextHotStreak(user.hotStreakCount, user.lastFreeSpinAt, Boolean(filters.clubId), threshold);
   const guaranteedTop = nextStreak >= threshold;
   const streakAfterSpin = guaranteedTop ? 0 : nextStreak;
@@ -105,7 +105,7 @@ router.post("/spin", requireAuth, async (req, res) => {
     sellPrice: price,
     level: playerLevel(user.totalSpins + 1),
     hotStreak: streakAfterSpin,
-    hotStreakThreshold: hotStreakThreshold(user.totalSpins + 1),
+    hotStreakThreshold: hotStreakThreshold(),
     wasGuaranteedTop: guaranteedTop,
     coins: user.coins - amount,
   });

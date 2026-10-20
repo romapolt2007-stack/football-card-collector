@@ -185,26 +185,22 @@ export async function spinStadium(topTierWeightBonus = 0) {
 
 // ──────────────────────────────────────────
 // Азарт (Hot Streak) — серия спинов без долгих пауз заполняет шкалу; по
-// достижении порога следующий спин ГАРАНТИРОВАННО топ-редкости (ICON/LEGEND/
-// GOLD по убыванию доступности), затем серия сбрасывается. Порог зависит от
-// уровня аккаунта: чем больше всего спинов сделано за всю историю, тем выше
-// уровень и тем короче путь до гарантии.
+// достижении порога (фиксированные 150 спинов для всех) следующий спин
+// ГАРАНТИРОВАННО топ-редкости (ICON/LEGEND/GOLD по убыванию доступности),
+// затем серия сбрасывается.
 // ──────────────────────────────────────────
 
 export const HOT_STREAK_IDLE_RESET_MS = 30 * 60 * 1000;
 export const SPINS_PER_LEVEL = 25;
 export const HOT_STREAK_BASE_THRESHOLD = 150;
-export const HOT_STREAK_LEVEL_REDUCTION = 2;
-export const HOT_STREAK_MIN_THRESHOLD = 30;
 
 export function playerLevel(totalSpins: number): number {
   return 1 + Math.floor(totalSpins / SPINS_PER_LEVEL);
 }
 
-/** Порог "Азарта" = 150 - уровень*2, но не ниже 30 (иначе гарантия станет слишком частой на высоких уровнях). */
-export function hotStreakThreshold(totalSpins: number): number {
-  const level = playerLevel(totalSpins);
-  return Math.max(HOT_STREAK_MIN_THRESHOLD, HOT_STREAK_BASE_THRESHOLD - level * HOT_STREAK_LEVEL_REDUCTION);
+/** Порог "Азарта" — фиксированные 150 спинов, не зависит от уровня аккаунта. */
+export function hotStreakThreshold(): number {
+  return HOT_STREAK_BASE_THRESHOLD;
 }
 
 /** Следующее значение серии: +1 за спин без долгой паузы, ещё +1 за жёсткий фильтр (выбран конкретный клуб). Капается порогом (нет смысла копить сверх него). */
