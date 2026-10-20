@@ -212,11 +212,10 @@ export function MockPlayScreen({
         <div className="flex rounded-[10px] p-0.5" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
           {([1, 2, 5, 10] as const).map((m) => {
             const active = multiplier === m;
-            const available = m === 1;
             return (
               <button
                 key={m}
-                disabled={!available || reeling || hasResult}
+                disabled={reeling || hasResult}
                 onClick={() => onMultiplierChange(m)}
                 className="flex-1 rounded-[7px] py-1 text-[11px] font-bold transition disabled:opacity-35"
                 style={{ background: active ? MOCK_ACTIVE_TINT : "transparent", color: active ? MOCK_ACTIVE_COLOR : "rgba(255,255,255,0.55)" }}
@@ -226,7 +225,7 @@ export function MockPlayScreen({
             );
           })}
         </div>
-        <p className="text-right text-[10px] text-white/30">x2 / x5 / x10 — скоро</p>
+        <p className="text-right text-[10px] text-white/30">Выше ставка — выше шанс на редкую карту</p>
       </div>
 
       {/* 1.6 — главная кнопка */}
