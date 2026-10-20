@@ -82,7 +82,6 @@ export function MockPlayScreen({
   onSave,
   resolvingResult,
 }: Props) {
-  const [multiplierOpen, setMultiplierOpen] = useState(false);
   const [azartOpen, setAzartOpen] = useState(false);
 
   return (
@@ -199,47 +198,38 @@ export function MockPlayScreen({
       </div>
 
       {/* 1.5 — параметры */}
-      <div className="flex items-center gap-2 px-3 pb-2">
+      <div className="flex flex-col gap-2 px-3 pb-2">
         <button
           onClick={onOpenPicker}
           disabled={reeling || hasResult}
-          className="flex flex-1 items-center justify-between rounded-[12px] px-3 py-2.5 text-xs font-semibold disabled:opacity-50"
+          className="flex items-center justify-between rounded-[12px] px-3 py-2.5 text-xs font-semibold disabled:opacity-50"
           style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
         >
           <span className="truncate">{selectedLabel}</span>
           <span className="text-white/40">⌄</span>
         </button>
-        <button
-          onClick={() => setMultiplierOpen((v) => !v)}
-          className="relative flex items-center gap-1 rounded-[12px] px-3 py-2.5 text-xs font-semibold"
-          style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
-        >
-          Множитель x{multiplier} <span className="text-white/40">⌄</span>
-          {multiplierOpen && (
-            <div className="absolute bottom-[110%] right-0 flex flex-col overflow-hidden rounded-[10px]" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
-              {([1, 2, 5, 10] as const).map((m) => (
+
+        <div className="flex items-center gap-2">
+          <span className="shrink-0 text-[11px] font-semibold text-white/40">Множитель</span>
+          <div className="flex flex-1 rounded-[12px] p-1" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
+            {([1, 2, 5, 10] as const).map((m) => {
+              const active = multiplier === m;
+              const available = m === 1;
+              return (
                 <button
                   key={m}
-                  disabled={m !== 1}
-                  onClick={() => {
-                    onMultiplierChange(m);
-                    setMultiplierOpen(false);
-                  }}
-                  className="flex items-center justify-between gap-3 px-4 py-2 text-left text-xs font-semibold hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent"
+                  disabled={!available || reeling || hasResult}
+                  onClick={() => onMultiplierChange(m)}
+                  className="flex-1 rounded-[9px] py-1.5 text-xs font-bold transition disabled:opacity-35"
+                  style={{ background: active ? MOCK_ACTIVE_TINT : "transparent", color: active ? MOCK_ACTIVE_COLOR : "rgba(255,255,255,0.55)" }}
                 >
-                  x{m} {m !== 1 && <span className="text-[9px] text-white/40">скоро</span>}
+                  x{m}
                 </button>
-              ))}
-            </div>
-          )}
-        </button>
-        <button
-          disabled
-          className="shrink-0 rounded-[12px] px-3 py-2.5 text-xs font-bold opacity-30"
-          style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}
-        >
-          5x
-        </button>
+              );
+            })}
+          </div>
+        </div>
+        <p className="text-right text-[10px] text-white/30">x2 / x5 / x10 — скоро</p>
       </div>
 
       {/* 1.6 — главная кнопка */}
