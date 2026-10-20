@@ -209,25 +209,22 @@ export function MockPlayScreen({
           <span className="text-white/40">⌄</span>
         </button>
 
-        <div className="flex items-center gap-2">
-          <span className="shrink-0 text-[11px] font-semibold text-white/40">Множитель</span>
-          <div className="flex flex-1 rounded-[12px] p-1" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
-            {([1, 2, 5, 10] as const).map((m) => {
-              const active = multiplier === m;
-              const available = m === 1;
-              return (
-                <button
-                  key={m}
-                  disabled={!available || reeling || hasResult}
-                  onClick={() => onMultiplierChange(m)}
-                  className="flex-1 rounded-[9px] py-1.5 text-xs font-bold transition disabled:opacity-35"
-                  style={{ background: active ? MOCK_ACTIVE_TINT : "transparent", color: active ? MOCK_ACTIVE_COLOR : "rgba(255,255,255,0.55)" }}
-                >
-                  x{m}
-                </button>
-              );
-            })}
-          </div>
+        <div className="flex rounded-[10px] p-0.5" style={{ background: MOCK_PANEL, border: `1px solid ${MOCK_PANEL_BORDER}` }}>
+          {([1, 2, 5, 10] as const).map((m) => {
+            const active = multiplier === m;
+            const available = m === 1;
+            return (
+              <button
+                key={m}
+                disabled={!available || reeling || hasResult}
+                onClick={() => onMultiplierChange(m)}
+                className="flex-1 rounded-[7px] py-1 text-[11px] font-bold transition disabled:opacity-35"
+                style={{ background: active ? MOCK_ACTIVE_TINT : "transparent", color: active ? MOCK_ACTIVE_COLOR : "rgba(255,255,255,0.55)" }}
+              >
+                x{m}
+              </button>
+            );
+          })}
         </div>
         <p className="text-right text-[10px] text-white/30">x2 / x5 / x10 — скоро</p>
       </div>
